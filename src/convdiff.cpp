@@ -12,9 +12,24 @@ ConvDiff::ConvDiff(const sreal pn) : peclet{1.0}, b{1.0/sqrt(3),1.0/sqrt(3), 1.0
 
 std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_solution() const
 {
+	const sreal pecnum = peclet;
+	const std::array<sreal,NDIM> advec = b;
 	std::array<std::function<sreal(const sreal[NDIM])>,2> soln;
+
 	soln[0] = [](const sreal r[NDIM]) { return sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]); };
-	soln[1] = [](const sreal r[NDIM]) { return 12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]); };
+
+	soln[1] = [pecnum,advec](const sreal r[NDIM]) {
+		          sreal retval = pecnum*12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]);
+		          for(int i = 0; i < NDIM; i++)
+		          {
+			          sreal term = 2*PI*advec[i];
+			          for(int j = 0; j < NDIM; j++)
+				          term *= (i==j) ? cos(2*PI*r[j]) : sin(2*PI*r[j]);
+			          retval += term;
+		          }
+		          return retval;
+	          };
+
 	return soln;
 }
 
@@ -23,10 +38,10 @@ std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_sol
  */
 int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 {
-	PetscErrorCode ierr = 0;	
+	PetscErrorCode ierr = 0;
 	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
 	if(rank == 0)	
-		printf("Poisson: ComputeLHS: Setting values of the LHS matrix...\n");
+		printf("ConvDiff: ComputeLHS: Setting values of the LHS matrix...\n");
 
 	// get the starting global indices and sizes (in each direction) of the local mesh partition
 	PetscInt start[NDIM], lsize[NDIM];
@@ -82,7 +97,7 @@ int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 			}
 
 	if(rank == 0)
-		printf("Poisson: ComputeLHS: Done.\n");
+		printf("ConvDiff: ComputeLHS: Done.\n");
 	
 	return ierr;
 }
