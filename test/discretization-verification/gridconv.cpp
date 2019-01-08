@@ -140,8 +140,7 @@ int main(int argc, char* argv[])
 	
 		ierr = KSPCreate(comm, &ksp);
 		KSPSetType(ksp, KSPRICHARDSON);
-		KSPRichardsonSetScale(ksp, 1.0);
-		KSPSetFromOptions(ksp);
+		ierr = KSPSetFromOptions(ksp); CHKERRQ(ierr);
 	
 		ierr = KSPSetOperators(ksp, A, A); CHKERRQ(ierr);
 	
@@ -155,9 +154,11 @@ int main(int argc, char* argv[])
 		ierr = KSPGetIterationNumber(ksp, &kspiters);
 		errors[imesh] = compute_error(comm,m,da,u,uexact);
 		h[imesh] = 1.0/pow(npoindim[0]*npoindim[1]*npoindim[2], 1.0/3);
+		//h[imesh] = m.gh();
+		printf("Mesh size = %f\n", h[imesh]);
 
 		if(rank==0) {
-			printf("Ref run: error = %.16f\n", errors[imesh]);
+			printf("Error = %f\n", errors[imesh]);
 		}
 
 		KSPDestroy(&ksp);

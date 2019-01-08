@@ -51,8 +51,10 @@ protected:
 public:
 	CartMesh();
 
-	CartMesh(const sint npdim[NDIM], const int num_partitions);
-
+	/// Create the mesh and set up the DMDA for it
+	/** \param comm The communicator of all ranks across which to distribute the computation
+	 * \param npdim Number of points along each dimension
+	 */
 	PetscErrorCode createMeshAndDMDA(const MPI_Comm comm, const PetscInt npdim[NDIM], 
 	                                 PetscInt ndofpernode, PetscInt stencil_width,
 	                                 DMBoundaryType bx, DMBoundaryType by, DMBoundaryType bz,

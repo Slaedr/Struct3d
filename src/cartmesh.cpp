@@ -35,27 +35,6 @@ CartMesh::CartMesh()
 	: coords{NULL}
 { }
 
-CartMesh::CartMesh(const sint npdim[NDIM], const int num_partitions)
-	: coords{NULL}
-{
-	std::printf("CartMesh: Number of points in each direction: ");
-	for(int i = 0; i < NDIM; i++) {
-		npoind[i] = npdim[i];
-		std::printf("%d ", npoind[i]);
-	}
-	std::printf("\n");
-	
-	npointotal = 1;
-	for(int i = 0; i < NDIM; i++)
-		npointotal *= npoind[i];
-
-	sint nbpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
-		(npoind[1]-2)*(npoind[2]-2)*2;
-	ninpoin = npointotal-nbpoints;
-
-	std::printf("CartMesh: Total points = %d, interior points = %d\n", npointotal, ninpoin);
-}
-
 PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt npdim[NDIM], 
                                            PetscInt ndofpernode, PetscInt stencil_width,
                                            DMBoundaryType bx, DMBoundaryType by, DMBoundaryType bz,

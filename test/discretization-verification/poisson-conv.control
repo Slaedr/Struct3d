@@ -7,7 +7,7 @@ Coords-of-first-point-in-x-y-and-z
 Coords-of-last-point-in-x-y-and-z
 1.0 1.0 1.0
 Number-of-meshes
-3
+4
 PDE-type
 poisson
 
