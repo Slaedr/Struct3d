@@ -7,19 +7,19 @@
 #include "convdiff.hpp"
 #include "common_utils.hpp"
 
-ConvDiff::ConvDiff(const sreal pn) : peclet{1.0}, b{1.0/sqrt(3),1.0/sqrt(3), 1.0/sqrt(3)}
+ConvDiff::ConvDiff(const sreal diffc) : mu{diffc}, b{1.0/sqrt(3),1.0/sqrt(3), 1.0/sqrt(3)}
 { }
 
 std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_solution() const
 {
-	const sreal pecnum = peclet;
+	const sreal munum = mu;
 	const std::array<sreal,NDIM> advec = b;
 	std::array<std::function<sreal(const sreal[NDIM])>,2> soln;
 
 	soln[0] = [](const sreal r[NDIM]) { return sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]); };
 
-	soln[1] = [pecnum,advec](const sreal r[NDIM]) {
-		          sreal retval = pecnum*12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]);
+	soln[1] = [munum,advec](const sreal r[NDIM]) {
+		          sreal retval = munum*12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]);
 		          for(int i = 0; i < NDIM; i++)
 		          {
 			          sreal term = 2*PI*advec[i];
@@ -55,8 +55,8 @@ int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 				PetscReal values[NSTENCIL];
 				MatStencil cindices[NSTENCIL];
 				MatStencil rindices[1];
-				PetscInt n = NSTENCIL;
-				PetscInt mm = 1;
+				const PetscInt n = NSTENCIL;
+				const PetscInt mm = 1;
 
 				rindices[0] = {k,j,i,0};
 
@@ -68,8 +68,18 @@ int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 				cindices[5] = {k,j+1,i,0};
 				cindices[6] = {k+1,j,i,0};
 
-				PetscInt I = i+1, J = j+1, K = k+1;		// 1-offset indices for mesh coords access
-				
+				const PetscInt I = i+1, J = j+1, K = k+1;   // 1-offset indices for mesh coords access
+
+				sreal drp[NDIM], drn[NDIM];
+				drp[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
+				drp[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
+				drp[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
+				drn[0] = m->gcoords(0,I+1)-m->gcoords(0,I);
+				drn[1] = m->gcoords(1,J+1)-m->gcoords(1,J);
+				drn[2] = m->gcoords(2,K+1)-m->gcoords(2,K);
+				(void)drn; // remove when used below for diffusion
+
+				// diffusion
 				values[0] = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
 						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
 				values[1] = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
@@ -90,6 +100,14 @@ int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
 				values[6] = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
 						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+				for(int l = 0; l < NSTENCIL; l++)
+					values[l] *= mu;
+
+				// upwind advection
+				for(int l = 0; l < 3; l++)
+					values[l] += -b[l]/drp[l];
+				values[3] += b[0]/drp[0] + b[1]/drp[1] + b[2]/drp[2];
 
 				MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
 				//if(rank == 0)
