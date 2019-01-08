@@ -173,7 +173,8 @@ int main(int argc, char* argv[])
 
 	// compute values of LHS, RHS and exact soln
 	
-	ierr = pde->computeRHS(&m, da, b, uexact); CHKERRQ(ierr);
+	ierr = pde->computeVector(&m, da, pde->manufactured_solution()[1], b); CHKERRQ(ierr);
+	ierr = pde->computeVector(&m, da, pde->manufactured_solution()[0], uexact); CHKERRQ(ierr);
 	ierr = pde->computeLHS(&m, da, A); CHKERRQ(ierr);
 
 	// Assemble LHS

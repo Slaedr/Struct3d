@@ -36,45 +36,12 @@ static inline PetscInt getFlattenedInteriorIndex(const CartMesh *const m,
 }
 #endif
 
-/// Set RHS = 12*pi^2*sin(2pi*x)sin(2pi*y)sin(2pi*z) for u_exact = sin(2pi*x)sin(2pi*y)sin(2pi*z)
-/** Note that the values are only set for interior points.
- * \param f is the rhs vector
- * \param uexact is the exact solution
- */
-int Poisson::computeRHS(const CartMesh *const m, DM da, Vec f, Vec uexact) const
+std::array<std::function<sreal(const sreal[NDIM])>,2> Poisson::manufactured_solution() const
 {
-	PetscErrorCode ierr = 0;
-	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
-	if(rank == 0)
-		printf("Poisson: ComputeRHS: Starting\n");
-
-	// get the starting global indices and sizes (in each direction) of the local mesh partition
-	PetscInt start[NDIM], lsize[NDIM];
-	ierr = DMDAGetCorners(da, &start[0], &start[1], &start[2], &lsize[0], &lsize[1], &lsize[2]);
-	CHKERRQ(ierr);
-
-	// get local data that can be accessed by global indices
-	PetscReal *** rhs, *** uex;
-	ierr = DMDAVecGetArray(da, f, (void*)&rhs); CHKERRQ(ierr);
-	ierr = DMDAVecGetArray(da, uexact, (void*)&uex); CHKERRQ(ierr);
-
-	// iterate over interior nodes
-	for(PetscInt k = start[2]; k < start[2]+lsize[2]; k++)
-		for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
-			for(PetscInt i = start[0]; i < start[0]+lsize[0]; i++)
-			{
-				rhs[k][j][i] = 12.0*PI*PI * std::sin(2*PI*m->gcoords(0,i))
-					* std::sin(2*PI*m->gcoords(1,j))*std::sin(2*PI*m->gcoords(2,k));
-				uex[k][j][i] = std::sin(2*PI*m->gcoords(0,i))
-					* std::sin(2*PI*m->gcoords(1,j))*std::sin(2*PI*m->gcoords(2,k));
-			}
-	
-	DMDAVecRestoreArray(da, f, (void*)&rhs);
-	DMDAVecRestoreArray(da, uexact, (void*)&uex);
-	if(rank == 0)
-		printf("Poisson: ComputeRHS: Done\n");
-
-	return ierr;
+	std::array<std::function<sreal(const sreal[NDIM])>,2> soln;
+	soln[0] = [](const sreal r[NDIM]) { return sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]); };
+	soln[1] = [](const sreal r[NDIM]) { return 12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]); };
+	return soln;
 }
 
 /// Set stiffness matrix corresponding to interior points

@@ -1,5 +1,5 @@
 
-add_library(base cartmesh.cpp common_utils.cpp)
+add_library(base pdebase.cpp cartmesh.cpp common_utils.cpp)
 target_link_libraries(base ${PETSC_LIB} ${MPI_C_LIBRARIES} ${MPI_C_LINK_FLAGS})
 
 add_library(cases case.cpp)

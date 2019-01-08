@@ -14,8 +14,9 @@ class ConvDiff : public PDEBase
 public:
 	ConvDiff(const sreal peclet_number);
 
-	int computeRHS(const CartMesh *const m, DM da, Vec f, Vec uexact) const;
 	int computeLHS(const CartMesh *const m, DM da, Mat A) const;
+
+	std::array<std::function<sreal(sreal[NDIM])>,2> manufactured_solution() const;
 
 protected:
 	const sreal peclet;                  ///< Peclet number

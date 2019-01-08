@@ -18,17 +18,15 @@ class Poisson : public PDEBase
 public:
 	Poisson() { }
 
-	/// Set RHS = 12*pi^2*sin(2pi*x)sin(2pi*y)sin(2pi*z) for u_exact = sin(2pi*x)sin(2pi*y)sin(2pi*z)
-	/** Note that the values are only set for interior points.
-	 * \param f is the rhs vector
-	 * \param uexact is the exact solution
-	 */
-	PetscErrorCode computeRHS(const CartMesh *const m, DM da, Vec f, Vec uexact) const;
-
 	/// Set stiffness matrix corresponding to interior points
 	/** Inserts entries rowwise into the matrix.
 	 */
 	PetscErrorCode computeLHS(const CartMesh *const m, DM da, Mat A) const;
+
+	/// Returns a pair of functions: the first being the solution and the second the right hand side
+	/** Set RHS = 12*pi^2*sin(2pi*x)sin(2pi*y)sin(2pi*z) for u_exact = sin(2pi*x)sin(2pi*y)sin(2pi*z)
+	 */
+	std::array<std::function<sreal(const sreal[NDIM])>,2> manufactured_solution() const;
 };
 
 #endif
