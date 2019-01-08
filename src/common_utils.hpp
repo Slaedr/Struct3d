@@ -15,6 +15,10 @@
  */
 PetscReal computeNorm(const MPI_Comm comm, const CartMesh *const m, Vec v, DM da);
 
+/// Computes L2 function norm of the error between u and uexact
+PetscReal compute_error(const MPI_Comm comm, const CartMesh& m, const DM da,
+                        const Vec u, const Vec uexact);
+
 /// Get the rank of the current process in a communicator
 int get_mpi_rank(MPI_Comm comm);
 

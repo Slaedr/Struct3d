@@ -5,18 +5,7 @@ target_link_libraries(testfd_csr ${BLASTED_LIB} base poisson)
 add_executable(testfd_csr_threaded compare-threaded.cpp)
 target_link_libraries(testfd_csr_threaded ${BLASTED_LIB} base poisson)
 
-# Tests
-#add_test(NAME SerialPoissonCSRPetscILU0 COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 1 ./testfd_csr 
-#${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control 
-#-options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson_csr_ilu0.perc)
-
-#add_test(NAME SerialPoissonCSRPetscSGS COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 1 ./testfd_csr 
-#${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control 
-#-options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson_csr_sgs.perc)
-
-#add_test(NAME SerialPoissonCSRPetscAMGILU0 COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 1 ./testfd_csr 
-#  ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson-amg.control 
-#  -options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson_csr_amg.perc)
+add_subdirectory(discretization-verification)
 
 add_test(NAME MPIPoissonCSRPetscJacobiRelaxation
   COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 4 ./testfd_csr

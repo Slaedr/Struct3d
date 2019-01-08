@@ -1,0 +1,12 @@
+-options_left
+
+-ksp_type richardson
+
+-ksp_rtol 1e-6
+-ksp_max_it 100
+-ksp_final_residual
+-ksp_view
+
+-pc_type bjacobi
+-sub_pc_type sor
+

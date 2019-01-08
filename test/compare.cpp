@@ -18,18 +18,6 @@
 
 #define PETSCOPTION_STR_LEN 30
 
-PetscReal compute_error(const MPI_Comm comm, const CartMesh& m, const DM da,
-		const Vec u, const Vec uexact) {
-	PetscReal errnorm;
-	Vec err;
-	VecDuplicate(u, &err);
-	VecCopy(u,err);
-	VecAXPY(err, -1.0, uexact);
-	errnorm = computeNorm(comm, &m, err, da);
-	VecDestroy(&err);
-	return errnorm;
-}
-
 int main(int argc, char* argv[])
 {
 	using namespace std;

@@ -21,6 +21,7 @@ CaseData readCtrl(FILE *const conf)
 		printf("Invalid grid type!");
 		std::abort();
 	}
+
 	fstatus = fscanf(conf, "%s", temp);
 	if(!fstatus) {
 		std::printf("! Error reading control file!\n");

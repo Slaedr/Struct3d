@@ -1,3 +1,4 @@
+#include <cmath>
 #include "common_utils.hpp"
 
 PetscReal computeNorm(const MPI_Comm comm, const CartMesh *const m, Vec v, DM da)
@@ -16,8 +17,10 @@ PetscReal computeNorm(const MPI_Comm comm, const CartMesh *const m, Vec v, DM da
 		for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
 			for(PetscInt i = start[0]; i < start[0]+lsize[0]; i++)
 			{
-				PetscReal vol = 1.0/8.0*(m->gcoords(0,i+1)-m->gcoords(0,i-1))
-					*(m->gcoords(1,j+1)-m->gcoords(1,j-1))*(m->gcoords(2,k+1)-m->gcoords(2,k-1));
+				// incremented indices for mesh coords access
+				const sint I = i+1, J = j+1, K = k+1;
+				const PetscReal vol = 1.0/8.0*(m->gcoords(0,I+1)-m->gcoords(0,I-1))
+					*(m->gcoords(1,J+1)-m->gcoords(1,J-1))*(m->gcoords(2,K+1)-m->gcoords(2,K-1));
 				norm += vv[k][j][i]*vv[k][j][i]*vol;
 			}
 
@@ -26,9 +29,21 @@ PetscReal computeNorm(const MPI_Comm comm, const CartMesh *const m, Vec v, DM da
 	MPI_Barrier(comm);
 
 	// get global norm
-	MPI_Reduce(&norm, &global_norm, 1, MPI_DOUBLE, MPI_SUM, 0, comm);
+	MPI_Allreduce(&norm, &global_norm, 1, MPI_DOUBLE, MPI_SUM, comm);
 
-	return global_norm;
+	return sqrt(global_norm);
+}
+
+PetscReal compute_error(const MPI_Comm comm, const CartMesh& m, const DM da,
+                        const Vec u, const Vec uexact) {
+	PetscReal errnorm;
+	Vec err;
+	VecDuplicate(u, &err);
+	VecCopy(u,err);
+	VecAXPY(err, -1.0, uexact);
+	errnorm = computeNorm(comm, &m, err, da);
+	VecDestroy(&err);
+	return errnorm;
 }
 
 int get_mpi_rank(MPI_Comm comm) {
