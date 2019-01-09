@@ -13,6 +13,7 @@ CaseData readCtrl(FILE *const conf)
 	int fstatus = 1;
 	fstatus = fscanf(conf, "%s", temp);
 	fstatus = fscanf(conf, "%s", grid_type);
+
 	if(!strcmp(grid_type, "uniform"))
 		cas.gridtype = S3D_UNIFORM;
 	else if(!strcmp(grid_type, "chebyshev"))

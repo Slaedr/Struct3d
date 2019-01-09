@@ -59,6 +59,8 @@ int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
 	ierr = DMDAGetCorners(da, &start[0], &start[1], &start[2], &lsize[0], &lsize[1], &lsize[2]);
 	CHKERRQ(ierr);
 
+	//const sreal dx = m->gcoords(0,2)-m->gcoords(0,1);
+
 	for(PetscInt k = start[2]; k < start[2]+lsize[2]; k++)
 		for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
 			for(PetscInt i = start[0]; i < start[0]+lsize[0]; i++)
@@ -79,7 +81,7 @@ int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
 				cindices[5] = {k,j+1,i,0};
 				cindices[6] = {k+1,j,i,0};
 
-				PetscInt I = i+1, J = j+1, K = k+1;		// 1-offset indices for mesh coords access
+				const PetscInt I = i+1, J = j+1, K = k+1;  // 1-offset indices for mesh coords access
 				
 				values[0] = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
 						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
@@ -101,6 +103,10 @@ int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
 						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
 				values[6] = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
 						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+				// // Uniform-grid central difference
+				// values[0] = values[1] = values[2] = values[4] = values[5] = values[6] = -1.0/(dx*dx);
+				// values[3] = 6.0/(dx*dx);
 
 				MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
 				//if(rank == 0)

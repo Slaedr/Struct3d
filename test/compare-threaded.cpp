@@ -19,13 +19,12 @@
 
 #include "poisson.hpp"
 #include "common_utils.hpp"
+#include "case.hpp"
 
 #define PETSCOPTION_STR_LEN 30
 
 int main(int argc, char* argv[])
 {
-	using namespace std;
-
 	if(argc < 3) {
 		printf("Please specify a control file and a Petsc options file.\n");
 		return 0;
@@ -36,14 +35,12 @@ int main(int argc, char* argv[])
            Command line options: -test_type <'compare_error','compare_its'>, -num_runs <int>";
 	
 	char * confile = argv[1];
-	PetscMPIInt size, rank;
 	PetscErrorCode ierr = 0;
-	int nruns;
 
 	ierr = PetscInitialize(&argc, &argv, NULL, help); CHKERRQ(ierr);
 	MPI_Comm comm = PETSC_COMM_WORLD;
-	MPI_Comm_size(comm,&size);
-	MPI_Comm_rank(comm,&rank);
+	const int size = get_mpi_size(comm);
+	const int rank = get_mpi_rank(comm);
 	if(rank == 0)
 		printf("Number of MPI ranks = %d.\n", size);
 
@@ -55,40 +52,12 @@ int main(int argc, char* argv[])
 
 	// Read control file
 	
-	PetscInt npdim[NDIM];
-	PetscReal rmax[NDIM], rmin[NDIM];
-	char temp[50], gridtype[50], pdetype[25];
 	FILE* conf = fopen(confile, "r");
-	int fstatus = 1;
-	fstatus = fscanf(conf, "%s", temp);
-	fstatus = fscanf(conf, "%s", gridtype);
-	fstatus = fscanf(conf, "%s", temp);
-	if(!fstatus) {
-		std::printf("! Error reading control file!\n");
-		std::abort();
-	}
-	for(int i = 0; i < NDIM; i++)
-		fstatus = fscanf(conf, "%d", &npdim[i]);
-	fstatus = fscanf(conf, "%s", temp);
-	for(int i = 0; i < NDIM; i++)
-		fstatus = fscanf(conf, "%lf", &rmin[i]);
-	fstatus = fscanf(conf, "%s", temp);
-	for(int i = 0; i < NDIM; i++)
-		fstatus = fscanf(conf, "%lf", &rmax[i]);
-	fstatus = fscanf(conf, "%s", temp); 
-	fstatus = fscanf(conf, "%d", &nruns);
-	fstatus = fscanf(conf, "%s", temp);
-	fstatus = fscanf(conf, "%s", pdetype);
+	const CaseData cdata = readCtrl(conf);
 	fclose(conf);
-	
-	if(!fstatus) {
-		std::printf("! Error reading control file!\n");
-		std::abort();
-	}
 
-	const std::string pdtype = pdetype;
 	PDEBase *pde = nullptr;
-	if(pdtype == "poisson")
+	if(cdata.pdetype == "poisson")
 		pde = new Poisson();
 	else {
 		std::printf("PDE type not recognized!\n");
@@ -98,9 +67,9 @@ int main(int argc, char* argv[])
 	if(rank == 0) {
 		printf("Domain boundaries in each dimension:\n");
 		for(int i = 0; i < NDIM; i++)
-			printf("%f %f ", rmin[i], rmax[i]);
+			printf("%f %f ", cdata.rmin[i], cdata.rmax[i]);
 		printf("\n");
-		printf("Number of runs: %d\n", nruns);
+		printf("Number of runs: %d\n", cdata.nruns);
 	}
 
 	char testtype[PETSCOPTION_STR_LEN];
@@ -121,11 +90,10 @@ int main(int argc, char* argv[])
 		error_tol = 1e6;
 	}
 
-	PetscInt cmdnumruns;
-	ierr = PetscOptionsGetInt(NULL,NULL,"-num_runs",&cmdnumruns,&set); CHKERRQ(ierr);
-	if(set)
-		nruns = cmdnumruns;
-	//----------------------------------------------------------------------------------
+	// PetscInt cmdnumruns;
+	// ierr = PetscOptionsGetInt(NULL,NULL,"-num_runs",&cmdnumruns,&set); CHKERRQ(ierr);
+	// if(set)
+	// 	nruns = cmdnumruns;
 
 	// set up Petsc variables
 	DM da;                        ///< Distributed array context for the cart grid
@@ -138,14 +106,15 @@ int main(int argc, char* argv[])
 
 	// grid structure - a copy of the mesh is stored by all processes as the mesh structure is very small
 	CartMesh m;
-	ierr = m.createMeshAndDMDA(comm, npdim, ndofpernode, stencil_width, bx, by, bz, stencil_type, &da);
+	ierr = m.createMeshAndDMDA(comm, cdata.npdim, ndofpernode, stencil_width, bx, by, bz,
+	                           stencil_type, &da);
 	CHKERRQ(ierr);
 
 	// generate grid
-	if(!strcmp(gridtype, "chebyshev"))
-		m.generateMesh_ChebyshevDistribution(rmin,rmax);
+	if(cdata.gridtype == S3D_CHEBYSHEV)
+		m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
 	else
-		m.generateMesh_UniformDistribution(rmin,rmax);
+		m.generateMesh_UniformDistribution(cdata.rmin,cdata.rmax);
 
 	Vec u, uexact, b, err;
 	Mat A;
@@ -186,7 +155,7 @@ int main(int argc, char* argv[])
 
 	PetscInt refkspiters;
 	ierr = KSPGetIterationNumber(kspref, &refkspiters);
-	const PetscReal errnormref = compute_error(comm,m,da,u,uexact);
+	const PetscReal errnormref = compute_error(m,da,u,uexact);
 
 	if(rank==0) {
 		printf("Ref run: error = %.16f\n", errnormref);
@@ -208,7 +177,7 @@ int main(int argc, char* argv[])
 	//omp_set_num_threads(4);
 #endif
 	
-	for(int irun = 0; irun < nruns; irun++)
+	for(int irun = 0; irun < cdata.nruns; irun++)
 	{
 		if(rank == 0)
 			printf("Run %d:\n", irun);
@@ -241,7 +210,7 @@ int main(int argc, char* argv[])
 			printf(" KSP residual norm = %f, num iters = %d.\n", rnorm, kspiters);
 		}
 		
-		errnorm += compute_error(comm,m,da,u,uexact);
+		errnorm += compute_error(m,da,u,uexact);
 		if(rank == 0) {
 			printf("Test run:\n");
 			printf(" h and error: %f  %.16f\n", m.gh(), errnorm);
@@ -267,15 +236,15 @@ int main(int argc, char* argv[])
 	}
 
 	if(rank == 0)
-		printf("KSP Iters: Reference %d vs BLASTed %d.\n", refkspiters, avgkspiters/nruns);
+		printf("KSP Iters: Reference %d vs BLASTed %d.\n", refkspiters, avgkspiters/cdata.nruns);
 
 	if(!strcmp(testtype, "compare_its"))
-		assert(refkspiters >= avgkspiters/nruns);
+		assert(refkspiters >= avgkspiters/cdata.nruns);
 
 	// the following test is probably not workable..
 	printf("Difference in error norm = %.16f.\n", std::fabs(errnorm-errnormref));
 	if(!strcmp(testtype,"compare_error"))
-		assert(std::fabs(errnorm/nruns-errnormref) < error_tol*DBL_EPSILON);
+		assert(std::fabs(errnorm/cdata.nruns-errnormref) < error_tol*DBL_EPSILON);
 
 
 	VecDestroy(&u);

@@ -38,26 +38,6 @@ int main(int argc, char* argv[])
 	// Read control file
 
 	FILE* conf = fopen(confile, "r");
-	// int fstatus = 1;
-	// fstatus = fscanf(conf, "%s", temp);
-	// fstatus = fscanf(conf, "%s", gridtype);
-	// fstatus = fscanf(conf, "%s", temp);
-	// if(!fstatus) {
-	// 	std::printf("! Error reading control file!\n");
-	// 	std::abort();
-	// }
-	// for(int i = 0; i < NDIM; i++)
-	// 	fstatus = fscanf(conf, "%d", &npdim[i]);
-	// fstatus = fscanf(conf, "%s", temp);
-	// for(int i = 0; i < NDIM; i++)
-	// 	fstatus = fscanf(conf, "%lf", &rmin[i]);
-	// fstatus = fscanf(conf, "%s", temp);
-	// for(int i = 0; i < NDIM; i++)
-	// 	fstatus = fscanf(conf, "%lf", &rmax[i]);
-	// fstatus = fscanf(conf, "%s", temp); 
-	// fstatus = fscanf(conf, "%d", &nruns);
-	// fstatus = fscanf(conf, "%s", temp);
-	// fstatus = fscanf(conf, "%s", pdetype);
 	const CaseData cdata = readCtrl(conf);
 	fclose(conf);
 
@@ -102,14 +82,19 @@ int main(int argc, char* argv[])
 		CartMesh m;
 		sint npoindim[NDIM];
 		for(int j = 0; j < NDIM; j++)
-			npoindim[j] = cdata.npdim[j]*(imesh+1);
+			npoindim[j] = cdata.npdim[j]*pow(2.0,imesh)/*(imesh+1)*/;
 		ierr = m.createMeshAndDMDA(comm, npoindim, ndofpernode, stencil_width, bx, by, bz,
 		                           stencil_type, &da);
 		CHKERRQ(ierr);
 
 		// generate grid
-		if(cdata.gridtype == S3D_CHEBYSHEV)
-			m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
+		if(cdata.gridtype == S3D_CHEBYSHEV) {
+			//m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
+			printf("Chebyshev grid type not supported for discretization verification.\n");
+			delete pde;
+			PetscFinalize();
+			exit(-1);
+		}
 		else
 			m.generateMesh_UniformDistribution(cdata.rmin,cdata.rmax);
 
@@ -152,12 +137,14 @@ int main(int argc, char* argv[])
 
 		PetscInt kspiters;
 		ierr = KSPGetIterationNumber(ksp, &kspiters);
-		errors[imesh] = compute_error(comm,m,da,u,uexact);
-		h[imesh] = 1.0/pow(npoindim[0]*npoindim[1]*npoindim[2], 1.0/3);
+		errors[imesh] = compute_error(m,da,u,uexact);
+		//h[imesh] = 1.0/pow(npoindim[0]*npoindim[1]*npoindim[2], 1.0/3);
 		//h[imesh] = m.gh();
-		printf("Mesh size = %f\n", h[imesh]);
+		h[imesh] = 1.0/pow(2.0,imesh);
+		//h[imesh] = 1.0/(imesh+1);
 
 		if(rank==0) {
+			printf("Mesh size = %f\n", h[imesh]);
 			printf("Error = %f\n", errors[imesh]);
 		}
 
@@ -176,13 +163,15 @@ int main(int argc, char* argv[])
 	sreal slope = 0;
 	for(int i = 1; i < nmesh; i++) {
 		slope = (log10(errors[i])-log10(errors[i-1]))/(log10(h[i])-log10(h[i-1]));
-		printf("Slope %d = %f\n", i, slope);
+		if(rank == 0)
+			printf("Slope %d = %f\n", i, slope);
 	}
 
-	if(cdata.pdetype == "poisson")
-		assert(slope >= 1.9 && slope <= 2.1);
-	else
-		assert(slope >= 0.9 && slope <= 2.1);
+	// if(cdata.pdetype == "poisson")
+	// 	assert(slope >= 1.9 && slope <= 2.1);
+	// else
+	// 	assert(slope >= 0.9 && slope <= 2.1);
+	assert(slope >= 0.9 && slope <= 1.1);
 
 	PetscFinalize();
 	return ierr;

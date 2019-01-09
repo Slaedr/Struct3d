@@ -1,7 +1,7 @@
 Type-of-grid('chebyshev'-or-'uniform')
 uniform
 Number-of-points-in-x-y-and-z
-4 4 4
+18 18 18
 Coords-of-first-point-in-x-y-and-z
 -1.0 -1.0 -1.0
 Coords-of-last-point-in-x-y-and-z

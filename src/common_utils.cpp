@@ -1,7 +1,7 @@
 #include <cmath>
 #include "common_utils.hpp"
 
-PetscReal computeNorm(const MPI_Comm comm, const CartMesh *const m, Vec v, DM da)
+PetscReal computeNorm(const CartMesh *const m, Vec v, DM da)
 {
 	// get the starting global indices and sizes (in each direction) of the local mesh partition
 	PetscInt start[NDIM], lsize[NDIM];
@@ -19,29 +19,29 @@ PetscReal computeNorm(const MPI_Comm comm, const CartMesh *const m, Vec v, DM da
 			{
 				// incremented indices for mesh coords access
 				const sint I = i+1, J = j+1, K = k+1;
-				const PetscReal vol = 1.0/8.0*(m->gcoords(0,I+1)-m->gcoords(0,I-1))
+				const sreal vol = 1.0/8.0*(m->gcoords(0,I+1)-m->gcoords(0,I-1))
 					*(m->gcoords(1,J+1)-m->gcoords(1,J-1))*(m->gcoords(2,K+1)-m->gcoords(2,K-1));
 				norm += vv[k][j][i]*vv[k][j][i]*vol;
 			}
 
 	DMDAVecRestoreArray(da, v, &vv);
 
-	MPI_Barrier(comm);
-
 	// get global norm
-	MPI_Allreduce(&norm, &global_norm, 1, MPI_DOUBLE, MPI_SUM, comm);
+	MPI_Allreduce(&norm, &global_norm, 1, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
 
 	return sqrt(global_norm);
 }
 
-PetscReal compute_error(const MPI_Comm comm, const CartMesh& m, const DM da,
-                        const Vec u, const Vec uexact) {
+PetscReal compute_error(const CartMesh& m, const DM da, const Vec u, const Vec uexact)
+{
 	PetscReal errnorm;
 	Vec err;
 	VecDuplicate(u, &err);
 	VecCopy(u,err);
 	VecAXPY(err, -1.0, uexact);
-	errnorm = computeNorm(comm, &m, err, da);
+	errnorm = computeNorm(&m, err, da);
+	// VecNorm(err, NORM_2, &errnorm);
+	// errnorm = errnorm / sqrt(m.gnpointotal());
 	VecDestroy(&err);
 	return errnorm;
 }
