@@ -110,8 +110,6 @@ int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 				values[3] += b[0]/drp[0] + b[1]/drp[1] + b[2]/drp[2];
 
 				MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
-				//if(rank == 0)
-				//	printf("\tProcessed index %d, diag value = %f\n", rindices[0], values[3]);
 			}
 
 	if(rank == 0)

@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 	if(cdata.pdetype == "poisson")
 		pde = new Poisson();
 	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff(10.0);
+		pde = new ConvDiff(1.0);
 	else {
 		std::printf("PDE type not recognized!\n");
 		std::abort();
