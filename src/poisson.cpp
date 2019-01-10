@@ -59,7 +59,7 @@ int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
 	ierr = DMDAGetCorners(da, &start[0], &start[1], &start[2], &lsize[0], &lsize[1], &lsize[2]);
 	CHKERRQ(ierr);
 
-	//const sreal dx = m->gcoords(0,2)-m->gcoords(0,1);
+	// const sreal dx = m->gcoords(0,2)-m->gcoords(0,1);
 
 	for(PetscInt k = start[2]; k < start[2]+lsize[2]; k++)
 		for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
@@ -109,12 +109,11 @@ int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
 				// values[3] = 6.0/(dx*dx);
 
 				MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
-				//if(rank == 0)
-				//	printf("\tProcessed index %d, diag value = %f\n", rindices[0], values[3]);
 			}
 
-	if(rank == 0)
+	if(rank == 0) {
 		printf("Poisson: ComputeLHS: Done.\n");
+	}
 	
 	return ierr;
 }

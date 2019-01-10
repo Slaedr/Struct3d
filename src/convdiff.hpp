@@ -11,7 +11,11 @@
 class ConvDiff : public PDEBase
 {
 public:
-	ConvDiff(const sreal diffusion_coeff);
+	/**
+	 * \param advel Advection velocity vector
+	 * \param diffusion_coeff Diffusion coefficient
+	 */
+	ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffusion_coeff);
 
 	int computeLHS(const CartMesh *const m, DM da, Mat A) const;
 

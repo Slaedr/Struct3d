@@ -27,7 +27,7 @@ int PDEBase::computeVector(const CartMesh *const m, DM da,
 		for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
 			for(PetscInt i = start[0]; i < start[0]+lsize[0]; i++)
 			{
-				const sreal crds[NDIM] = {m->gcoords(0,i), m->gcoords(1,j), m->gcoords(2,k)};
+				const sreal crds[NDIM] = {m->gcoords(0,i+1), m->gcoords(1,j+1), m->gcoords(2,k+1)};
 				rhs[k][j][i] = func(crds);
 			}
 	

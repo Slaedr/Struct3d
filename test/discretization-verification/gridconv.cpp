@@ -39,19 +39,20 @@ int main(int argc, char* argv[])
 
 	FILE* conf = fopen(confile, "r");
 	const CaseData cdata = readCtrl(conf);
+	char tmp[100];
+	int nrefinedirs;
+	fscanf(conf, "%s", tmp); fscanf(conf, "%d", &nrefinedirs);
 	fclose(conf);
 
 	const int nmesh = cdata.nruns;
-	if(nmesh < 2) {
-		PetscFinalize();
-		throw std::runtime_error("Need at least 2 meshes!");
-	}
+	assert(nmesh >= 2);
+	assert(nrefinedirs == 1 || nrefinedirs == 2 || nrefinedirs == 3);
 
 	PDEBase *pde = nullptr;
 	if(cdata.pdetype == "poisson")
 		pde = new Poisson();
 	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff(1.0);
+		pde = new ConvDiff({1.0,0.0,0}, 0.1);
 	else {
 		std::printf("PDE type not recognized!\n");
 		std::abort();
@@ -67,8 +68,8 @@ int main(int argc, char* argv[])
 	const PetscInt ndofpernode = 1;
 	const PetscInt stencil_width = 1;
 	const DMBoundaryType bx = DM_BOUNDARY_GHOSTED;
-	const DMBoundaryType by = DM_BOUNDARY_GHOSTED;
-	const DMBoundaryType bz = DM_BOUNDARY_GHOSTED;
+	const DMBoundaryType by = nrefinedirs >= 2 ? DM_BOUNDARY_GHOSTED : DM_BOUNDARY_PERIODIC;
+	const DMBoundaryType bz = nrefinedirs == 3 ? DM_BOUNDARY_GHOSTED : DM_BOUNDARY_PERIODIC;
 	const DMDAStencilType stencil_type = DMDA_STENCIL_STAR;
 
 	std::vector<sreal> h(nmesh);
@@ -76,13 +77,17 @@ int main(int argc, char* argv[])
 
 	for(int imesh = 0; imesh < nmesh; imesh++)
 	{
-		printf("\n");
-		DM da;                        //< Distributed array context for the cart grid
+		if(rank == 0)
+			printf("\n");
+		sint npoindim[NDIM];
+		for(int j = 0; j < nrefinedirs; j++)
+			npoindim[j] = cdata.npdim[j]*pow(2.0,imesh)/*(imesh+1)*/;
+		for(int j = nrefinedirs; j < NDIM; j++)
+			npoindim[j] = cdata.npdim[j];
+
 		// grid structure - a copy of the mesh is stored by all processes
 		CartMesh m;
-		sint npoindim[NDIM];
-		for(int j = 0; j < NDIM; j++)
-			npoindim[j] = cdata.npdim[j]*pow(2.0,imesh)/*(imesh+1)*/;
+		DM da;                        //< Distributed array context for the cart grid
 		ierr = m.createMeshAndDMDA(comm, npoindim, ndofpernode, stencil_width, bx, by, bz,
 		                           stencil_type, &da);
 		CHKERRQ(ierr);
@@ -167,11 +172,10 @@ int main(int argc, char* argv[])
 			printf("Slope %d = %f\n", i, slope);
 	}
 
-	// if(cdata.pdetype == "poisson")
-	// 	assert(slope >= 1.9 && slope <= 2.1);
-	// else
-	// 	assert(slope >= 0.9 && slope <= 2.1);
-	assert(slope >= 0.9 && slope <= 1.1);
+	if(cdata.pdetype == "poisson")
+		assert(slope >= 1.9 && slope <= 2.1);
+	else
+		assert(slope >= 0.9 && slope <= 1.9);
 
 	PetscFinalize();
 	return ierr;

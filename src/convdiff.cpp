@@ -7,8 +7,13 @@
 #include "convdiff.hpp"
 #include "common_utils.hpp"
 
-ConvDiff::ConvDiff(const sreal diffc) : mu{diffc}, b{1.0/sqrt(3),1.0/sqrt(3), 1.0/sqrt(3)}
-{ }
+ConvDiff::ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffc) : mu{diffc}, b(advel)
+{
+	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+	if(rank == 0) {
+		printf("ConvDiff: Using b = (%f,%f,%f), mu = %f.\n", b[0], b[1], b[2], mu);
+	}
+}
 
 std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_solution() const
 {
@@ -19,16 +24,16 @@ std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_sol
 	soln[0] = [](const sreal r[NDIM]) { return sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]); };
 
 	soln[1] = [munum,advec](const sreal r[NDIM]) {
-		          sreal retval = munum*12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]);
-		          for(int i = 0; i < NDIM; i++)
-		          {
-			          sreal term = 2*PI*advec[i];
-			          for(int j = 0; j < NDIM; j++)
-				          term *= (i==j) ? cos(2*PI*r[j]) : sin(2*PI*r[j]);
-			          retval += term;
-		          }
-		          return retval;
-	          };
+		sreal retval = munum*12*PI*PI*sin(2*PI*r[0])*sin(2*PI*r[1])*sin(2*PI*r[2]);
+		for(int i = 0; i < NDIM; i++)
+		{
+			sreal term = 2*PI*advec[i];
+			for(int j = 0; j < NDIM; j++)
+				term *= (i==j) ? cos(2*PI*r[j]) : sin(2*PI*r[j]);
+			retval += term;
+		}
+		return retval;
+	};
 
 	return soln;
 }

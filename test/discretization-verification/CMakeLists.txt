@@ -8,6 +8,6 @@ add_test(NAME Poisson_GridConv_UniformGrid
   )
 
 add_test(NAME CD_GridConv_UniformGrid
-  COMMAND ${MPIEXEC} -n 4 gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
+  COMMAND ${MPIEXEC} -n 2 gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/gen.perc
   )

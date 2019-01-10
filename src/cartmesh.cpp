@@ -145,11 +145,14 @@ void CartMesh::generateMesh_UniformDistribution(const sreal rmin[NDIM],
 	if(rank == 0)
 		std::printf("CartMesh: generateMesh_Uniform: h = %f\n", h);
 
-	const sreal dx = gcoords(0,1)-gcoords(0,0);
+	sreal dr[NDIM];
+	for(int i = 0; i < NDIM; i++)
+		dr[i] = gcoords(i,1)-gcoords(i,0);
 	for(int idim = 0; idim < NDIM; idim++)
 	{
 		for(int j = 0; j < gnpoind(idim)-1; j++) {
-			if(std::abs(gcoords(idim,j+1)-gcoords(idim,j)-dx) > std::numeric_limits<sreal>::epsilon())
+			if(std::abs(gcoords(idim,j+1)-gcoords(idim,j)-dr[idim])
+			   > std::numeric_limits<sreal>::epsilon())
 				throw std::runtime_error("Uniform mesh is not actually uniform!");
 		}
 	}
