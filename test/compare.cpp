@@ -13,7 +13,8 @@
 
 #include <blasted_petsc.h>
 
-#include "poisson.hpp"
+#include "pde/poisson.hpp"
+#include "pde/convdiff.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 

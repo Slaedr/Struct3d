@@ -6,8 +6,8 @@
 #include <vector>
 #include <cassert>
 
-#include "poisson.hpp"
-#include "convdiff.hpp"
+#include "pde/poisson.hpp"
+#include "pde/convdiff.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 
