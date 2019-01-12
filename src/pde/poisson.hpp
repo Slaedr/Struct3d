@@ -21,7 +21,9 @@ public:
 	/// Set stiffness matrix corresponding to interior points
 	/** Inserts entries rowwise into the matrix.
 	 */
-	PetscErrorCode computeLHS(const CartMesh *const m, DM da, Mat A) const;
+	PetscErrorCode computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const;
+
+	SMat computeLHS(const CartMesh *const m) const;
 
 	/// Returns a pair of functions: the first being the solution and the second the right hand side
 	/** Set RHS = 12*pi^2*sin(2pi*x)sin(2pi*y)sin(2pi*z) for u_exact = sin(2pi*x)sin(2pi*y)sin(2pi*z)

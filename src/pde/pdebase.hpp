@@ -8,6 +8,7 @@
 #include <array>
 #include <functional>
 #include "cartmesh.hpp"
+#include "linalg/matvec.hpp"
 
 /// Abstract class for all PDE discretizations on Cartesian grids
 class PDEBase
@@ -23,12 +24,19 @@ public:
 	 * \param func The function whose discrete representation is desired
 	 * \param[in,out] f The vec that must be written to
 	 */
-	virtual int computeVector(const CartMesh *const m, DM da,
-	                          const std::function<sreal(const sreal[NDIM])> func,
-	                          Vec f) const;
+	virtual int computeVectorPetsc(const CartMesh *const m, DM da,
+	                               const std::function<sreal(const sreal[NDIM])> func,
+	                               Vec f) const;
+
+	/// Computes a grid vector same as computeVectorPetsc, but using our native SVec instead
+	virtual SVec computeVector(const CartMesh *const m,
+	                           const std::function<sreal(const sreal[NDIM])> func) const;
 
 	/// Prescribes computation of the left-hand side operator for specific PDEs
-	virtual int computeLHS(const CartMesh *const m, DM da, Mat A) const = 0;
+	virtual int computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const = 0;
+
+	/// Prescribes computation of the left-hand side operator for specific PDEs, using native format
+	virtual SMat computeLHS(const CartMesh *const m) const = 0;
 
 	/// Prescribes generation of a pair of functions: the first being the solution and
 	///  the second being the right hand side

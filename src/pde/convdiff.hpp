@@ -17,7 +17,9 @@ public:
 	 */
 	ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffusion_coeff);
 
-	int computeLHS(const CartMesh *const m, DM da, Mat A) const;
+	int computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const;
+
+	SMat computeLHS(const CartMesh *const m) const;
 
 	/// Return the solution sin(2pi x)sin(2pi y)sin(2pi z) and the corresponding source term
 	/** The source term is, of course, dependent on the diffusion coeff and advection velocity.

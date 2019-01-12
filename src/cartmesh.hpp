@@ -61,6 +61,9 @@ public:
 	                                 DMDAStencilType stencil_type,
 	                                 DM *const dap);
 
+	/// Simpler mesh setup for single-processor runs independent of PETSc
+	int createMesh(const sint npdim[NDIM]);
+
 	~CartMesh();
 
 	/// Returns the number of points along a coordinate direction
@@ -129,6 +132,23 @@ public:
 	 */
 	void generateMesh_UniformDistribution(const sreal rmin[NDIM], const sreal rmax[NDIM]);
 
+	/// Returns the flattened 1D index of point at index (i,j,k). Excludes ghost points.
+	/// \warning Note the reversed argument order.
+	sint localFlattenedIndexReal(const sint k, const sint j, const sint i) const
+		__attribute__((always_inline))
+	{
+		constexpr int ng = 1;
+		return k*(npoind[1]-2*ng)*(npoind[0]-2*ng) + j*(npoind[0]-2*ng) + i;
+	}
+
+	/// Returns the flattened 1D index of point at index (i,j,k), including ghost points.
+	/// \warning Note the reversed argument order.
+	sint localFlattenedIndexAll(const sint k, const sint j, const sint i) const
+		__attribute__((always_inline))
+	{
+		return k*npoind[1]*npoind[0] + j*npoind[0] + i;
+	}
 };
+
 
 #endif

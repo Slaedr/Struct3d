@@ -41,7 +41,7 @@ std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_sol
 /// Set stiffness matrix corresponding to interior points
 /** Inserts entries rowwise into the matrix.
  */
-int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
+int ConvDiff::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 {
 	PetscErrorCode ierr = 0;
 	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
@@ -121,4 +121,64 @@ int ConvDiff::computeLHS(const CartMesh *const m, DM da, Mat A) const
 		printf("ConvDiff: ComputeLHS: Done.\n");
 	
 	return ierr;
+}
+
+SMat ConvDiff::computeLHS(const CartMesh *const m) const
+{
+	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+
+	SMat A(m);
+
+	if(rank == 0)	
+		printf("ConvDiff: ComputeLHS: Setting values of the LHS matrix...\n");
+
+	for(PetscInt k = A.start; k < A.start+A.sz[2]; k++)
+		for(PetscInt j = A.start; j < A.start+A.sz[1]; j++)
+			for(PetscInt i = A.start; i < A.start+A.sz[0]; i++)
+			{
+				// 1-offset indices for mesh coords access
+				const sint I = i + A.nghost, J = j + A.nghost, K = k + A.nghost;
+
+				const sint idx = m->localFlattenedIndexReal(k,j,i);
+
+				sreal drp[NDIM];
+				drp[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
+				drp[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
+				drp[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
+
+				// diffusion
+				A.vals[0][idx] = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
+						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
+				A.vals[1][idx] = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
+						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
+				A.vals[2][idx] = -1.0/( (m->gcoords(2,K)-m->gcoords(2,K-1)) 
+						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+				A.vals[3][idx] =  2.0/(m->gcoords(0,I+1)-m->gcoords(0,I-1))*
+				  (1.0/(m->gcoords(0,I+1)-m->gcoords(0,I))+1.0/(m->gcoords(0,I)-m->gcoords(0,I-1)));
+				A.vals[3][idx] += 2.0/(m->gcoords(1,J+1)-m->gcoords(1,J-1))*
+				  (1.0/(m->gcoords(1,J+1)-m->gcoords(1,J))+1.0/(m->gcoords(1,J)-m->gcoords(1,J-1)));
+				A.vals[3][idx] += 2.0/(m->gcoords(2,K+1)-m->gcoords(2,K-1))*
+				  (1.0/(m->gcoords(2,K+1)-m->gcoords(2,K))+1.0/(m->gcoords(2,K)-m->gcoords(2,K-1)));
+
+				A.vals[4][idx] = -1.0/( (m->gcoords(0,I+1)-m->gcoords(0,I)) 
+						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
+				A.vals[5][idx] = -1.0/( (m->gcoords(1,J+1)-m->gcoords(1,J)) 
+						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
+				A.vals[6][idx] = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
+						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+				for(int l = 0; l < NSTENCIL; l++)
+					A.vals[l][idx] *= mu;
+
+				// upwind advection
+				for(int l = 0; l < 3; l++)
+					A.vals[l][idx] += -b[l]/drp[l];
+				A.vals[3][idx] += b[0]/drp[0] + b[1]/drp[1] + b[2]/drp[2];
+			}
+
+	if(rank == 0)
+		printf("ConvDiff: ComputeLHS: Done.\n");
+	
+	return A;
 }

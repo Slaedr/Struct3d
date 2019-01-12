@@ -47,7 +47,7 @@ std::array<std::function<sreal(const sreal[NDIM])>,2> Poisson::manufactured_solu
 /// Set stiffness matrix corresponding to interior points
 /** Inserts entries rowwise into the matrix.
  */
-int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
+int Poisson::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 {
 	PetscErrorCode ierr = 0;	
 	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
@@ -116,5 +116,56 @@ int Poisson::computeLHS(const CartMesh *const m, DM da, Mat A) const
 	}
 	
 	return ierr;
+}
+
+SMat Poisson::computeLHS(const CartMesh *const m) const
+{
+	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+
+	SMat A(m);
+
+	if(rank == 0)	
+		printf("Poisson: ComputeLHS: Setting values of the LHS matrix...\n");
+
+	// const sreal dx = m->gcoords(0,2)-m->gcoords(0,1);
+
+	for(PetscInt k = A.start; k < A.start + A.sz[2]; k++)
+		for(PetscInt j = A.start; j < A.start + A.sz[1]; j++)
+			for(PetscInt i = A.start; i < A.start + A.sz[0]; i++)
+			{
+				const sint I = i+1, J = j+1, K = k+1;  // 1-offset indices for mesh coords access
+				const sint idx = m->localFlattenedIndexReal(k,j,i);
+				
+				A.vals[0][idx] = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
+				                        * 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
+				A.vals[1][idx] = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
+				                        * 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
+				A.vals[2][idx] = -1.0/( (m->gcoords(2,K)-m->gcoords(2,K-1)) 
+				                        * 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+				A.vals[3][idx] =  2.0/(m->gcoords(0,I+1)-m->gcoords(0,I-1))*
+					(1.0/(m->gcoords(0,I+1)-m->gcoords(0,I))+1.0/(m->gcoords(0,I)-m->gcoords(0,I-1)));
+				A.vals[3][idx] += 2.0/(m->gcoords(1,J+1)-m->gcoords(1,J-1))*
+					(1.0/(m->gcoords(1,J+1)-m->gcoords(1,J))+1.0/(m->gcoords(1,J)-m->gcoords(1,J-1)));
+				A.vals[3][idx] += 2.0/(m->gcoords(2,K+1)-m->gcoords(2,K-1))*
+					(1.0/(m->gcoords(2,K+1)-m->gcoords(2,K))+1.0/(m->gcoords(2,K)-m->gcoords(2,K-1)));
+
+				A.vals[4][idx] = -1.0/( (m->gcoords(0,I+1)-m->gcoords(0,I)) 
+				                        * 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
+				A.vals[5][idx] = -1.0/( (m->gcoords(1,J+1)-m->gcoords(1,J)) 
+				                        * 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
+				A.vals[6][idx] = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
+				                        * 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+				// // Uniform-grid central difference
+				// values[0] = values[1] = values[2] = values[4] = values[5] = values[6] = -1.0/(dx*dx);
+				// values[3] = 6.0/(dx*dx);
+			}
+
+	if(rank == 0) {
+		printf("Poisson: ComputeLHS: Done.\n");
+	}
+	
+	return A;
 }
 

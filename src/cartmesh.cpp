@@ -99,6 +99,59 @@ PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt n
 	return ierr;
 }
 
+PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])
+{
+	int ierr = 0;
+	const int rank = get_mpi_rank(MPI_COMM_WORLD);
+	const int mpisize = get_mpi_size(MPI_COMM_WORLD);
+	if(mpisize > 1) {
+		throw std::runtime_error("Our version does not work with Petsc yet!");
+	}
+
+	for(int i = 0; i < NDIM; i++) {
+		npoind[i] = npdim[i];
+	}
+
+	if(rank == 0) {
+		std::printf("CartMesh: Number of points in each direction: ");
+		for(int i = 0; i < NDIM; i++) {
+			std::printf("%d ", npoind[i]);
+		}
+		std::printf("\n");
+	}
+
+	npointotal = 1;
+	for(int i = 0; i < NDIM; i++)
+		npointotal *= npoind[i];
+
+	PetscInt nbpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
+		(npoind[1]-2)*(npoind[2]-2)*2;
+	ninpoin = npointotal-nbpoints;
+
+	if(rank == 0)
+		std::printf("CartMesh: Setting up DMDA\n");
+	
+	nprocs[0] = nprocs[1] = nprocs[2] = 1;
+
+	ntprocs = nprocs[0]*nprocs[1]*nprocs[2];
+
+	if(rank == 0) {
+		std::printf("CartMesh: Number of points in each direction: %d,%d,%d.\n", 
+		            npoind[0], npoind[1], npoind[2]);
+		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
+				nprocs[0], nprocs[1], nprocs[2]);
+		std::printf("CartMesh: Total points = %d, interior points = %d, partitions = %d\n", 
+				npointotal, ninpoin, ntprocs);
+	}
+
+	// have each process store coords; hardly costs anything
+	coords = (sreal**)std::malloc(NDIM*sizeof(sreal*));
+	for(int i = 0; i < NDIM; i++)
+		coords[i] = (PetscReal*)std::malloc(npoind[i]*sizeof(sreal));
+
+	return ierr;
+}
+
 CartMesh::~CartMesh()
 {
 	for(int i = 0; i < NDIM; i++)

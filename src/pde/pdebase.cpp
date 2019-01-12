@@ -5,8 +5,8 @@
 #include "pdebase.hpp"
 #include "common_utils.hpp"
 
-int PDEBase::computeVector(const CartMesh *const m, DM da,
-                           const std::function<sreal(const sreal[NDIM])> func, Vec f) const
+int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,
+                                const std::function<sreal(const sreal[NDIM])> func, Vec f) const
 {
 	PetscErrorCode ierr = 0;
 	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
@@ -36,4 +36,29 @@ int PDEBase::computeVector(const CartMesh *const m, DM da,
 		printf("ComputeRHS: Done\n");
 
 	return ierr;
+}
+
+SVec PDEBase::computeVector(const CartMesh *const m,
+                            const std::function<sreal(const sreal[NDIM])> func) const
+{
+	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+
+	SVec f(m);
+
+	if(rank == 0)
+		printf("ComputeRHS: Starting\n");
+
+	// iterate over interior nodes
+	for(PetscInt k = f.start; k < f.start + f.sz[2]; k++)
+		for(PetscInt j = f.start; j < f.start + f.sz[1]; j++)
+			for(PetscInt i = f.start; i < f.start + f.sz[0]; i++)
+			{
+				const sreal crds[NDIM] = {m->gcoords(0,i), m->gcoords(1,j), m->gcoords(2,k)};
+				f.vals[m->localFlattenedIndexAll(k,j,i)] = func(crds);
+			}
+	
+	if(rank == 0)
+		printf("ComputeRHS: Done\n");
+
+	return f;
 }
