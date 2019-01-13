@@ -125,7 +125,7 @@ int ConvDiff::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 
 SMat ConvDiff::computeLHS(const CartMesh *const m) const
 {
-	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+	const int rank = get_mpi_rank(MPI_COMM_WORLD);
 
 	SMat A(m);
 

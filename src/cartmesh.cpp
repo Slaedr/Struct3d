@@ -82,19 +82,19 @@ PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt n
 
 	ntprocs = nprocs[0]*nprocs[1]*nprocs[2];
 
-	if(rank == 0) {
-		std::printf("CartMesh: Number of points in each direction: %d,%d,%d.\n", 
-				M,N,P);
-		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
-				nprocs[0], nprocs[1], nprocs[2]);
-		std::printf("CartMesh: Total points = %d, interior points = %d, partitions = %d\n", 
-				npointotal, ninpoin, ntprocs);
-	}
-
 	// have each process store coords; hardly costs anything
 	coords = (PetscReal**)std::malloc(NDIM*sizeof(PetscReal*));
 	for(int i = 0; i < NDIM; i++)
 		coords[i] = (PetscReal*)std::malloc(npoind[i]*sizeof(PetscReal));
+
+	if(rank == 0) {
+		std::printf("CartMesh: Number of points in each direction: %d,%d,%d.\n", 
+		            M,N,P);
+		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
+		            nprocs[0], nprocs[1], nprocs[2]);
+		std::printf("CartMesh: Total points = %d, interior points = %d, partitions = %d\n", 
+		            npointotal, ninpoin, ntprocs);
+	}
 
 	return ierr;
 }
@@ -124,30 +124,27 @@ PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])
 	for(int i = 0; i < NDIM; i++)
 		npointotal *= npoind[i];
 
-	PetscInt nbpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
+	sint nbpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
 		(npoind[1]-2)*(npoind[2]-2)*2;
 	ninpoin = npointotal-nbpoints;
-
-	if(rank == 0)
-		std::printf("CartMesh: Setting up DMDA\n");
 	
 	nprocs[0] = nprocs[1] = nprocs[2] = 1;
 
 	ntprocs = nprocs[0]*nprocs[1]*nprocs[2];
 
+	// have each process store coords; hardly costs anything
+	coords = (sreal**)std::malloc(NDIM*sizeof(sreal*));
+	for(int i = 0; i < NDIM; i++)
+		coords[i] = (sreal*)std::malloc(npoind[i]*sizeof(sreal));
+
 	if(rank == 0) {
 		std::printf("CartMesh: Number of points in each direction: %d,%d,%d.\n", 
 		            npoind[0], npoind[1], npoind[2]);
 		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
-				nprocs[0], nprocs[1], nprocs[2]);
+		            nprocs[0], nprocs[1], nprocs[2]);
 		std::printf("CartMesh: Total points = %d, interior points = %d, partitions = %d\n", 
-				npointotal, ninpoin, ntprocs);
+		            npointotal, ninpoin, ntprocs);
 	}
-
-	// have each process store coords; hardly costs anything
-	coords = (sreal**)std::malloc(NDIM*sizeof(sreal*));
-	for(int i = 0; i < NDIM; i++)
-		coords[i] = (PetscReal*)std::malloc(npoind[i]*sizeof(sreal));
 
 	return ierr;
 }
@@ -162,7 +159,7 @@ CartMesh::~CartMesh()
 void CartMesh::generateMesh_ChebyshevDistribution(const sreal rmin[NDIM], 
                                                   const sreal rmax[NDIM])
 {
-	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+	const int rank = get_mpi_rank(MPI_COMM_WORLD);
 	if(rank == 0)
 		std::printf("CartMesh: generateMesh_cheb: Generating grid\n");
 	for(int idim = 0; idim < NDIM; idim++)
@@ -184,7 +181,7 @@ void CartMesh::generateMesh_ChebyshevDistribution(const sreal rmin[NDIM],
 void CartMesh::generateMesh_UniformDistribution(const sreal rmin[NDIM], 
                                                 const sreal rmax[NDIM])
 {
-	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+	const int rank = get_mpi_rank(MPI_COMM_WORLD);
 	if(rank == 0)
 		std::printf("CartMesh: generateMesh_Uniform: Generating grid\n");
 	for(int idim = 0; idim < NDIM; idim++)

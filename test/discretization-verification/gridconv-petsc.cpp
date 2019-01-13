@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
 
 	std::vector<sreal> h(nmesh);
 	std::vector<sreal> errors(nmesh);
+	std::vector<sreal> ress(nmesh);
 
 	for(int imesh = 0; imesh < nmesh; imesh++)
 	{
@@ -126,6 +127,20 @@ int main(int argc, char* argv[])
 		ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
 		ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY); CHKERRQ(ierr);
 
+		// residual defect
+		Vec res;
+		ierr = VecDuplicate(u, &res); CHKERRQ(ierr);
+		ierr = MatMult(A, uexact, res); CHKERRQ(ierr);
+		ierr = VecAXPY(res, -1.0, b); CHKERRQ(ierr);
+		sreal defect;
+		ierr = VecNorm(res, NORM_2, &defect); CHKERRQ(ierr);
+		defect /= sqrt(m.gnpointotal());
+		if(rank==0)
+			printf("Defect = %f\n", defect);
+		ress[imesh] = defect;
+
+		// Solve
+
 		KSP ksp; 
 	
 		ierr = KSPCreate(comm, &ksp);
@@ -153,13 +168,13 @@ int main(int argc, char* argv[])
 			printf("Error = %f\n", errors[imesh]);
 		}
 
-		KSPDestroy(&ksp);
+		ierr = KSPDestroy(&ksp); CHKERRQ(ierr);
 
 		VecDestroy(&u);
 		VecDestroy(&uexact);
 		VecDestroy(&b);
 		VecDestroy(&err);
-		MatDestroy(&A);
+		ierr = MatDestroy(&A); CHKERRQ(ierr);
 		DMDestroy(&da);
 	}
 
@@ -170,6 +185,13 @@ int main(int argc, char* argv[])
 		slope = (log10(errors[i])-log10(errors[i-1]))/(log10(h[i])-log10(h[i-1]));
 		if(rank == 0)
 			printf("Slope %d = %f\n", i, slope);
+	}
+
+	sreal resslope = 0;
+	for(int i = 1; i < nmesh; i++) {
+		resslope = (log10(ress[i])-log10(ress[i-1]))/(log10(h[i])-log10(h[i-1]));
+		if(rank == 0)
+			printf("Defect slope %d = %f\n", i, resslope);
 	}
 
 	if(cdata.pdetype == "poisson")

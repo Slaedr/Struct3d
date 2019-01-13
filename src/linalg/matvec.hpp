@@ -5,7 +5,7 @@
 #ifndef STRUCT3D_MATVEC_H
 #define STRUCT3D_MATVEC_H
 
-#include <valarray>
+#include <vector>
 #include <array>
 #include "cartmesh.hpp"
 
@@ -15,6 +15,9 @@
 struct SVec
 {
 	/// Construct the vector over the given Cartesian grid
+	/** Assumes compact stencil and allocate extra space for one ghost layer
+	 * The formal sizes (\ref SVec::sz) only reflect real points.
+	 */
 	SVec(const CartMesh *const mesh);
 
 	/// Associated mesh
@@ -24,16 +27,16 @@ struct SVec
 	/** This depends on the number of ghost points needed. Note that this is not a flattened index -
 	 * its value will usually be 1 or 2.
 	 */
-	sint start;
-	/// Number of 'real' points in each direction (0 is i, 1 is j and 2 is k)
-	std::array<sint,NDIM> sz;
+	const sint start;
 	/// Number of ghost points per boundary
-	int nghost;
+	const int nghost;
+	/// Number of 'real' points in each direction (0 is i, 1 is j and 2 is k)
+	const std::array<sint,NDIM> sz;
 
 	/// 3D storage - access the value at point (i,j,k) as vals[localFlattenedIndex(k,j,i)]
 	/** \sa CartMesh::localFlattenedIndex
 	 */
-	std::valarray<sreal> vals;
+	std::vector<sreal> vals;
 };
 
 /// Matrix format for a stencil of size NSTENCIL on a 3D structured grid
@@ -47,6 +50,12 @@ struct SMat
 	/// Construct the matrix over the given Cartesian grid
 	SMat(const CartMesh *const mesh);
 
+	/// Compute a matrix-vector product y += Ax (\warning the result is ADDED TO, not overwritten)
+	void apply(const SVec& x, SVec& y) const;
+
+	/// Computes y = b - Ax (the results is overwritten)
+	void apply_res(const SVec& b, const SVec& x, SVec& y) const;
+
 	/// Associated mesh
 	const CartMesh *const m;
 
@@ -54,22 +63,27 @@ struct SMat
 	/** This depends on the number of ghost points needed. Note that this is not a flattened index -
 	 * its value will usually be 0,1 or 2.
 	 */
-	sint start;
-	/// Number of 'real' points in each of the directions (0 is i, 1 is j and 2 is k)
-	std::array<sint,NDIM> sz;
+	const sint start;
 	/// Number of ghost points per boundary
-	int nghost;
+	const int nghost;
+	/// Number of 'real' points in each of the directions (0 is i, 1 is j and 2 is k)
+	const std::array<sint,NDIM> sz;
 
 	/// Non-zero values of the matrix - access as vals[<neighbor>][localFlattenedIndex(k,j,i)].
 	/** \sa CartMesh::localFlattenedIndex
 	 */
-	std::valarray<sreal> vals[NSTENCIL];
-
-	/// Compute a matrix-vector product y += Ax (\warning the result is ADDED TO, not overwritten)
-	void apply(const SVec& x, SVec& y) const;
-
-	/// Computes y = b - Ax (the results is overwritten)
-	void apply_res(const SVec& b, const SVec& x, SVec& y) const;
+	std::vector<sreal> vals[NSTENCIL];
 };
+
+/// y <- y + a*x
+void vecaxpy(const sreal a, const SVec& x, SVec& y);
+
+/// Computes the L2 function norm over the underlying mesh
+/** Only considers real points, not ghost points.
+ */
+sreal norm_L2(const SVec& x);
+
+/// Computes the l2 vector norm over the real points
+sreal norm_vector_l2(const SVec& x);
 
 #endif

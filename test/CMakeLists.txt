@@ -5,6 +5,22 @@ target_link_libraries(testfd_csr ${BLASTED_LIB} base poisson)
 add_executable(testfd_csr_threaded compare-threaded.cpp)
 target_link_libraries(testfd_csr_threaded ${BLASTED_LIB} base poisson)
 
+add_executable(testnativeassembly nativevectorassemblytest.cpp)
+target_link_libraries(testnativeassembly base poisson)
+
+add_executable(testmatvec matvectest.cpp)
+target_link_libraries(testmatvec base poisson convdiff)
+
+add_test(NAME NativeAssembly
+  COMMAND ${MPIEXEC} -n 1 ./testnativeassembly
+  ${CMAKE_CURRENT_SOURCE_DIR}/input/poissonsmall.control
+  )
+
+add_test(NAME NativeMatVec
+  COMMAND ${MPIEXEC} -n 1 ./testmatvec
+  ${CMAKE_CURRENT_SOURCE_DIR}/discretization-verification/poisson-conv.control
+  )
+
 add_subdirectory(discretization-verification)
 
 add_test(NAME MPIPoissonCSRPetscJacobiRelaxation

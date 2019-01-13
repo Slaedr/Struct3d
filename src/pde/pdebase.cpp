@@ -41,7 +41,7 @@ int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,
 SVec PDEBase::computeVector(const CartMesh *const m,
                             const std::function<sreal(const sreal[NDIM])> func) const
 {
-	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+	const int rank = get_mpi_rank(MPI_COMM_WORLD);
 
 	SVec f(m);
 
