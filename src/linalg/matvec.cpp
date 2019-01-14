@@ -122,3 +122,12 @@ sreal norm_vector_l2(const SVec& x)
 			}
 	return sqrt(norm);
 }
+
+sreal compute_error_L2(const SVec& x, const SVec& y)
+{
+	assert(x.m == y.m);
+	SVec diff = y;
+	vecaxpy(-1.0, x, diff);
+	//return norm_vector_l2(diff)/sqrt(x.m->gnpointotal());
+	return norm_L2(diff);
+}

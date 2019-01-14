@@ -86,4 +86,7 @@ sreal norm_L2(const SVec& x);
 /// Computes the l2 vector norm over the real points
 sreal norm_vector_l2(const SVec& x);
 
+/// L2 function norm of the difference between two vectors
+sreal compute_error_L2(const SVec& x, const SVec& y);
+
 #endif

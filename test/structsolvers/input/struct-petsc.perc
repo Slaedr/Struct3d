@@ -1,0 +1,7 @@
+-options_left
+
+-ksp_type richardson
+-ksp_rtol 1e-6
+-ksp_max_it 1000
+
+-s3d_ksp_type richardson

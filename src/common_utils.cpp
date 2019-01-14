@@ -1,6 +1,8 @@
 #include <cmath>
 #include "common_utils.hpp"
 
+#define PETSCOPTION_STR_MAX_LEN 200
+
 PetscReal computeNorm(const CartMesh *const m, Vec v, DM da)
 {
 	// get the starting global indices and sizes (in each direction) of the local mesh partition
@@ -56,4 +58,48 @@ int get_mpi_size(MPI_Comm comm) {
 	int size;
 	MPI_Comm_size(comm, &size);
 	return size;
+}
+
+NonExistentPetscOpion::NonExistentPetscOpion(const std::string& msg)
+	: std::runtime_error(msg)
+{ }
+
+std::string petscoptions_get_string(const std::string optionname, const size_t sz)
+{
+	char output[PETSCOPTION_STR_MAX_LEN];
+	PetscBool set = PETSC_FALSE;
+	int ierr = PetscOptionsGetString(NULL, NULL, optionname.c_str(), output, sz, &set);
+	if(ierr) throw std::runtime_error("Could not get PETSc options!");
+	if(!set) {
+		throw NonExistentPetscOpion(std::string("Could not find ") + optionname);
+	}
+
+	std::string outs = output;
+	return outs;
+}
+
+sreal petscoptions_get_real(const std::string optionname)
+{
+	PetscBool set = PETSC_FALSE;
+	sreal output;
+	int ierr = PetscOptionsGetReal(NULL, NULL, optionname.c_str(), &output, &set);
+	if(ierr) throw std::runtime_error("Could not get PETSc options!");
+	if(!set) {
+		throw NonExistentPetscOpion(std::string("Could not find ") + optionname);
+	}
+
+	return output;
+}
+
+int petscoptions_get_int(const std::string optionname)
+{
+	PetscBool set = PETSC_FALSE;
+	int output;
+	int ierr = PetscOptionsGetInt(NULL, NULL, optionname.c_str(), &output, &set);
+	if(ierr) throw std::runtime_error("Could not get PETSc options!");
+	if(!set) {
+		throw NonExistentPetscOpion(std::string("Could not find ") + optionname);
+	}
+
+	return output;
 }

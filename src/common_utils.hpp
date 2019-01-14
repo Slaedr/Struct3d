@@ -24,4 +24,18 @@ int get_mpi_rank(MPI_Comm comm);
 /// Get number of ranks in a communicator
 int get_mpi_size(MPI_Comm comm);
 
+class NonExistentPetscOpion : public std::runtime_error
+{
+public:
+	NonExistentPetscOpion(const std::string& msg);
+};
+
+/// Get a string option from the default PETSc options database
+std::string petscoptions_get_string(const std::string optionname, const size_t sz);
+
+/// Get a floating-point option from the default PETSc options database
+sreal petscoptions_get_real(const std::string optionname);
+
+int petscoptions_get_int(const std::string optionname);
+
 #endif

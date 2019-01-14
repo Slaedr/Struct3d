@@ -1,9 +1,9 @@
 # test executables
-add_executable(testfd_csr compare.cpp)
-target_link_libraries(testfd_csr ${BLASTED_LIB} base poisson)
+add_executable(testblasted_csr compare_blasted.cpp)
+target_link_libraries(testblasted_csr ${BLASTED_LIB} base poisson)
 
-add_executable(testfd_csr_threaded compare-threaded.cpp)
-target_link_libraries(testfd_csr_threaded ${BLASTED_LIB} base poisson)
+add_executable(testblasted_csr_threaded compare-threaded_blasted.cpp)
+target_link_libraries(testblasted_csr_threaded ${BLASTED_LIB} base poisson)
 
 add_executable(testnativeassembly nativevectorassemblytest.cpp)
 target_link_libraries(testnativeassembly base poisson)
@@ -11,41 +11,37 @@ target_link_libraries(testnativeassembly base poisson)
 add_executable(testmatvec matvectest.cpp)
 target_link_libraries(testmatvec base poisson convdiff)
 
-add_test(NAME NativeAssembly
+add_test(NAME Assembly
   COMMAND ${MPIEXEC} -n 1 ./testnativeassembly
   ${CMAKE_CURRENT_SOURCE_DIR}/input/poissonsmall.control
   )
 
-add_test(NAME NativeMatVec
+add_test(NAME MatVec
   COMMAND ${MPIEXEC} -n 1 ./testmatvec
   ${CMAKE_CURRENT_SOURCE_DIR}/discretization-verification/poisson-conv.control
   )
 
 add_subdirectory(discretization-verification)
 
-add_test(NAME MPIPoissonCSRPetscJacobiRelaxation
-  COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 4 ./testfd_csr
-  ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control
-  -options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/mpi_poisson_localrelaxation.perc
-  -ref_sub_pc_type jacobi -blasted_pc_type jacobi
-  )
+add_subdirectory(structsolvers)
 
-add_test(NAME MPIPoissonCSRPetscILU0 COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 4 ./testfd_csr 
+add_test(NAME BlastedMPIPoissonCSRPetscILU0
+  COMMAND env OMP_NUM_THREADS=1 ${MPIEXEC} -n 4 ./testblasted_csr
   ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control
   -options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/mpi_poisson_csr_ilu0.perc)
 
-add_test(NAME ThreadedPoissonCSRPetscILU0 COMMAND ${MPIEXEC} -n 1 ./testfd_csr_threaded 
+add_test(NAME BlastedThreadedPoissonCSRPetscILU0 COMMAND ${MPIEXEC} -n 1 ./testblasted_csr_threaded 
   ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control
   -options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/thread_poisson_csr.perc
   -ref_sub_pc_type ilu -blasted_pc_type ilu0 -test_type compare_error -error_tolerance_factor 1e7)
 
-add_test(NAME ThreadedPoissonCSRPetscSAPILU0 COMMAND ${MPIEXEC} -n 1 ./testfd_csr_threaded 
+add_test(NAME BlastedThreadedPoissonCSRPetscSAPILU0 COMMAND ${MPIEXEC} -n 1 ./testblasted_csr_threaded 
   ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control 
   -options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/thread_poisson_csr.perc 
   -ref_sub_pc_type ilu -blasted_pc_type sapilu0 -test_type compare_error)
 
-add_test(NAME AsyncRelaxationPoissonPetsc-SGS-IterationsLowerBound
-  COMMAND ${MPIEXEC} ${THREADOPTS} -n 1 ./testfd_csr_threaded
+add_test(NAME BlastedAsyncRelaxationPoissonPetsc-SGS-IterationsLowerBound
+  COMMAND ${MPIEXEC} ${THREADOPTS} -n 1 ./testblasted_csr_threaded
   ${CMAKE_CURRENT_SOURCE_DIR}/input/poisson.control 
   -options_file  ${CMAKE_CURRENT_SOURCE_DIR}/input/asyncrelaxation.perc 
   -ref_sub_pc_type jacobi -blasted_pc_type sgs -test_type compare_its)
