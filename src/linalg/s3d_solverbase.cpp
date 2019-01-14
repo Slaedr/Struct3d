@@ -60,6 +60,10 @@ SolveInfo Richardson::apply(const SVec& b, SVec& x) const
 		A.apply_res(b, x, res);
 		resnorm = norm_vector_l2(res);
 
+		if(step % 10 == 0) {
+			printf("  Step %d: Rel res = %f\n", step, resnorm/bnorm);
+			fflush(stdout);
+		}
 		step++;
 	}
 

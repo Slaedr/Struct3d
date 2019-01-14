@@ -36,6 +36,10 @@ std::string petscoptions_get_string(const std::string optionname, const size_t s
 /// Get a floating-point option from the default PETSc options database
 sreal petscoptions_get_real(const std::string optionname);
 
+/// Get an integer option
 int petscoptions_get_int(const std::string optionname);
+
+/// Get a boolean option. Can be used to check if a no-argument option has been given.
+bool petscoptions_get_bool(const std::string optionname);
 
 #endif

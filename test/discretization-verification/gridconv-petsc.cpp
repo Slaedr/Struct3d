@@ -41,7 +41,9 @@ int main(int argc, char* argv[])
 	const CaseData cdata = readCtrl(conf);
 	char tmp[100];
 	int nrefinedirs;
-	fscanf(conf, "%s", tmp); fscanf(conf, "%d", &nrefinedirs);
+	ierr = fscanf(conf, "%s", tmp);
+	ierr = fscanf(conf, "%d", &nrefinedirs);
+	if(ierr) printf("Could not read number of refine directions!\n");
 	fclose(conf);
 
 	const int nmesh = cdata.nruns;

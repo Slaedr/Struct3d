@@ -103,3 +103,16 @@ int petscoptions_get_int(const std::string optionname)
 
 	return output;
 }
+
+bool petscoptions_get_bool(const std::string optionname)
+{
+	PetscBool set = PETSC_FALSE;
+	PetscBool output = PETSC_FALSE;
+	int ierr = PetscOptionsGetBool(NULL, NULL, optionname.c_str(), &output, &set);
+	if(ierr) throw std::runtime_error("Could not get PETSc options!");
+	if(!set) {
+		throw NonExistentPetscOpion(std::string("Could not find ") + optionname);
+	}
+
+	return output;
+}

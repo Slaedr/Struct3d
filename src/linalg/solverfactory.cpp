@@ -6,6 +6,7 @@
 #include <petscsys.h>
 #include "common_utils.hpp"
 #include "s3d_jacobi.hpp"
+#include "s3d_sgspreconditioners.hpp"
 #include "solverfactory.hpp"
 
 SolverBase *createSolver(const SMat& lhs)
@@ -29,7 +30,23 @@ SolverBase *createSolver(const SMat& lhs)
 
 	if(precstr == "jacobi")
 	{
+		printf("Using Jacobi preconditioner\n");
 		prec = new JacobiPreconditioner(lhs);
+	}
+	else if(precstr == "sgs")
+	{
+		printf("Using SGS preconditioner\n");
+		PreconParams pparams;
+		pparams.nbuildsweeps = 0;
+		pparams.napplysweeps = petscoptions_get_int("-s3d_pc_apply_sweeps");
+		pparams.thread_chunk_size = petscoptions_get_int("-s3d_thread_chunk_size");
+		pparams.threadedbuild = false;
+		try {
+			pparams.threadedapply = petscoptions_get_bool("-s3d_pc_use_threaded_apply");
+		} catch(NonExistentPetscOpion& e) {
+			pparams.threadedapply = true;
+		}
+		prec = new SGS_preconditioner(lhs, pparams);
 	}
 	else {
 		prec = new NoSolver(lhs);
@@ -38,6 +55,7 @@ SolverBase *createSolver(const SMat& lhs)
 
 	if(tlsolver == "richardson")
 	{
+		printf("Using Richardson solver\n");
 		solver = new Richardson(lhs, prec, params);
 	}
 	else {

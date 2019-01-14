@@ -64,6 +64,7 @@ public:
 	SolveInfo apply(const SVec& b, SVec& x) const;
 };
 
+/// Richardson iteration
 class Richardson : public SolverBase
 {
 public:

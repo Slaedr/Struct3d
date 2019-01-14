@@ -30,11 +30,14 @@ void SMat::apply(const SVec& x, SVec& y) const
 	if(x.m != y.m)
 		throw std::runtime_error("Both vectors should be defined over the same mesh!");
 
+	const int ng = x.nghost;
+	assert(ng == 1);
+
 	for(sint k = x.start; k < x.start + x.sz[2]; k++)
 		for(sint j = x.start; j < x.start + x.sz[1]; j++)
 			for(sint i = x.start; i < x.start + x.sz[0]; i++)
 			{
-				const sint idxr = x.m->localFlattenedIndexReal(k,j,i);
+				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 				const sint jdx[] = {
 					x.m->localFlattenedIndexAll(k,j,i-1),
 					x.m->localFlattenedIndexAll(k,j-1,i),
