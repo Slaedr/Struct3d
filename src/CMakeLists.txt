@@ -3,7 +3,7 @@ add_library(base case.cpp pde/pdebase.cpp linalg/matvec.cpp cartmesh.cpp common_
 target_link_libraries(base ${PETSC_LIB} ${MPI_C_LIBRARIES} ${MPI_C_LINK_FLAGS})
 
 add_library(linalg linalg/solverfactory.cpp
-  linalg/s3d_jacobi.cpp linalg/s3d_sgspreconditioners.cpp
+  linalg/s3d_ilu.cpp linalg/s3d_jacobi.cpp linalg/s3d_sgspreconditioners.cpp
   linalg/s3d_solverbase.cpp)
 target_link_libraries(linalg base)
 

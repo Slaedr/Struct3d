@@ -7,6 +7,7 @@
 #include "common_utils.hpp"
 #include "s3d_jacobi.hpp"
 #include "s3d_sgspreconditioners.hpp"
+#include "s3d_ilu.hpp"
 #include "solverfactory.hpp"
 
 SolverBase *createSolver(const SMat& lhs)
@@ -47,6 +48,25 @@ SolverBase *createSolver(const SMat& lhs)
 			pparams.threadedapply = true;
 		}
 		prec = new SGS_preconditioner(lhs, pparams);
+	}
+	else if(precstr == "strilu")
+	{
+		printf("Using StrILU preconditioner\n");
+		PreconParams pparams;
+		pparams.nbuildsweeps = petscoptions_get_int("-s3d_pc_build_sweeps");
+		pparams.napplysweeps = petscoptions_get_int("-s3d_pc_apply_sweeps");
+		pparams.thread_chunk_size = petscoptions_get_int("-s3d_thread_chunk_size");
+		try {
+			pparams.threadedbuild = petscoptions_get_bool("-s3d_pc_use_threaded_build");
+		} catch(NonExistentPetscOpion& e) {
+			pparams.threadedbuild = true;
+		}
+		try {
+			pparams.threadedapply = petscoptions_get_bool("-s3d_pc_use_threaded_apply");
+		} catch(NonExistentPetscOpion& e) {
+			pparams.threadedapply = true;
+		}
+		prec = new StrILU_preconditioner(lhs, pparams);
 	}
 	else {
 		prec = new NoSolver(lhs);

@@ -40,7 +40,6 @@ Richardson::Richardson(const SMat& lhs, SolverBase *const precond, const SolvePa
 
 void Richardson::updateOperator()
 {
-	prec->updateOperator();
 }
 
 SolveInfo Richardson::apply(const SVec& b, SVec& x) const

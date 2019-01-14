@@ -166,6 +166,7 @@ int main(int argc, char* argv[])
 	
 	int avgkspiters = 0;
 	PetscReal errnorm = 0;
+	sreal wtime = 0;
 	for(int irun = 0; irun < cdata.nruns; irun++)
 	{
 		if(mpirank == 0)
@@ -174,7 +175,10 @@ int main(int argc, char* argv[])
 		const SolverBase *const solver = createSolver(A);
 		SVec u(&m);
 
+		sreal starttime = MPI_Wtime();
 		const SolveInfo slvinfo = solver->apply(b, u);
+		sreal endtime = MPI_Wtime() - starttime;
+		wtime += endtime;
 
 		assert(slvinfo.converged);
 		avgkspiters += slvinfo.iters;
@@ -190,6 +194,9 @@ int main(int argc, char* argv[])
 
 		delete solver;
 	}
+
+	wtime /= cdata.nruns;
+	printf("Time taken by native solve = %f\n", wtime);
 
 	if(mpirank == 0)
 		printf("KSP Iters: Reference %d vs native %d.\n", refkspiters, avgkspiters/cdata.nruns);

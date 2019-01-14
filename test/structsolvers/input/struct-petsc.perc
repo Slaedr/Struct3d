@@ -5,7 +5,7 @@
 -ksp_max_it 1000
 -ksp_monitor
 -ksp_final_residual
--ksp_view
+#-ksp_view
 #-ksp_norm_type unpreconditioned
 
 -s3d_ksp_type richardson

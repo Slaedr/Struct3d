@@ -68,9 +68,9 @@ public:
 class Richardson : public SolverBase
 {
 public:
-	/// Builds the preconditioner
+	/// Sets parameters
 	Richardson(const SMat& lhs, SolverBase *const precond, const SolveParams params);
-	/// Updates the preconditioner
+	/// Does nothing
 	void updateOperator();
 	/// Solve
 	SolveInfo apply(const SVec& b, SVec& x) const;
