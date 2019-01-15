@@ -13,21 +13,17 @@ StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams
 void StrILU_preconditioner::updateOperator()
 {
 	sreal starttime = MPI_Wtime();
+
 	// initialize
-#pragma omp parallel for simd collapse(3) default(shared)
-	for(sint k = A.start; k < A.start + A.sz[2]; k++)
-		for(sint j = A.start; j < A.start + A.sz[1]; j++)
-			for(sint i = A.start; i < A.start + A.sz[0]; i++)
-			{
-				const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
-				diaginv[idxr] = A.vals[STENCIL_DIAG][idxr];
-			}
+#pragma omp parallel for simd default(shared)
+	for(size_t i = 0; i < diaginv.size(); i++)
+		diaginv[i] = A.vals[STENCIL_DIAG][i];
 
 #pragma omp parallel default(shared) if(params.threadedbuild)
 	{
 		for(int iswp = 0; iswp < params.nbuildsweeps; iswp++)
 		{
-#pragma omp for collapse(3)
+#pragma omp for collapse(3) nowait
 			for(sint k = A.start; k < A.start + A.sz[2]; k++)
 				for(sint j = A.start; j < A.start + A.sz[1]; j++)
 					for(sint i = A.start; i < A.start + A.sz[0]; i++)
@@ -55,14 +51,9 @@ void StrILU_preconditioner::updateOperator()
 	}
 
 	// invert
-#pragma omp parallel for simd collapse(3) default(shared)
-	for(sint k = A.start; k < A.start + A.sz[2]; k++)
-		for(sint j = A.start; j < A.start + A.sz[1]; j++)
-			for(sint i = A.start; i < A.start + A.sz[0]; i++)
-			{
-				const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
-				diaginv[idxr] = 1.0/diaginv[idxr];
-			}
+#pragma omp parallel for simd default(shared)
+	for(size_t i = 0; i < diaginv.size(); i++)
+		diaginv[i] = 1.0/diaginv[i];
 
 	sreal etime = MPI_Wtime() - starttime;
 	printf(" >> Time taken to compute ILU = %f.\n", etime);
