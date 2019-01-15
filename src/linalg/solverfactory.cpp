@@ -46,6 +46,7 @@ SolverBase *createSolver(const SMat& lhs)
 			pparams.threadedapply = petscoptions_get_bool("-s3d_pc_use_threaded_apply");
 		} catch(NonExistentPetscOpion& e) {
 			pparams.threadedapply = true;
+			printf(" WARNING: SolverFactory: Using threaded apply.\n");
 		}
 		prec = new SGS_preconditioner(lhs, pparams);
 	}
@@ -60,11 +61,13 @@ SolverBase *createSolver(const SMat& lhs)
 			pparams.threadedbuild = petscoptions_get_bool("-s3d_pc_use_threaded_build");
 		} catch(NonExistentPetscOpion& e) {
 			pparams.threadedbuild = true;
+			printf(" WARNING: SolverFactory: Using threaded build.\n");
 		}
 		try {
 			pparams.threadedapply = petscoptions_get_bool("-s3d_pc_use_threaded_apply");
 		} catch(NonExistentPetscOpion& e) {
 			pparams.threadedapply = true;
+			printf(" WARNING: SolverFactory: Using threaded apply.\n");
 		}
 		prec = new StrILU_preconditioner(lhs, pparams);
 	}

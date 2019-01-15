@@ -12,6 +12,10 @@ class StrILU_preconditioner : public SGS_like_preconditioner
 public:
 	StrILU_preconditioner(const SMat& lhs, const PreconParams params);
 	void updateOperator();
+
+protected:
+	void updateOperatorWithBranchingInLoop();
+	void updateOperatorWithSeparateLoops();
 };
 
 #endif

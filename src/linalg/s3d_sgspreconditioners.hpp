@@ -17,8 +17,6 @@ public:
 protected:
 	/// Inverse of diagonal entries to be used as D^(-1) in the application
 	std::vector<sreal> diaginv;
-	/// Temporary vector for application. Same size as arguments to apply().
-	mutable std::vector<sreal> y;
 	/// Parameters for preconditioner application
 	const PreconParams params;
 };
