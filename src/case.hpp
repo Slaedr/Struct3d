@@ -6,6 +6,7 @@
 #ifndef STRUCT3D_CASE_H
 #define STRUCT3D_CASE_H
 
+#include <array>
 #include "struct3d_config.h"
 
 /// Type of point distribution in a Cartesian grid
@@ -18,6 +19,9 @@ struct CaseData {
 	GridType gridtype;               ///< Type of Cartesian grid
 	std::string pdetype;             ///< PDE to solve
 	int nruns;                       ///< Number of times to repeat the experiment
+
+	std::array<sreal,NDIM> vel;      ///< Advection velocity
+	sreal diffcoeff;                 ///< Diffusion coefficient
 };
 
 CaseData readCtrl(FILE *const fp);

@@ -10,4 +10,7 @@ Number-of-repititions-of-solver
 1
 PDE-type
 convdiff
-
+Advection-velocity
+0.577350269189626 0.577350269189626 0.577350269189626
+Diffusion-coeff
+0.01

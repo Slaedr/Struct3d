@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	if(cdata.pdetype == "poisson")
 		pde = new Poisson();
 	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff(std::array<sreal,3>{1.0/sqrt(3.0),1.0/sqrt(3.0),1.0/sqrt(3.0)}, 0.01);
+		pde = new ConvDiff(cdata.vel, cdata.diffcoeff);
 	else {
 		std::printf("PDE type not recognized!\n");
 		std::abort();
@@ -85,22 +85,24 @@ int main(int argc, char* argv[])
 
 	// Prepare native solver
 	
-	const SVec b = pde->computeVector(&m, pde->manufactured_solution()[1]);
-	const SVec uexact = pde->computeVector(&m, pde->manufactured_solution()[0]);
+	const SVec b = pde->computeVector(&m, pde->manufactured_solution()[0]);
 	const SMat A = pde->computeLHS(&m);
 
 	// run the solve to be tested as many times as requested
 	
 	int avgkspiters = 0;
-	PetscReal errnorm = 0;
 	sreal wtime = 0;
+	sreal precbuildtime = 0, precapplytime=0;
 	for(int irun = 0; irun < cdata.nruns; irun++)
 	{
 		if(mpirank == 0)
 			printf("Test run %d:\n", irun);
 
 		SolverBase *const solver = createSolver(A);
+
+		sreal buildstarttime = MPI_Wtime();
 		solver->updateOperator();
+		precbuildtime += MPI_Wtime() - buildstarttime;
 
 		SVec u(&m);
 
@@ -108,31 +110,31 @@ int main(int argc, char* argv[])
 		const SolveInfo slvinfo = solver->apply(b, u);
 		sreal endtime = MPI_Wtime() - starttime;
 		wtime += endtime;
+		precapplytime += slvinfo.precapplywtime;
 
 		assert(slvinfo.converged);
 		avgkspiters += slvinfo.iters;
 		if(mpirank == 0) {
-			printf(" KSP residual norm = %f\n", slvinfo.resnorm);
+			printf(" KSP residual norm = %10.10f\n", slvinfo.resnorm);
 		}
 		
-		errnorm = compute_error_L2(u,uexact);
-		if(mpirank == 0) {
-			printf(" h and error: %f  %.16f\n", m.gh(), errnorm);
-			printf(" log h and log error: %f  %f\n", log10(m.gh()), log10(errnorm));
-		}
-
 		delete solver;
 	}
 
 	wtime /= cdata.nruns;
-	printf("Time taken by native solve = %f\n", wtime);
+	precapplytime /= cdata.nruns;
+	precbuildtime /= cdata.nruns;
+	printf("Time taken by native solver = %f\n", wtime);
+	printf("Time taken by preconditioner build = %f\n", precbuildtime);
+	printf("Time taken by all preconditioner applications = %f\n", precapplytime);
 
 	if(mpirank == 0)
-		printf("Solver iters: %d.\n", avgkspiters/cdata.nruns);
+		printf("Avg solver iters: %d.\n\n", avgkspiters/cdata.nruns);
 	fflush(stdout);
 
 	delete pde;
 	PetscFinalize();
+	printf("\n");
 
 	return ierr;
 }

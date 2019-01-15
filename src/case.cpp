@@ -42,6 +42,14 @@ CaseData readCtrl(FILE *const conf)
 	fstatus = fscanf(conf, "%s", pde_type);
 	cas.pdetype = pde_type;
 
+	if(cas.pdetype == "convdiff") {
+		fstatus = fscanf(conf, "%s", temp);
+		for(int i = 0; i < NDIM; i++)
+			fstatus = fscanf(conf, "%lf", &cas.vel[i]);
+		fstatus = fscanf(conf, "%s", temp);
+		fstatus = fscanf(conf, "%lf", &cas.diffcoeff);
+	}
+
 	if(!fstatus) {
 		std::printf("! Error reading control file!\n");
 		std::abort();

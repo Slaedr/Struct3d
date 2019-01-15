@@ -80,11 +80,11 @@ int main(int argc, char* argv[])
 
 		// generate grid
 		if(cdata.gridtype == S3D_CHEBYSHEV) {
-			//m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
-			printf("Chebyshev grid type not supported for discretization verification.\n");
-			delete pde;
-			MPI_Finalize();
-			exit(-1);
+			m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
+			// printf("Chebyshev grid type not supported for discretization verification.\n");
+			// delete pde;
+			// MPI_Finalize();
+			// exit(-1);
 		}
 		else
 			m.generateMesh_UniformDistribution(cdata.rmin,cdata.rmax);

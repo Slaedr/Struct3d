@@ -24,7 +24,7 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 	for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
 		y[i] = 0;
 
-#pragma omp parallel default(shared) if(params.threadedapply)
+	//#pragma omp parallel default(shared) if(params.threadedapply)
 	{
 		for(int iswp = 0; iswp < params.napplysweeps; iswp++)
 		{
@@ -34,7 +34,7 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 			 * However, adding an omp simd pragma over the i-loop leads to the solver taking more
 			 * iterations (again using LLVM/Clang 6.0).
 			 */
-#pragma omp for collapse(2) nowait
+			//#pragma omp for collapse(2) nowait
 			for(sint k = r.start; k < r.start + r.sz[2]; k++)
 				for(sint j = r.start; j < r.start + r.sz[1]; j++)
 					for(sint i = r.start; i < r.start + r.sz[0]; i++)
@@ -47,17 +47,17 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 							r.m->localFlattenedIndexAll(k,j,i),
 						};
 
-						// y[jdx[3]] = r.vals[jdx[3]];
-						// for(int is = 0; is < STENCIL_DIAG; is++)
-						// 	y[jdx[3]] -= A.vals[is][idxr] * y[jdx[is]];
+						y[jdx[3]] = r.vals[jdx[3]];
+						for(int is = 0; is < STENCIL_DIAG; is++)
+							y[jdx[3]] -= A.vals[is][idxr] * y[jdx[is]];
 
-						y[jdx[3]] = r.vals[jdx[3]] - A.vals[0][idxr]*y[jdx[0]]
-							- A.vals[1][idxr]*y[jdx[1]] - A.vals[2][idxr]*y[jdx[2]];
+						// y[jdx[3]] = r.vals[jdx[3]] - A.vals[0][idxr]*y[jdx[0]]
+						// 	- A.vals[1][idxr]*y[jdx[1]] - A.vals[2][idxr]*y[jdx[2]];
 
 						y[jdx[3]] *= diaginv[idxr];
 					}
 
-#pragma omp for collapse(2) nowait
+			//#pragma omp for collapse(2) nowait
 			for(sint k = r.start; k < r.start + r.sz[2]; k++)
 				for(sint j = r.start; j < r.start + r.sz[1]; j++)
 					for(sint i = r.start; i < r.start + r.sz[0]; i++)
@@ -71,13 +71,13 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 							r.m->localFlattenedIndexAll(k+1,j,i)
 						};
 
-						// z.vals[jdx[3]] = y[jdx[3]];
-						// for(int is = STENCIL_DIAG + 1; is < NSTENCIL; is++)
-						// 	z.vals[jdx[3]] -= diaginv[idxr]*A.vals[is][idxr] * z.vals[jdx[is]];
+						z.vals[jdx[3]] = y[jdx[3]];
+						for(int is = STENCIL_DIAG + 1; is < NSTENCIL; is++)
+							z.vals[jdx[3]] -= diaginv[idxr]*A.vals[is][idxr] * z.vals[jdx[is]];
 
-						z.vals[jdx[3]] = y[jdx[3]] - diaginv[idxr]*(A.vals[4][idxr]*z.vals[jdx[4]]
-						                                            + A.vals[5][idxr]*z.vals[jdx[5]]
-						                                            + A.vals[6][idxr]*z.vals[jdx[6]]);
+						// z.vals[jdx[3]] = y[jdx[3]] - diaginv[idxr]*(A.vals[4][idxr]*z.vals[jdx[4]]
+						//                                             + A.vals[5][idxr]*z.vals[jdx[5]]
+						//                                             + A.vals[6][idxr]*z.vals[jdx[6]]);
 					}
 		}
 	}

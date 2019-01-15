@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	int nrefinedirs;
 	ierr = fscanf(conf, "%s", tmp);
 	ierr = fscanf(conf, "%d", &nrefinedirs);
-	if(ierr) printf("Could not read number of refine directions!\n");
+	if(ierr <= 0) printf("Could not read number of refine directions!\n");
 	fclose(conf);
 
 	const int nmesh = cdata.nruns;
@@ -97,11 +97,11 @@ int main(int argc, char* argv[])
 
 		// generate grid
 		if(cdata.gridtype == S3D_CHEBYSHEV) {
-			//m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
-			printf("Chebyshev grid type not supported for discretization verification.\n");
-			delete pde;
-			PetscFinalize();
-			exit(-1);
+			m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
+			// printf("Chebyshev grid type not supported for discretization verification.\n");
+			// delete pde;
+			// PetscFinalize();
+			// exit(-1);
 		}
 		else
 			m.generateMesh_UniformDistribution(cdata.rmin,cdata.rmax);

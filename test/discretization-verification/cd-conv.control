@@ -10,5 +10,9 @@ Number-of-meshes
 3
 PDE-type
 convdiff
+Advection-velocity
+0.577350269189626 0.577350269189626 0.577350269189626
+Diffusion-coeff
+0.01
 Number-of-refinement-directions
 3

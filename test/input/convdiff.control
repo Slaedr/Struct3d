@@ -1,13 +1,13 @@
 Type-of-grid('chebyshev'-or-'uniform')
-uniform
+chebyshev
 Number-of-points-in-x-y-and-z
-76 76 76
+16 16 16
 Coords-of-first-point-in-x-y-and-z
 -1.0 -1.0 -1.0
 Coords-of-last-point-in-x-y-and-z
 1.0 1.0 1.0
 Number-of-repititions-of-solver
-1
+2
 PDE-type
 convdiff
 Advection-velocity
