@@ -172,7 +172,9 @@ int main(int argc, char* argv[])
 		if(mpirank == 0)
 			printf("Test run %d:\n", irun);
 
-		const SolverBase *const solver = createSolver(A);
+		SolverBase *const solver = createSolver(A);
+		solver->updateOperator();
+
 		SVec u(&m);
 
 		sreal starttime = MPI_Wtime();

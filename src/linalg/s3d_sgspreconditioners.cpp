@@ -88,7 +88,6 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 SGS_preconditioner::SGS_preconditioner(const SMat& lhs, const PreconParams parms)
 	: SGS_like_preconditioner(lhs, parms)
 {
-	updateOperator();
 }
 
 void SGS_preconditioner::updateOperator()

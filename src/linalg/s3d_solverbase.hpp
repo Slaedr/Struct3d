@@ -26,6 +26,7 @@ struct SolveInfo {
 	bool converged;                 ///< Whether the solve converged to required tolerance
 	int iters;                      ///< Number of iterations performed
 	sreal resnorm;                  ///< 2-norm of the final residual vector
+	double precapplywtime;          ///< Total wall time taken by preconditioner application
 };
 
 /// Abstract class for cartesian-mesh dependent solvers
@@ -70,7 +71,7 @@ class Richardson : public SolverBase
 public:
 	/// Sets parameters
 	Richardson(const SMat& lhs, SolverBase *const precond, const SolveParams params);
-	/// Does nothing
+	/// Updates the preconditioner
 	void updateOperator();
 	/// Solve
 	SolveInfo apply(const SVec& b, SVec& x) const;

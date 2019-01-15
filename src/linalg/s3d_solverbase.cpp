@@ -34,12 +34,12 @@ SolveInfo NoSolver::apply(const SVec& b, SVec& x) const
 
 Richardson::Richardson(const SMat& lhs, SolverBase *const precond, const SolveParams params)
 	: SolverBase(lhs, precond), sparams(params)
-{
-	updateOperator();
-}
+{ }
 
 void Richardson::updateOperator()
 {
+	if(prec)
+		prec->updateOperator();
 }
 
 SolveInfo Richardson::apply(const SVec& b, SVec& x) const
@@ -51,9 +51,16 @@ SolveInfo Richardson::apply(const SVec& b, SVec& x) const
 	sreal resnorm = norm_vector_l2(res);
 
 	int step = 0;
+
+	SolveInfo info;
+	info.precapplywtime = 0;
+
 	while(resnorm/bnorm > sparams.rtol && step < sparams.maxiter)
 	{
+		sreal starttime = MPI_Wtime();
 		prec->apply(res, dx);
+		info.precapplywtime += MPI_Wtime()-starttime;
+
 		vecaxpy(1.0, dx, x);
 
 		A.apply_res(b, x, res);
@@ -66,5 +73,8 @@ SolveInfo Richardson::apply(const SVec& b, SVec& x) const
 		step++;
 	}
 
-	return SolveInfo{resnorm/bnorm <= sparams.rtol ? true : false, step, resnorm};
+	info.converged = resnorm/bnorm <= sparams.rtol ? true : false;
+	info.iters = step;
+	info.resnorm = resnorm;
+	return info;
 }
