@@ -27,7 +27,8 @@ int main(int argc, char* argv[])
 	}
 
 	char help[] = "Compares PETSc solvers with Struct3d native solvers.\
-				   Arguments: (1) Control file (2) Petsc options file\n\n";
+				   Arguments: (1) Control file (2) Petsc options file \
+                   (3) -relative_iters_deviation <float> \n\n";
 	const char *confile = argv[1];
 	PetscErrorCode ierr = 0;
 
@@ -54,6 +55,8 @@ int main(int argc, char* argv[])
 	FILE* conf = fopen(confile, "r");
 	const CaseData cdata = readCtrl(conf);
 	fclose(conf);
+
+	const sreal relitersdev = petscoptions_get_real("-relative_iters_deviation");
 
 	printf("PDE: %s\n", cdata.pdetype.c_str());
 	PDEBase *pde = nullptr;
@@ -205,8 +208,11 @@ int main(int argc, char* argv[])
 	fflush(stdout);
 
 	// the test
-	assert(avgkspiters/cdata.nruns <= refkspiters);
-	// assert(std::fabs(errnorm-errnormref) < 10.0*DBL_EPSILON);
+	const sreal measuredpcdev = fabs((sreal)avgkspiters/cdata.nruns - refkspiters)/refkspiters;
+	printf("Relative deviation in number of iterations is %f.\n", measuredpcdev); fflush(stdout);
+
+	assert(measuredpcdev < relitersdev);
+	//assert(std::fabs(errnorm-errnormref) < 100.0*DBL_EPSILON);
 
 	delete pde;
 	PetscFinalize();

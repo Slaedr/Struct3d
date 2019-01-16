@@ -39,7 +39,11 @@ int main(int argc, char* argv[])
 	const CaseData cdata = readCtrl(conf);
 	char tmp[100];
 	int nrefinedirs;
-	fscanf(conf, "%s", tmp); fscanf(conf, "%d", &nrefinedirs);
+	int fstatus = fscanf(conf, "%s", tmp);
+	fstatus = fscanf(conf, "%d", &nrefinedirs);
+	if(fstatus < 1)
+		if(rank == 0)
+			printf("Could not read number of refinement directions!\n");
 	fclose(conf);
 
 	const int nmesh = cdata.nruns;
@@ -52,7 +56,7 @@ int main(int argc, char* argv[])
 	if(cdata.pdetype == "poisson")
 		pde = new Poisson();
 	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff({1.0,0.0,0}, 0.1);
+		pde = new ConvDiff(cdata.vel, cdata.diffcoeff);
 	else {
 		std::printf("PDE type not recognized!\n");
 		std::abort();
@@ -66,6 +70,7 @@ int main(int argc, char* argv[])
 
 	std::vector<sreal> h(nmesh);
 	std::vector<sreal> errors(nmesh);
+	std::vector<sreal> ress(nmesh);
 
 	for(int imesh = 0; imesh < nmesh; imesh++)
 	{
@@ -94,12 +99,16 @@ int main(int argc, char* argv[])
 		const SVec uexact = pde->computeVector(&m, pde->manufactured_solution()[0]);
 		const SMat A = pde->computeLHS(&m);
 
+		SVec res(&m);
+		A.apply_res(b, uexact, res);
+		ress[imesh] = norm_vector_l2(res)/sqrt(m.gnpointotal());
+
 		SolverBase *const solver = createSolver(A);
 		solver->updateOperator();
 		
 		SVec u(&m);
 		const SolveInfo sinfo = solver->apply(b, u);
-		assert(sinfo.converged);
+		//assert(sinfo.converged);
 
 		errors[imesh] = compute_error_L2(u,uexact);
 
@@ -110,7 +119,9 @@ int main(int argc, char* argv[])
 
 		if(rank==0) {
 			printf("Mesh size = %f\n", h[imesh]);
-			printf("Error = %f\n", errors[imesh]);
+			printf("  Converged in %d itrs.\n", sinfo.iters);
+			printf("  Defect = %f\n", ress[imesh]);
+			printf("  Error = %f\n", errors[imesh]);
 		}
 
 		delete solver;
@@ -118,12 +129,21 @@ int main(int argc, char* argv[])
 
 	delete pde;
 
-	sreal slope = 0;
+	sreal slope = 0, resslope = 0;
 	for(int i = 1; i < nmesh; i++) {
 		slope = (log10(errors[i])-log10(errors[i-1]))/(log10(h[i])-log10(h[i-1]));
 		if(rank == 0)
-			printf("Slope %d = %f\n", i, slope);
+			printf("Error slope %d = %f\n", i, slope);
+		resslope = (log10(ress[i])-log10(ress[i-1]))/(log10(h[i])-log10(h[i-1]));
+		if(rank == 0)
+			printf("Defect slope %d = %f\n", i, resslope);
+		fflush(stdout);
 	}
+
+	if(cdata.pdetype == "poisson")
+		assert(resslope >= 1.9 && resslope <= 2.1);
+	else
+		assert(resslope >= 0.9 && resslope <= 1.1);
 
 	if(cdata.pdetype == "poisson")
 		assert(slope >= 1.9 && slope <= 2.1);

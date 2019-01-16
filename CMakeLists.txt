@@ -99,7 +99,7 @@ endif()
 if(NOOMP)
   if(CXX_COMPILER_GNUCLANG)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
   endif()
   if(CXX_COMPILER_PGI)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nomp")
@@ -273,9 +273,8 @@ else()
   set(THREADOPTS "")
 endif(SLURM)
 
-# PETSc
-find_package(MPI REQUIRED)
-include_directories(${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
+# find_package(MPI REQUIRED)
+# include_directories(${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
 if(SLURM)
   set(MPIEXEC "srun")
   set(MPIOPTS "--cpu-bind=cores")
@@ -284,6 +283,7 @@ else()
   set(MPIOPTS "")
 endif(SLURM)
 
+# PETSc
 # If PETSc variables were not passed to CMake, set them from environment variables
 if(NOT DEFINED PETSC_DIR)
   set(PETSC_DIR $ENV{PETSC_DIR} CACHE PATH "PETSc install directory")
@@ -332,7 +332,7 @@ endif(WITH_MC64)
 
 # ---------------------------------------------------------------------------- #
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -DDEBUG=1")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -UDEBUG -DNDEBUG")
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")

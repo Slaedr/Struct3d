@@ -21,16 +21,17 @@ add_test(NAME StructSolver_VsPetsc_CD_SGS
   )
 
 add_test(NAME StructSolver_VsPetsc_CD_StrILU
-  COMMAND comparewithpetsc ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-large.control
+  COMMAND env OMP_NUM_THREADS=1 ${CMAKE_CURRENT_BINARY_DIR}/comparewithpetsc 
+  ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
   -pc_type ilu -s3d_pc_type strilu
   -s3d_pc_use_threaded_build false -s3d_pc_use_threaded_apply false
   -s3d_pc_build_sweeps 1 -s3d_pc_apply_sweeps 1
   )
 
-add_test(NAME StructSolver_VsPetsc_CD_StrILU_Threaded
+add_test(NAME StructSolver_VsPetsc_CD_ThreadedBuild_StrILU
   COMMAND env OMP_NUM_THREADS=4 ${CMAKE_CURRENT_BINARY_DIR}/comparewithpetsc 
-  ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-verylarge.control
+  ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-large.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
   -pc_type ilu -s3d_pc_type strilu
   -s3d_pc_use_threaded_build true -s3d_pc_use_threaded_apply true

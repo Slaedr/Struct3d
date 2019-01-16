@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	if(cdata.pdetype == "poisson")
 		assert(resslope >= 1.9 && resslope <= 2.1);
 	else
-		assert(resslope >= 0.9 && resslope <= 1.9);
+		assert(resslope >= 0.9 && resslope <= 1.1);
 
 	MPI_Finalize();
 	return ierr;

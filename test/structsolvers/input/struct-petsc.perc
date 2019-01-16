@@ -2,7 +2,7 @@
 
 -ksp_type richardson
 -ksp_rtol 1e-6
--ksp_max_it 1000
+-ksp_max_it 5000
 -ksp_monitor
 -ksp_final_residual
 #-ksp_view
@@ -11,3 +11,5 @@
 -s3d_ksp_type richardson
 
 -s3d_thread_chunk_size 1024
+
+-relative_iters_deviation 0.02

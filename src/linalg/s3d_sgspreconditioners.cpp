@@ -2,6 +2,7 @@
  * \brief Implementation of SGS-like application and SGS preconditioner
  */
 
+#include <cassert>
 #include "s3d_sgspreconditioners.hpp"
 
 SGS_like_preconditioner::SGS_like_preconditioner(const SMat& lhs, const PreconParams parms)
@@ -16,10 +17,10 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 		throw std::runtime_error("apply: Vectors and matrix must be defined over the same mesh!");
 
 	const int ng = r.nghost;
+	assert(ng == 1);
 
 	// Temporary vector for application. Same size as arguments to apply().
 	std::vector<sreal> y(A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
-	// y.assign(A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2), 0);
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
 		y[i] = 0;
@@ -56,11 +57,14 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 
 						y[jdx[3]] *= diaginv[idxr];
 					}
+		}
 
+		for(int iswp = 0; iswp < params.napplysweeps; iswp++)
+		{
 			//#pragma omp for collapse(2) nowait
-			for(sint k = r.start; k < r.start + r.sz[2]; k++)
-				for(sint j = r.start; j < r.start + r.sz[1]; j++)
-					for(sint i = r.start; i < r.start + r.sz[0]; i++)
+			for(sint k = r.start + r.sz[2]-1; k >= r.start; k--)
+				for(sint j = r.start + r.sz[1]-1; j >= r.start; j--)
+					for(sint i = r.start + r.sz[0]-1; i >= r.start; i--)
 					{
 						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 						const sint jdx[] = {
