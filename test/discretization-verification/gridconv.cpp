@@ -9,6 +9,7 @@
 #include "pde/convdiff.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
+#include "linalg/solverfactory.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -25,8 +26,8 @@ int main(int argc, char* argv[])
 	int size, rank;
 	int ierr = 0;
 
-	MPI_Init(&argc, &argv);
-	MPI_Comm comm = MPI_COMM_WORLD;
+	PetscInitialize(&argc, &argv, NULL, help);
+	MPI_Comm comm = PETSC_COMM_WORLD;
 	MPI_Comm_size(comm,&size);
 	MPI_Comm_rank(comm,&rank);
 	if(rank == 0)
@@ -44,7 +45,9 @@ int main(int argc, char* argv[])
 	const int nmesh = cdata.nruns;
 	assert(nmesh >= 2);
 	assert(nrefinedirs == 1 || nrefinedirs == 2 || nrefinedirs == 3);
+	printf("Refinement in %d directions.\n", nrefinedirs);
 
+	printf("PDE: %s\n", cdata.pdetype.c_str());
 	PDEBase *pde = nullptr;
 	if(cdata.pdetype == "poisson")
 		pde = new Poisson();
@@ -81,17 +84,9 @@ int main(int argc, char* argv[])
 		// generate grid
 		if(cdata.gridtype == S3D_CHEBYSHEV) {
 			m.generateMesh_ChebyshevDistribution(cdata.rmin,cdata.rmax);
-			// printf("Chebyshev grid type not supported for discretization verification.\n");
-			// delete pde;
-			// MPI_Finalize();
-			// exit(-1);
 		}
 		else
 			m.generateMesh_UniformDistribution(cdata.rmin,cdata.rmax);
-
-		// create vectors and matrix
-		SVec u = m->createGridVec();
-		SVec err = m->createGridVec();
 
 		// compute values of LHS, RHS and exact soln
 	
@@ -99,7 +94,14 @@ int main(int argc, char* argv[])
 		const SVec uexact = pde->computeVector(&m, pde->manufactured_solution()[0]);
 		const SMat A = pde->computeLHS(&m);
 
-		//errors[imesh] = compute_error(m,u,uexact);
+		SolverBase *const solver = createSolver(A);
+		solver->updateOperator();
+		
+		SVec u(&m);
+		const SolveInfo sinfo = solver->apply(b, u);
+		assert(sinfo.converged);
+
+		errors[imesh] = compute_error_L2(u,uexact);
 
 		//h[imesh] = 1.0/pow(npoindim[0]*npoindim[1]*npoindim[2], 1.0/3);
 		//h[imesh] = m.gh();
@@ -110,6 +112,8 @@ int main(int argc, char* argv[])
 			printf("Mesh size = %f\n", h[imesh]);
 			printf("Error = %f\n", errors[imesh]);
 		}
+
+		delete solver;
 	}
 
 	delete pde;
@@ -124,9 +128,9 @@ int main(int argc, char* argv[])
 	if(cdata.pdetype == "poisson")
 		assert(slope >= 1.9 && slope <= 2.1);
 	else
-		assert(slope >= 0.9 && slope <= 1.9);
+		assert(slope >= 0.9 && slope <= 1.1);
 
-	MPI_finalize();
+	PetscFinalize();
 	return ierr;
 }
 
