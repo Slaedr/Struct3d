@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.0)
 #
 # - MPI is required. It is best to pass MPI wrappers as C and CXX compilers to CMake.
 # - -DNOOMP=1 to compile without OpenMP (default build is with OpenMP)
+# - -DNOVECTORIZE=1 to disable vectorization in GCC and Clang (takes precedence over other options).
 # - -DSSE=1 to compile with SSE 4.2 instructions (default)
 # - -DAVX=1 to compile with AVX instructions.
 # - -DAVX_2=1 to compile with AVX 2.0.
@@ -64,7 +65,7 @@ if(CXX_COMPILER_GNUCLANG OR CXX_COMPILER_INTEL)
   set (CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror")
   set (CMAKE_C_FLAGS "-std=c11 -Wall -Werror")
   set (CMAKE_CXX_FLAGS_DEBUG "-g")
-  set (CMAKE_CXX_FLAGS_RELEASE "-O3 -fno-tree-vectorize")
+  set (CMAKE_CXX_FLAGS_RELEASE "-O3")
 elseif(CXX_COMPILER_PGI)
   set (CMAKE_CXX_FLAGS "-std=c++14")
   set (CMAKE_C_FLAGS "-std=c11")
@@ -75,6 +76,23 @@ elseif(CXX_COMPILER_CRAY)
   set (CMAKE_C_FLAGS "-h std=c11 -h error_on_warning")
   set (CMAKE_CXX_FLAGS_DEBUG "-g -O1")
   set (CMAKE_CXX_FLAGS_RELEASE "-O2")
+endif()
+
+if(NOVECTORIZE)
+  # As release/debug flags are added after shared flags, we need to add to debug and release flags.
+  if(CXX_COMPILER_CLANG)
+	set (CMAKE_CXX_FLAGS_RELEASE
+	  "${CMAKE_CXX_FLAGS_RELEASE} -fno-tree-vectorize -fno-slp-vectorize -fno-vectorize")
+	set (CMAKE_CXX_FLAGS_DEBUG
+	  "${CMAKE_CXX_FLAGS_DEBUG} -fno-tree-vectorize -fno-slp-vectorize -fno-vectorize")
+  endif()
+  if(CXX_COMPILER_GNU)
+	set (CMAKE_CXX_FLAGS_RELEASE
+	  "${CMAKE_CXX_FLAGS_RELEASE} -fno-tree-vectorize -fno-tree-slp-vectorize")
+	set (CMAKE_CXX_FLAGS_DEBUG
+	  "${CMAKE_CXX_FLAGS_DEBUG} -fno-tree-vectorize -fno-tree-slp-vectorize")
+  endif()
+  message(WARNING "Vectorization disabled.")
 endif()
 
 # to compile with OpenMP

@@ -4,11 +4,11 @@
 -ksp_max_it 1000
 
 -s3d_ksp_type richardson
--s3d_pc_type strilu
+-s3d_pc_type sgs
 
 -s3d_pc_use_threaded_build true
 -s3d_pc_use_threaded_apply true
 -s3d_pc_build_sweeps 1
--s3d_pc_apply_sweeps 2
+-s3d_pc_apply_sweeps 1
 
 -s3d_thread_chunk_size 1024
