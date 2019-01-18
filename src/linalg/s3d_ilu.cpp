@@ -28,7 +28,7 @@ void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
 	{
 		for(int iswp = 0; iswp < params.nbuildsweeps; iswp++)
 		{
-#pragma omp for collapse(2) nowait
+#pragma omp for collapse(2) nowait schedule(dynamic, params.thread_chunk_size)
 			for(sint k = A.start; k < A.start + A.sz[2]; k++)
 				for(sint j = A.start; j < A.start + A.sz[1]; j++)
 #pragma omp simd
