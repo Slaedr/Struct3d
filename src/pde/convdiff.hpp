@@ -7,7 +7,7 @@
 
 #include "pdebase.hpp"
 
-/// Solves b.grad u - p div grad u = f where b = (1/v3,1/v3,1/v3) and p is the diffusion coefficient
+/// Solves b.grad u - p div grad u = f
 class ConvDiff : public PDEBase
 {
 public:
