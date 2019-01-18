@@ -297,38 +297,40 @@ include_directories(${PETSC_DIR}/include ${PETSC_DIR}/${PETSC_ARCH}/include)
 message(STATUS "Building with PETSc found at ${PETSC_LIB}")
 
 # BLASTed
-find_path(BLASTED_INCLUDE_DIR blasted_petsc.h PATHS ENV BLASTED_DIR PATH_SUFFIXES include
-  DOC "Include directory of BLASTed library")
-if(${BLASTED_INCLUDE_DIR} STREQUAL "BLASTED_INCLUDE_DIR-NOTFOUND")
-  message(SEND_ERROR "BLASTed requested, but header not found!")
-endif()
-include_directories(${BLASTED_INCLUDE_DIR})
-
-find_library(BLASTED_LIB blasted_petsc PATHS ENV BLASTED_BIN_DIR PATH_SUFFIXES lib
-  DOC "Location of BLASTed library")
-if(${BLASTED_LIB} STREQUAL "BLASTED_LIB-NOTFOUND")
-  message(SEND_ERROR "BLASTed requested, but library not found!")
-endif()
-
-message(STATUS "Building with BLASTed: ${BLASTED_INCLUDE_DIR}, ${BLASTED_LIB}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BLASTED=1")
-
-# Harwell's matrix ordering library - static library is assumed
-if(WITH_MC64)
-  if(NOT DEFINED MC64_DIR)
-	set(MC64_DIR $ENV{MC64_DIR} CACHE PATH "MC64 install directory")
+if(WITH_BLASTED)
+  find_path(BLASTED_INCLUDE_DIR blasted_petsc.h PATHS ENV BLASTED_DIR PATH_SUFFIXES include
+	DOC "Include directory of BLASTed library")
+  if(${BLASTED_INCLUDE_DIR} STREQUAL "BLASTED_INCLUDE_DIR-NOTFOUND")
+	message(SEND_ERROR "BLASTed requested, but header not found!")
   endif()
-  find_library(MC64_LIB libmc64.a ${MC64_DIR}/lib)
-  add_definitions(-DHAVE_MC64)
-  message(STATUS "Building with MC64 found at ${MC64_LIB}")
-  if(CXX_COMPILER_GNUCLANG)
-	set(FORTLDFLAGS "-lgfortran")
-  elseif(CXX_COMPILER_INTEL)
-	set(FORTLDFLAGS "-lifcore")
-  else()
-	message(WARNING "Don't know Fortran library for this compiler")
+  include_directories(${BLASTED_INCLUDE_DIR})
+
+  find_library(BLASTED_LIB blasted_petsc PATHS ENV BLASTED_BIN_DIR PATH_SUFFIXES lib
+	DOC "Location of BLASTed library")
+  if(${BLASTED_LIB} STREQUAL "BLASTED_LIB-NOTFOUND")
+	message(SEND_ERROR "BLASTed requested, but library not found!")
   endif()
-endif(WITH_MC64)
+
+  message(STATUS "Building with BLASTed: ${BLASTED_INCLUDE_DIR}, ${BLASTED_LIB}")
+  add_definitions(-DHAVE_BLASTED)
+
+  # Harwell's matrix ordering library - static library is assumed
+  if(WITH_MC64)
+	if(NOT DEFINED MC64_DIR)
+	  set(MC64_DIR $ENV{MC64_DIR} CACHE PATH "MC64 install directory")
+	endif()
+	find_library(MC64_LIB libmc64.a ${MC64_DIR}/lib)
+	add_definitions(-DHAVE_MC64)
+	message(STATUS "Building with MC64 found at ${MC64_LIB}")
+	if(CXX_COMPILER_GNUCLANG)
+	  set(FORTLDFLAGS "-lgfortran")
+	elseif(CXX_COMPILER_INTEL)
+	  set(FORTLDFLAGS "-lifcore")
+	else()
+	  message(WARNING "Don't know Fortran library for this compiler")
+	endif()
+  endif(WITH_MC64)
+endif(WITH_BLASTED)
 
 # ---------------------------------------------------------------------------- #
 

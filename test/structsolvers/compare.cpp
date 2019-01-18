@@ -1,7 +1,5 @@
 #undef NDEBUG
 
-#include <petscksp.h>
-
 #include <sys/time.h>
 #include <ctime>
 #include <cfloat>
@@ -10,6 +8,8 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
+
+#include <petscksp.h>
 
 #include "pde/poisson.hpp"
 #include "pde/convdiff.hpp"
