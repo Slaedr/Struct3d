@@ -5,6 +5,10 @@
 #ifndef STRUCT3D_CONFIG_H
 #define STRUCT3D_CONFIG_H
 
+/// Cache line size for alignment purposes
+#define S3D_CACHE_LINE_LEN 64
+
+/// Spatial dimension
 #define NDIM 3
 
 /// Number of entries in a row of the matrix for an interior point

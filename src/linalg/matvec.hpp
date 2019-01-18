@@ -7,7 +7,15 @@
 
 #include <vector>
 #include <array>
+#include <boost/align/aligned_allocator.hpp>
 #include "cartmesh.hpp"
+
+namespace s3d {
+
+template <typename T>
+using vector = std::vector<T, boost::alignment::aligned_allocator<T, S3D_CACHE_LINE_LEN>>;
+
+}
 
 /// Vector format for a 3D structured grid
 /** The convention is that 'i' is the fastest-changing index
@@ -36,7 +44,7 @@ struct SVec
 	/// 3D storage - access the value at point (i,j,k) as vals[localFlattenedIndex(k,j,i)]
 	/** \sa CartMesh::localFlattenedIndex
 	 */
-	std::vector<sreal> vals;
+	s3d::vector<sreal> vals;
 };
 
 /// Matrix format for a stencil of size NSTENCIL on a 3D structured grid
@@ -72,7 +80,7 @@ struct SMat
 	/// Non-zero values of the matrix - access as vals[<neighbor>][localFlattenedIndex(k,j,i)].
 	/** \sa CartMesh::localFlattenedIndex
 	 */
-	std::vector<sreal> vals[NSTENCIL];
+	s3d::vector<sreal> vals[NSTENCIL];
 };
 
 /// y <- y + a*x

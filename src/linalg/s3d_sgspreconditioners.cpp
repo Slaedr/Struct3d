@@ -20,7 +20,7 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 	assert(ng == 1);
 
 	// Temporary vector for application. Same size as arguments to apply().
-	std::vector<sreal> y(A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
+	s3d::vector<sreal> y(A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
 		y[i] = 0;

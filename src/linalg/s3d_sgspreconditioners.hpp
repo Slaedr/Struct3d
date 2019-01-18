@@ -16,7 +16,7 @@ public:
 
 protected:
 	/// Inverse of diagonal entries to be used as D^(-1) in the application
-	std::vector<sreal> diaginv;
+	s3d::vector<sreal> diaginv;
 	/// Parameters for preconditioner application
 	const PreconParams params;
 };

@@ -147,12 +147,6 @@ if(MICKNC)
 	message(SEND_ERROR "Need to use Intel compiler for Xeon Phi!")
   endif()
   
-  # Link the mic version of MKL if requested
-  if(WITH_MKL)
-	include_directories($ENV{MKL_ROOT}/include)
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_MKL -L${MKLROOT}/lib/mic -lmkl_rt -lpthread -lm -ldl")
-	message(STATUS "Linking MKL for mic.")
-  endif()
 else()
   # Select hardware-specific optimizations
   if(AVX)
@@ -246,42 +240,16 @@ else()
 	endif()
   endif()
 
-  # Link MKL if requested
-  if(WITH_MKL)
-	include_directories($ENV{MKL_ROOT}/include)
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_MKL -L$ENV{MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_rt -lpthread -lm -ldl")
-	message(STATUS "Linking MKL.")
-  endif()
 endif()
 
-# profiling
-if(PROFILE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -g")
-endif()
+# ---------------- Libraries -------------------------------------------- #
 
-if(SLURM)
-  set(SEQEXEC "srun")
-  set(SEQTASKS "-n 1")
-  if(SLURMTESTTHREADS)
-	  set(THREADOPTS "--cpus-per-task=${SLURMTESTTHREADS}")
-  else()
-	  set(THREADOPTS "--cpus-per-task=4")
-  endif()
-else()
-  set(SEQEXEC "")
-  set(SEQTASKS "")
-  set(THREADOPTS "")
-endif(SLURM)
+# Boost for aligned allocation etc.
+find_package(Boost 1.60 REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # find_package(MPI REQUIRED)
 # include_directories(${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
-if(SLURM)
-  set(MPIEXEC "srun")
-  set(MPIOPTS "--cpu-bind=cores")
-else()
-  set(MPIEXEC "mpirun")
-  set(MPIOPTS "")
-endif(SLURM)
 
 # PETSc
 # If PETSc variables were not passed to CMake, set them from environment variables
@@ -332,10 +300,39 @@ if(WITH_BLASTED)
   endif(WITH_MC64)
 endif(WITH_BLASTED)
 
+# -------------------------------------------------------------------------- #
+
+if(SLURM)
+  set(SEQEXEC "srun")
+  set(SEQTASKS "-n 1")
+  if(SLURMTESTTHREADS)
+	  set(THREADOPTS "--cpus-per-task=${SLURMTESTTHREADS}")
+  else()
+	  set(THREADOPTS "--cpus-per-task=4")
+  endif()
+else()
+  set(SEQEXEC "")
+  set(SEQTASKS "")
+  set(THREADOPTS "")
+endif(SLURM)
+
+if(SLURM)
+  set(MPIEXEC "srun")
+  set(MPIOPTS "--cpu-bind=cores")
+else()
+  set(MPIEXEC "mpirun")
+  set(MPIOPTS "")
+endif(SLURM)
+
 # ---------------------------------------------------------------------------- #
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=1")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -UDEBUG -DNDEBUG")
+
+# profiling
+if(PROFILE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -g")
+endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
   message(STATUS "Debug mode")
