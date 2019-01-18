@@ -17,7 +17,7 @@ add_test(NAME StructSolver_VsPetsc_CD_Jacobi
 add_test(NAME StructSolver_VsPetsc_CD_SGS
   COMMAND comparewithpetsc ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
-  -pc_type sor -s3d_pc_type sgs -s3d_pc_use_threaded_apply false -s3d_pc_apply_sweeps 1
+  -pc_type sor -s3d_pc_type sgs -s3d_pc_use_threaded_apply false -s3d_pc_apply_sweeps 3
   )
 
 add_test(NAME StructSolver_VsPetsc_CD_StrILU
@@ -26,7 +26,7 @@ add_test(NAME StructSolver_VsPetsc_CD_StrILU
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
   -pc_type ilu -s3d_pc_type strilu
   -s3d_pc_use_threaded_build false -s3d_pc_use_threaded_apply false
-  -s3d_pc_build_sweeps 1 -s3d_pc_apply_sweeps 1
+  -s3d_pc_build_sweeps 1 -s3d_pc_apply_sweeps 4
   )
 
 add_test(NAME StructSolver_VsPetsc_CD_ThreadedBuild_StrILU
@@ -35,5 +35,5 @@ add_test(NAME StructSolver_VsPetsc_CD_ThreadedBuild_StrILU
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
   -pc_type ilu -s3d_pc_type strilu
   -s3d_pc_use_threaded_build true -s3d_pc_use_threaded_apply true
-  -s3d_pc_build_sweeps 1 -s3d_pc_apply_sweeps 1
+  -s3d_pc_build_sweeps 3 -s3d_pc_apply_sweeps 4
   )

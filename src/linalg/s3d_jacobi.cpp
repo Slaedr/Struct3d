@@ -13,8 +13,10 @@ void JacobiPreconditioner::updateOperator()
 
 SolveInfo JacobiPreconditioner::apply(const SVec& r, SVec& z) const
 {
+#pragma omp parallel for collapse(2) default(shared)
 	for(sint k = r.start; k < r.start + r.sz[2]; k++)
 		for(sint j = r.start; j < r.start + r.sz[1]; j++)
+#pragma omp simd
 			for(sint i = r.start; i < r.start + r.sz[0]; i++)
 			{
 				const sint idxr = r.m->localFlattenedIndexReal(k-1,j-1,i-1);

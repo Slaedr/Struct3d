@@ -33,8 +33,10 @@ void SMat::apply(const SVec& x, SVec& y) const
 	const int ng = x.nghost;
 	assert(ng == 1);
 
+#pragma omp parallel for collapse(2) default(shared)
 	for(sint k = x.start; k < x.start + x.sz[2]; k++)
 		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+#pragma omp simd
 			for(sint i = x.start; i < x.start + x.sz[0]; i++)
 			{
 				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
@@ -48,8 +50,19 @@ void SMat::apply(const SVec& x, SVec& y) const
 					x.m->localFlattenedIndexAll(k+1,j,i)
 				};
 
-				for(int is = 0; is < NSTENCIL; is++)
-					y.vals[jdx[3]] += vals[is][idxr] * x.vals[jdx[is]];
+				/* It turns out both GCC 8.2 and Clang 7 need the following loop manually unrolled
+				 * in order to vectorize the i loop.
+				 */ 
+				// for(int is = 0; is < NSTENCIL; is++)
+				// 	y.vals[jdx[3]] += vals[is][idxr] * x.vals[jdx[is]];
+
+				y.vals[jdx[3]] += vals[0][idxr]*x.vals[jdx[0]]
+					+ vals[1][idxr]*x.vals[jdx[1]]
+					+ vals[2][idxr]*x.vals[jdx[2]]
+					+ vals[3][idxr]*x.vals[jdx[3]]
+					+ vals[4][idxr]*x.vals[jdx[4]]
+					+ vals[5][idxr]*x.vals[jdx[5]]
+					+ vals[6][idxr]*x.vals[jdx[6]];
 			}
 }
 
@@ -61,8 +74,10 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 	const int ng = x.nghost;
 	assert(ng == 1);
 
+#pragma omp parallel for collapse(2) default(shared)
 	for(sint k = x.start; k < x.start + x.sz[2]; k++)
 		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+#pragma omp simd
 			for(sint i = x.start; i < x.start + x.sz[0]; i++)
 			{
 				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
@@ -77,8 +92,20 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 				};
 
 				y.vals[jdx[3]] = b.vals[jdx[3]];
-				for(int is = 0; is < NSTENCIL; is++)
-					y.vals[jdx[3]] -= vals[is][idxr] * x.vals[jdx[is]];
+
+				/* It turns out both GCC 8.2 and Clang 7 need the following loop manually unrolled
+				 * in order to vectorize the i loop.
+				 */ 
+				// for(int is = 0; is < NSTENCIL; is++)
+				// 	y.vals[jdx[3]] -= vals[is][idxr] * x.vals[jdx[is]];
+
+				y.vals[jdx[3]] -= vals[0][idxr]*x.vals[jdx[0]]
+					+ vals[1][idxr]*x.vals[jdx[1]]
+					+ vals[2][idxr]*x.vals[jdx[2]]
+					+ vals[3][idxr]*x.vals[jdx[3]]
+					+ vals[4][idxr]*x.vals[jdx[4]]
+					+ vals[5][idxr]*x.vals[jdx[5]]
+					+ vals[6][idxr]*x.vals[jdx[6]];
 			}
 }
 
@@ -87,8 +114,10 @@ void vecaxpy(const sreal a, const SVec& x, SVec& y)
 	if(x.m != y.m)
 		throw std::runtime_error("Both vectors should be defined over the same mesh!");
 
+#pragma omp parallel for collapse(2) default(shared)
 	for(sint k = x.start; k < x.start + x.sz[2]; k++)
 		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+#pragma omp simd
 			for(sint i = x.start; i < x.start + x.sz[0]; i++)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
@@ -100,8 +129,10 @@ sreal norm_L2(const SVec& x)
 {
 	sreal norm = 0;
 
+#pragma omp parallel for collapse(2) default(shared) reduction(+:norm)
 	for(sint k = x.start; k < x.start + x.sz[2]; k++)
 		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+#pragma omp simd reduction(+:norm)
 			for(sint i = x.start; i < x.start + x.sz[0]; i++)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
@@ -116,8 +147,10 @@ sreal norm_vector_l2(const SVec& x)
 {
 	sreal norm = 0;
 
+#pragma omp parallel for collapse(2) default(shared) reduction(+:norm)
 	for(sint k = x.start; k < x.start + x.sz[2]; k++)
 		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+#pragma omp simd reduction(+:norm)
 			for(sint i = x.start; i < x.start + x.sz[0]; i++)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);

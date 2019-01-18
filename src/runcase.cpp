@@ -100,15 +100,17 @@ int main(int argc, char* argv[])
 
 		SolverBase *const solver = createSolver(A);
 
-		sreal buildstarttime = MPI_Wtime();
+		const sreal buildstarttime = MPI_Wtime();
 		solver->updateOperator();
-		precbuildtime += MPI_Wtime() - buildstarttime;
+		const sreal buildtimeinterval = MPI_Wtime() - buildstarttime;
+		precbuildtime += buildtimeinterval;
+		wtime += buildtimeinterval;
 
 		SVec u(&m);
 
-		sreal starttime = MPI_Wtime();
+		const sreal starttime = MPI_Wtime();
 		const SolveInfo slvinfo = solver->apply(b, u);
-		sreal endtime = MPI_Wtime() - starttime;
+		const sreal endtime = MPI_Wtime() - starttime;
 		wtime += endtime;
 		precapplytime += slvinfo.precapplywtime;
 
@@ -124,9 +126,9 @@ int main(int argc, char* argv[])
 	wtime /= cdata.nruns;
 	precapplytime /= cdata.nruns;
 	precbuildtime /= cdata.nruns;
-	printf("Time taken by native solver = %f\n", wtime);
 	printf("Time taken by preconditioner build = %f\n", precbuildtime);
 	printf("Time taken by all preconditioner applications = %f\n", precapplytime);
+	printf("Time taken by native linear solver = %f\n", wtime);
 
 	if(mpirank == 0)
 		printf("Avg solver iters: %d.\n\n", avgkspiters/cdata.nruns);

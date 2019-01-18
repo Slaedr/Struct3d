@@ -26,7 +26,8 @@ add_subdirectory(discretization-verification)
 add_subdirectory(structsolvers)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/run-defaults.perc ${CMAKE_BINARY_DIR}/run-defaults.perc)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control ${CMAKE_BINARY_DIR}/convdiff.control)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-testcase.control 
+	${CMAKE_BINARY_DIR}/convdiff-testcase.control)
 
 add_test(NAME NativeRunCase
   COMMAND runcase ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control

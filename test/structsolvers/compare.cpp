@@ -176,7 +176,9 @@ int main(int argc, char* argv[])
 			printf("Test run %d:\n", irun);
 
 		SolverBase *const solver = createSolver(A);
+		//sreal startbuildtime = MPI_Wtime();
 		solver->updateOperator();
+		//wtime += MPI_Wtime() - startbuildtime;
 
 		SVec u(&m);
 
