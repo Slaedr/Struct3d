@@ -248,8 +248,8 @@ endif()
 find_package(Boost 1.60 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-# find_package(MPI REQUIRED)
-# include_directories(${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
+find_package(MPI REQUIRED)
+include_directories(${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
 
 # PETSc
 # If PETSc variables were not passed to CMake, set them from environment variables
