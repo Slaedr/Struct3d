@@ -5,6 +5,7 @@
 #ifndef STRUCT3D_COMMON_UTILS_H
 #define STRUCT3D_COMMON_UTILS_H
 
+#include <vector>
 #include <petscmat.h>
 #include "cartmesh.hpp"
 
@@ -41,5 +42,8 @@ int petscoptions_get_int(const std::string optionname);
 
 /// Get a boolean option. Can be used to check if a no-argument option has been given.
 bool petscoptions_get_bool(const std::string optionname);
+
+/// Get a list of integer options
+std::vector<int> petscoptions_get_array_int(const std::string optionname, const int maxlen);
 
 #endif

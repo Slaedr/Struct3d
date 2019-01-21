@@ -22,12 +22,19 @@ add_subdirectory(structsolvers)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/run-defaults.perc ${CMAKE_BINARY_DIR}/run-defaults.perc)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-testcase.control 
-	${CMAKE_BINARY_DIR}/convdiff-testcase.control)
+  ${CMAKE_BINARY_DIR}/convdiff-testcase.control)
+configure_file(input/scaling_openmp.perc input/scaling_openmp.perc)
 
 add_test(NAME NativeRunCase
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_BINARY_DIR}/src/runcase 
   ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/run-defaults.perc
+  )
+
+add_test(NAME ScalingTest_OpenMP
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOPTS} ${CMAKE_BINARY_DIR}/bin/runtest_openmp
+  ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
+  -options_file ${CMAKE_CURRENT_BINARY_DIR}/input/scaling_openmp.perc
   )
 
 if(WITH_BLASTED)

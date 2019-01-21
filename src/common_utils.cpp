@@ -116,3 +116,18 @@ bool petscoptions_get_bool(const std::string optionname)
 
 	return output;
 }
+
+std::vector<int> petscoptions_get_array_int(const std::string optionname, const int maxlen)
+{
+	int ierr = 0;
+	PetscBool set = PETSC_FALSE;
+	std::vector<int> arr(maxlen);
+	int len = maxlen;
+
+	ierr = PetscOptionsGetIntArray(NULL, NULL, optionname.c_str(), &arr[0], &len, &set);
+	arr.resize(len);
+
+	if(ierr) throw std::runtime_error(std::string("Could not get array ") + optionname);
+	if(!set) throw NonExistentPetscOpion(std::string("Array ") + optionname + std::string(" not set"));
+	return arr;
+}

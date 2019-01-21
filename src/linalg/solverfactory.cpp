@@ -31,12 +31,12 @@ SolverBase *createSolver(const SMat& lhs)
 
 	if(precstr == "jacobi")
 	{
-		printf("Using Jacobi preconditioner\n");
+		printf("  Using Jacobi preconditioner\n");
 		prec = new JacobiPreconditioner(lhs);
 	}
 	else if(precstr == "sgs")
 	{
-		printf("Using SGS preconditioner\n");
+		printf("  Using SGS preconditioner\n");
 		PreconParams pparams;
 		pparams.nbuildsweeps = 0;
 		pparams.napplysweeps = petscoptions_get_int("-s3d_pc_apply_sweeps");
@@ -52,7 +52,7 @@ SolverBase *createSolver(const SMat& lhs)
 	}
 	else if(precstr == "strilu")
 	{
-		printf("Using StrILU preconditioner\n");
+		printf("  Using StrILU preconditioner\n");
 		PreconParams pparams;
 		pparams.nbuildsweeps = petscoptions_get_int("-s3d_pc_build_sweeps");
 		pparams.napplysweeps = petscoptions_get_int("-s3d_pc_apply_sweeps");
@@ -78,7 +78,7 @@ SolverBase *createSolver(const SMat& lhs)
 
 	if(tlsolver == "richardson")
 	{
-		printf("Using Richardson solver\n");
+		printf("  Using Richardson solver\n");
 		solver = new Richardson(lhs, prec, params);
 	}
 	else {

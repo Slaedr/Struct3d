@@ -15,5 +15,5 @@ target_link_libraries(poisson base)
 add_library(convdiff pde/convdiff.cpp)
 target_link_libraries(convdiff base)
 
-add_executable(runcase runcase.cpp)
-target_link_libraries(runcase linalg poisson convdiff base)
+add_subdirectory(perftesting)
+

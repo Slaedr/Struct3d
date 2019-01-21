@@ -1,0 +1,25 @@
+-options_left
+
+-ksp_rtol 1e-6
+-ksp_max_it 1000
+
+-s3d_ksp_type richardson
+-s3d_pc_type strilu
+
+-s3d_pc_use_threaded_build true
+-s3d_pc_use_threaded_apply true
+
+-s3d_thread_chunk_size 1024
+
+-openmptest_threads_list 2,4
+-openmptest_build_sweeps 1,2
+-openmptest_apply_sweeps 2,3
+-openmptest_num_repeats 2
+
+-openmptest_ref_threads 1
+-openmptest_ref_build_sweeps 1
+-openmptest_ref_apply_sweeps 1
+-openmptest_ref_num_repeats 1
+
+-openmptest_output_file @CMAKE_CURRENT_BINARY_DIR@/scaling-output.txt
+
