@@ -6,12 +6,12 @@ add_executable(gridconv gridconv.cpp)
 target_link_libraries(gridconv linalg poisson convdiff base)
 
 add_test(NAME Poisson_NativeGridConv_UniformGrid
-  COMMAND gridconv ${CMAKE_CURRENT_SOURCE_DIR}/poisson-conv.control
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/poisson-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
   )
 
 add_test(NAME CD_NativeGridConv_UniformGrid
-  COMMAND gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
   )
 

@@ -25,7 +25,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-testcase.control
 	${CMAKE_BINARY_DIR}/convdiff-testcase.control)
 
 add_test(NAME NativeRunCase
-  COMMAND runcase ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_BINARY_DIR}/src/runcase 
+  ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/run-defaults.perc
   )
 

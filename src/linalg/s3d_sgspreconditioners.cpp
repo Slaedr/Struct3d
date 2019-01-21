@@ -26,6 +26,8 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
 		y[i] = 0;
+	
+	const sint idxmax[3] = {r.start + r.sz[0], r.start + r.sz[1], r.start + r.sz[2]};
 
 #pragma omp parallel default(shared) if(params.threadedapply)
 	{
@@ -49,10 +51,10 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 			 */
 
 #pragma omp for collapse(2) nowait schedule(static, params.thread_chunk_size)
-			for(sint k = r.start; k < r.start + r.sz[2]; k++)
-				for(sint j = r.start; j < r.start + r.sz[1]; j++)
+			for(sint k = r.start; k < idxmax[2]; k++)
+				for(sint j = r.start; j < idxmax[1]; j++)
 #pragma omp simd
-					for(sint i = r.start; i < r.start + r.sz[0]; i++)
+					for(sint i = r.start; i < idxmax[0]; i++)
 					{
 						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 						const sint jdx[] = {
@@ -80,10 +82,10 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 		for(int iswp = 0; iswp < params.napplysweeps; iswp++)
 		{
 #pragma omp for collapse(2) nowait schedule(static, params.thread_chunk_size)
-			for(sint k = r.start + r.sz[2]-1; k >= r.start; k--)
-				for(sint j = r.start + r.sz[1]-1; j >= r.start; j--)
+			for(sint k = idxmax[2]-1; k >= r.start; k--)
+				for(sint j = idxmax[1]-1; j >= r.start; j--)
 #pragma omp simd
-					for(sint i = r.start + r.sz[0]-1; i >= r.start; i--)
+					for(sint i = idxmax[0]-1; i >= r.start; i--)
 					{
 						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 						const sint jdx[] = {
@@ -115,11 +117,13 @@ SGS_preconditioner::SGS_preconditioner(const SMat& lhs, const PreconParams parms
 
 void SGS_preconditioner::updateOperator()
 {
+	const sint idxmax[3] = {A.start + A.sz[0], A.start + A.sz[1], A.start + A.sz[2]};
+
 #pragma omp parallel for collapse(2) default(shared)
-	for(sint k = A.start; k < A.start + A.sz[2]; k++)
-		for(sint j = A.start; j < A.start + A.sz[1]; j++)
+	for(sint k = A.start; k < idxmax[2]; k++)
+		for(sint j = A.start; j < idxmax[1]; j++)
 #pragma omp simd
-			for(sint i = A.start; i < A.start + A.sz[0]; i++)
+			for(sint i = A.start; i < idxmax[0]; i++)
 			{
 				const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
 				diaginv[idxr] = 1.0/A.vals[STENCIL_DIAG][idxr];

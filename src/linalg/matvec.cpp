@@ -33,11 +33,13 @@ void SMat::apply(const SVec& x, SVec& y) const
 	const int ng = x.nghost;
 	assert(ng == 1);
 
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
+
 #pragma omp parallel for collapse(2) default(shared)
-	for(sint k = x.start; k < x.start + x.sz[2]; k++)
-		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd
-			for(sint i = x.start; i < x.start + x.sz[0]; i++)
+			for(sint i = x.start; i < idxmax[0]; i++)
 			{
 				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 				const sint jdx[] = {
@@ -73,12 +75,14 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 
 	const int ng = x.nghost;
 	assert(ng == 1);
+	
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
 #pragma omp parallel for collapse(2) default(shared)
-	for(sint k = x.start; k < x.start + x.sz[2]; k++)
-		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd
-			for(sint i = x.start; i < x.start + x.sz[0]; i++)
+			for(sint i = x.start; i < idxmax[0]; i++)
 			{
 				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 				const sint jdx[] = {
@@ -113,12 +117,14 @@ void vecaxpy(const sreal a, const SVec& x, SVec& y)
 {
 	if(x.m != y.m)
 		throw std::runtime_error("Both vectors should be defined over the same mesh!");
+	
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
 #pragma omp parallel for collapse(2) default(shared)
-	for(sint k = x.start; k < x.start + x.sz[2]; k++)
-		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd
-			for(sint i = x.start; i < x.start + x.sz[0]; i++)
+			for(sint i = x.start; i < idxmax[0]; i++)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				y.vals[idx] += a*x.vals[idx];
@@ -128,12 +134,13 @@ void vecaxpy(const sreal a, const SVec& x, SVec& y)
 sreal norm_L2(const SVec& x)
 {
 	sreal norm = 0;
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
 #pragma omp parallel for collapse(2) default(shared) reduction(+:norm)
-	for(sint k = x.start; k < x.start + x.sz[2]; k++)
-		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd reduction(+:norm)
-			for(sint i = x.start; i < x.start + x.sz[0]; i++)
+			for(sint i = x.start; i < idxmax[0]; i++)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				const sreal vol = 1.0/8.0*(x.m->gcoords(0,i+1)-x.m->gcoords(0,i-1))
@@ -146,12 +153,13 @@ sreal norm_L2(const SVec& x)
 sreal norm_vector_l2(const SVec& x)
 {
 	sreal norm = 0;
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
 #pragma omp parallel for collapse(2) default(shared) reduction(+:norm)
-	for(sint k = x.start; k < x.start + x.sz[2]; k++)
-		for(sint j = x.start; j < x.start + x.sz[1]; j++)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd reduction(+:norm)
-			for(sint i = x.start; i < x.start + x.sz[0]; i++)
+			for(sint i = x.start; i < idxmax[0]; i++)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				norm += x.vals[idx]*x.vals[idx];

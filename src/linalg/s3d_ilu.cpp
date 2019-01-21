@@ -23,16 +23,18 @@ void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
 		diaginv[i] = A.vals[STENCIL_DIAG][i];
+	
+	const sint idxmax[3] = {A.start + A.sz[0], A.start + A.sz[1], A.start + A.sz[2]};
 
 #pragma omp parallel default(shared) if(params.threadedbuild)
 	{
 		for(int iswp = 0; iswp < params.nbuildsweeps; iswp++)
 		{
 #pragma omp for collapse(2) nowait schedule(dynamic, params.thread_chunk_size)
-			for(sint k = A.start; k < A.start + A.sz[2]; k++)
-				for(sint j = A.start; j < A.start + A.sz[1]; j++)
+			for(sint k = A.start; k < idxmax[2]; k++)
+				for(sint j = A.start; j < idxmax[1]; j++)
 #pragma omp simd
-					for(sint i = A.start; i < A.start + A.sz[0]; i++)
+					for(sint i = A.start; i < idxmax[0]; i++)
 					{
 						const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
 						const sint jdx[] = { A.m->localFlattenedIndexReal(k,j,i-1),
@@ -70,6 +72,8 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
 		diaginv[i] = A.vals[STENCIL_DIAG][i];
+	
+	const sint idxmax[3] = {A.start + A.sz[0], A.start + A.sz[1], A.start + A.sz[2]};
 
 #pragma omp parallel default(shared) if(params.threadedbuild)
 	{
@@ -78,7 +82,7 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 			// corners
 
 #pragma omp for simd nowait
-			for(sint i = A.start+1; i < A.start + A.sz[0]; i++)
+			for(sint i = A.start+1; i < idxmax[0]; i++)
 			{
 				const sint idxr = A.m->localFlattenedIndexReal(0,0,i);
 				const sint jdx =  A.m->localFlattenedIndexReal(0,0,i-1);
@@ -86,7 +90,7 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 					- A.vals[0][idxr]*A.vals[4][jdx]/diaginv[jdx];
 			}
 #pragma omp for nowait
-			for(sint j = A.start+1; j < A.start + A.sz[1]; j++)
+			for(sint j = A.start+1; j < idxmax[1]; j++)
 			{
 				const sint idxr = A.m->localFlattenedIndexReal(0,j,0);
 				const sint jdx =  A.m->localFlattenedIndexReal(0,j-1,0);
@@ -94,7 +98,7 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 					- A.vals[1][idxr]*A.vals[5][jdx]/diaginv[jdx];
 			}
 #pragma omp for nowait
-			for(sint k = A.start+1; k < A.start + A.sz[2]; k++)
+			for(sint k = A.start+1; k < idxmax[2]; k++)
 			{
 				const sint idxr = A.m->localFlattenedIndexReal(k,0,0);
 				const sint jdx =  A.m->localFlattenedIndexReal(k-1,0,0);
@@ -105,9 +109,9 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 			// faces
 
 #pragma omp for nowait
-			for(sint j = A.start+1; j < A.start + A.sz[1]; j++)
+			for(sint j = A.start+1; j < idxmax[1]; j++)
 #pragma omp simd
-				for(sint i = A.start+1; i < A.start + A.sz[0]; i++)
+				for(sint i = A.start+1; i < idxmax[0]; i++)
 				{
 					const sint idxr = A.m->localFlattenedIndexReal(0,j,i);
 					const sint jdx[] = { A.m->localFlattenedIndexReal(0,j,i-1),
@@ -123,9 +127,9 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 				}
 
 #pragma omp for nowait
-			for(sint k = A.start+1; k < A.start + A.sz[2]; k++)
+			for(sint k = A.start+1; k < idxmax[2]; k++)
 #pragma omp simd
-				for(sint i = A.start+1; i < A.start + A.sz[0]; i++)
+				for(sint i = A.start+1; i < idxmax[0]; i++)
 				{
 					const sint idxr = A.m->localFlattenedIndexReal(k,0,i);
 					const sint jdx[] = { A.m->localFlattenedIndexReal(k,0,i-1),
@@ -142,9 +146,9 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 				}
 
 #pragma omp for nowait
-			for(sint k = A.start+1; k < A.start + A.sz[2]; k++)
+			for(sint k = A.start+1; k < idxmax[2]; k++)
 #pragma omp simd
-				for(sint j = A.start+1; j < A.start + A.sz[1]; j++)
+				for(sint j = A.start+1; j < idxmax[1]; j++)
 				{
 					const sint idxr = A.m->localFlattenedIndexReal(k,j,0);
 					const sint jdx[] = { -1,                                     //< dummy
@@ -162,10 +166,10 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 
 			// interior 
 #pragma omp for collapse(2) nowait
-			for(sint k = A.start+1; k < A.start + A.sz[2]; k++)
-				for(sint j = A.start+1; j < A.start + A.sz[1]; j++)
+			for(sint k = A.start+1; k < idxmax[2]; k++)
+				for(sint j = A.start+1; j < idxmax[1]; j++)
 #pragma omp simd
-					for(sint i = A.start+1; i < A.start + A.sz[0]; i++)
+					for(sint i = A.start+1; i < idxmax[0]; i++)
 					{
 						const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
 						const sint jdx[] = { A.m->localFlattenedIndexReal(k,j,i-1),
