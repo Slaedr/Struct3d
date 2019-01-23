@@ -202,10 +202,10 @@ void writeReportHeader(const ThreadCaseInfo refrun, FILE *const fp)
 
 void writeReportLine(const ThreadCaseInfo run, const ThreadCaseInfo refrun, FILE *const fp)
 {
-	const double totalspdp = (run.avg_precbuildtime + run.avg_precapplytime)
-		/ (refrun.avg_precbuildtime + refrun.avg_precapplytime);
+	const double totalspdp = (refrun.avg_precbuildtime + refrun.avg_precapplytime)
+		/ (run.avg_precbuildtime + run.avg_precapplytime);
 	fprintf(fp, "%8d %8d %8d %6d %10f %8f %8f %8f %12f %12f %12f\n", run.nbuildsweeps, run.napplysweeps,
-	        run.nthreads, run.avg_niter, run.dev_niter, run.avg_precbuildtime/refrun.avg_precbuildtime,
-	        run.avg_precapplytime/refrun.avg_precapplytime, totalspdp,
+	        run.nthreads, run.avg_niter, run.dev_niter, refrun.avg_precbuildtime/run.avg_precbuildtime,
+	        refrun.avg_precapplytime/run.avg_precapplytime, totalspdp,
 	        run.dev_precbuildtime, run.dev_precapplytime, run.dev_residual);
 }
