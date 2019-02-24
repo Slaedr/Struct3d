@@ -26,7 +26,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff-testcase.control
 configure_file(input/scaling_openmp.perc input/scaling_openmp.perc)
 
 add_test(NAME NativeRunCase
-  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_BINARY_DIR}/src/runcase 
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_BINARY_DIR}/bin/runcase 
   ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/run-defaults.perc
   )
