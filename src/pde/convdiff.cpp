@@ -73,46 +73,8 @@ int ConvDiff::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 				cindices[5] = {k,j+1,i,0};
 				cindices[6] = {k+1,j,i,0};
 
-				const PetscInt I = i+1, J = j+1, K = k+1;   // 1-offset indices for mesh coords access
-
-				sreal drp[NDIM], drn[NDIM];
-				drp[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
-				drp[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
-				drp[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
-				drn[0] = m->gcoords(0,I+1)-m->gcoords(0,I);
-				drn[1] = m->gcoords(1,J+1)-m->gcoords(1,J);
-				drn[2] = m->gcoords(2,K+1)-m->gcoords(2,K);
-				(void)drn; // remove when used below for diffusion
-
-				// diffusion
-				values[0] = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
-						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
-				values[1] = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
-						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
-				values[2] = -1.0/( (m->gcoords(2,K)-m->gcoords(2,K-1)) 
-						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
-
-				values[3] =  2.0/(m->gcoords(0,I+1)-m->gcoords(0,I-1))*
-				  (1.0/(m->gcoords(0,I+1)-m->gcoords(0,I))+1.0/(m->gcoords(0,I)-m->gcoords(0,I-1)));
-				values[3] += 2.0/(m->gcoords(1,J+1)-m->gcoords(1,J-1))*
-				  (1.0/(m->gcoords(1,J+1)-m->gcoords(1,J))+1.0/(m->gcoords(1,J)-m->gcoords(1,J-1)));
-				values[3] += 2.0/(m->gcoords(2,K+1)-m->gcoords(2,K-1))*
-				  (1.0/(m->gcoords(2,K+1)-m->gcoords(2,K))+1.0/(m->gcoords(2,K)-m->gcoords(2,K-1)));
-
-				values[4] = -1.0/( (m->gcoords(0,I+1)-m->gcoords(0,I)) 
-						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
-				values[5] = -1.0/( (m->gcoords(1,J+1)-m->gcoords(1,J)) 
-						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
-				values[6] = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
-						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
-
-				for(int l = 0; l < NSTENCIL; l++)
-					values[l] *= mu;
-
-				// upwind advection
-				for(int l = 0; l < 3; l++)
-					values[l] += -b[l]/drp[l];
-				values[3] += b[0]/drp[0] + b[1]/drp[1] + b[2]/drp[2];
+				assembly_kernel(m, i,j,k, 1, values[0], values[1], values[2], values[3], values[4],
+				                values[5], values[6]);
 
 				MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
 			}
@@ -136,49 +98,65 @@ SMat ConvDiff::computeLHS(const CartMesh *const m) const
 		for(PetscInt j = A.start; j < A.start+A.sz[1]; j++)
 			for(PetscInt i = A.start; i < A.start+A.sz[0]; i++)
 			{
-				// 1-offset indices for mesh coords access
-				const sint I = i + A.nghost, J = j + A.nghost, K = k + A.nghost;
-
 				const sint idx = m->localFlattenedIndexReal(k,j,i);
 
-				sreal drp[NDIM];
-				drp[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
-				drp[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
-				drp[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
-
-				// diffusion
-				A.vals[0][idx] = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
-						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
-				A.vals[1][idx] = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
-						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
-				A.vals[2][idx] = -1.0/( (m->gcoords(2,K)-m->gcoords(2,K-1)) 
-						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
-
-				A.vals[3][idx] =  2.0/(m->gcoords(0,I+1)-m->gcoords(0,I-1))*
-				  (1.0/(m->gcoords(0,I+1)-m->gcoords(0,I))+1.0/(m->gcoords(0,I)-m->gcoords(0,I-1)));
-				A.vals[3][idx] += 2.0/(m->gcoords(1,J+1)-m->gcoords(1,J-1))*
-				  (1.0/(m->gcoords(1,J+1)-m->gcoords(1,J))+1.0/(m->gcoords(1,J)-m->gcoords(1,J-1)));
-				A.vals[3][idx] += 2.0/(m->gcoords(2,K+1)-m->gcoords(2,K-1))*
-				  (1.0/(m->gcoords(2,K+1)-m->gcoords(2,K))+1.0/(m->gcoords(2,K)-m->gcoords(2,K-1)));
-
-				A.vals[4][idx] = -1.0/( (m->gcoords(0,I+1)-m->gcoords(0,I)) 
-						* 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
-				A.vals[5][idx] = -1.0/( (m->gcoords(1,J+1)-m->gcoords(1,J)) 
-						* 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
-				A.vals[6][idx] = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
-						* 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
-
-				for(int l = 0; l < NSTENCIL; l++)
-					A.vals[l][idx] *= mu;
-
-				// upwind advection
-				for(int l = 0; l < 3; l++)
-					A.vals[l][idx] += -b[l]/drp[l];
-				A.vals[3][idx] += b[0]/drp[0] + b[1]/drp[1] + b[2]/drp[2];
+				assembly_kernel(m, i,j,k, A.nghost, A.vals[0][idx], A.vals[1][idx], A.vals[2][idx],
+				                A.vals[3][idx], A.vals[4][idx], A.vals[5][idx], A.vals[6][idx]);
 			}
 
 	if(rank == 0)
 		printf("ConvDiff: ComputeLHS: Done.\n");
 	
 	return A;
+}
+
+inline void
+ConvDiff::assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
+                          const sint nghost,
+                          sreal& v0, sreal& v1, sreal& v2, sreal& v3,
+                          sreal& v4, sreal& v5, sreal& v6) const
+{
+	// 1-offset indices for mesh coords access
+	const sint I = i + nghost, J = j + nghost, K = k + nghost;
+
+	sreal drp[NDIM];
+	drp[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
+	drp[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
+	drp[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
+
+	// diffusion
+	v0 = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
+	            * 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
+	v1 = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
+	            * 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
+	v2 = -1.0/( (m->gcoords(2,K)-m->gcoords(2,K-1)) 
+	            * 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+	v3 =  2.0/(m->gcoords(0,I+1)-m->gcoords(0,I-1))*
+		(1.0/(m->gcoords(0,I+1)-m->gcoords(0,I))+1.0/(m->gcoords(0,I)-m->gcoords(0,I-1)));
+	v3 += 2.0/(m->gcoords(1,J+1)-m->gcoords(1,J-1))*
+		(1.0/(m->gcoords(1,J+1)-m->gcoords(1,J))+1.0/(m->gcoords(1,J)-m->gcoords(1,J-1)));
+	v3 += 2.0/(m->gcoords(2,K+1)-m->gcoords(2,K-1))*
+		(1.0/(m->gcoords(2,K+1)-m->gcoords(2,K))+1.0/(m->gcoords(2,K)-m->gcoords(2,K-1)));
+
+	v4 = -1.0/( (m->gcoords(0,I+1)-m->gcoords(0,I)) 
+	            * 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
+	v5 = -1.0/( (m->gcoords(1,J+1)-m->gcoords(1,J)) 
+	            * 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
+	v6 = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
+	            * 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+
+	v0 *= mu;
+	v1 *= mu;
+	v2 *= mu;
+	v3 *= mu;
+	v4 *= mu;
+	v5 *= mu;
+	v6 *= mu;
+
+	// upwind advection
+	v0 += -b[0]/drp[0];
+	v1 += -b[1]/drp[1];
+	v2 += -b[2]/drp[2];
+	v3 += b[0]/drp[0] + b[1]/drp[1] + b[2]/drp[2];
 }

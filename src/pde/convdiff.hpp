@@ -29,6 +29,13 @@ public:
 protected:
 	const sreal mu;                      ///< Diffusion coeff
 	const std::array<sreal,NDIM> b;      ///< Advection velocity (normalized)
+
+private:
+	/// Kernel used for assembling the matrix
+	void assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
+	                     const sint nghost,
+	                     sreal& v0, sreal& v1, sreal& v2, sreal& v3, sreal& v4, sreal& v5, sreal& v6)
+		const __attribute__((always_inline));
 };
 
 #endif
