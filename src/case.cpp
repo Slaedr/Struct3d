@@ -49,6 +49,12 @@ CaseData readCtrl(FILE *const conf)
 		fstatus = fscanf(conf, "%s", temp);
 		fstatus = fscanf(conf, "%lf", &cas.diffcoeff);
 	}
+	else if(cas.pdetype == "convdiff_circular") {
+		fstatus = fscanf(conf, "%s", temp);
+		fstatus = fscanf(conf, "%lf", &cas.vel[0]);
+		fstatus = fscanf(conf, "%s", temp);
+		fstatus = fscanf(conf, "%lf", &cas.diffcoeff);
+	}
 
 	if(!fstatus) {
 		std::printf("! Error reading control file!\n");

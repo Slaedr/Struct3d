@@ -9,6 +9,7 @@
 
 #include "pde/poisson.hpp"
 #include "pde/convdiff.hpp"
+#include "pde/convdiff_circular.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 #include "scaling_openmp.hpp"
@@ -56,6 +57,8 @@ int main(int argc, char* argv[])
 		pde = new Poisson();
 	else if(cdata.pdetype == "convdiff")
 		pde = new ConvDiff(cdata.vel, cdata.diffcoeff);
+	else if(cdata.pdetype == "convdiff_circular")
+		pde = new ConvDiffCirc(cdata.vel[0], cdata.diffcoeff);
 	else {
 		std::printf("PDE type not recognized!\n");
 		std::abort();

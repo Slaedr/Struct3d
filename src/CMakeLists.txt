@@ -12,7 +12,7 @@ add_library(cases case.cpp)
 add_library(poisson pde/poisson.cpp)
 target_link_libraries(poisson base)
 
-add_library(convdiff pde/convdiff.cpp)
+add_library(convdiff pde/convdiff.cpp pde/convdiff_circular.cpp)
 target_link_libraries(convdiff base)
 
 add_subdirectory(perftesting)

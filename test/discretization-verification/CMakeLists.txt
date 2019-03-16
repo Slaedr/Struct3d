@@ -15,6 +15,11 @@ add_test(NAME CD_NativeGridConv_UniformGrid
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
   )
 
+add_test(NAME CDCirc_NativeGridConv_UniformGrid
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cdcirc-conv.control
+  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
+  )
+
 add_test(NAME Poisson_PetscGridConv_UniformGrid
   COMMAND ${MPIEXEC} -n 1 gridconv-petsc ${CMAKE_CURRENT_SOURCE_DIR}/poisson-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/petscsolver.perc

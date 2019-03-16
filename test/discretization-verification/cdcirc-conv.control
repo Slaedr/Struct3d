@@ -1,0 +1,18 @@
+Type-of-grid('chebyshev'-or-'uniform')
+uniform
+Number-of-points-in-x-y-and-z
+24 24 24
+Coords-of-first-point-in-x-y-and-z
+-1.0 -1.0 -1.0
+Coords-of-last-point-in-x-y-and-z
+1.0 1.0 1.0
+Number-of-meshes
+3
+PDE-type
+convdiff_circular
+Advection-velocity-magnitude
+1.0
+Diffusion-coeff
+0.1
+Number-of-refinement-directions
+3
