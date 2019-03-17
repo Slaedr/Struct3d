@@ -12,9 +12,6 @@
 /// Type of point distribution in a Cartesian grid
 enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };
 
-/// Types of boundary conditions (BCs) available
-enum BCType { S3D_EXTRAPOLATION, S3D_DIRICHLET };
-
 /// Data defining a case to be run
 /** Faces of the rectangular domain are numbered in the order:
  * i-face at i=0, i-face at i=imax, j-face at j=0, j-face at j=jmax, k-face at k=0, k-face at k=kmax.

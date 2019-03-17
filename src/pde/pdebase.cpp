@@ -5,6 +5,23 @@
 #include "pdebase.hpp"
 #include "common_utils.hpp"
 
+inline
+sreal PDEBase::rhs_kernel(const sint i, const sint j, const sint k,
+                          const CartMesh *const m,
+                          const std::function<sreal(const sreal[NDIM])> func) const
+{
+	const sreal crds[NDIM] = {m->gcoords(0,i), m->gcoords(1,j), m->gcoords(2,k)};
+	return func(crds);
+}
+
+inline
+sreal PDEBase::rhs_boundary_kernel(const sint i, const sint j, const sint k,
+                                   const CartMesh *const m, const BCType btype, const sreal bval,
+                                   const std::function<sreal(const sreal[NDIM])> func) const
+{
+	return 0;
+}
+
 int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,
                                 const std::function<sreal(const sreal[NDIM])> func, Vec f) const
 {
@@ -27,8 +44,9 @@ int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,
 		for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
 			for(PetscInt i = start[0]; i < start[0]+lsize[0]; i++)
 			{
-				const sreal crds[NDIM] = {m->gcoords(0,i+1), m->gcoords(1,j+1), m->gcoords(2,k+1)};
-				rhs[k][j][i] = func(crds);
+				// const sreal crds[NDIM] = {m->gcoords(0,i+1), m->gcoords(1,j+1), m->gcoords(2,k+1)};
+				// rhs[k][j][i] = func(crds);
+				rhs[k][j][i] = rhs_kernel(i+1,j+1,k+1,m,func);
 			}
 	
 	DMDAVecRestoreArray(da, f, (void*)&rhs);
@@ -53,8 +71,9 @@ SVec PDEBase::computeVector(const CartMesh *const m,
 		for(PetscInt j = f.start; j < f.start + f.sz[1]; j++)
 			for(PetscInt i = f.start; i < f.start + f.sz[0]; i++)
 			{
-				const sreal crds[NDIM] = {m->gcoords(0,i), m->gcoords(1,j), m->gcoords(2,k)};
-				f.vals[m->localFlattenedIndexAll(k,j,i)] = func(crds);
+				// const sreal crds[NDIM] = {m->gcoords(0,i), m->gcoords(1,j), m->gcoords(2,k)};
+				// f.vals[m->localFlattenedIndexAll(k,j,i)] = func(crds);
+				f.vals[m->localFlattenedIndexAll(k,j,i)] = rhs_kernel(i,j,k,m,func);
 			}
 	
 	if(rank == 0)

@@ -25,4 +25,7 @@ typedef PetscScalar sreal;
 /// Default index type
 typedef PetscInt sint;
 
+/// Types of boundary conditions (BCs) available
+enum BCType { S3D_EXTRAPOLATION, S3D_DIRICHLET };
+
 #endif

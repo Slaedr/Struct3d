@@ -26,11 +26,13 @@ public:
 	 */
 	virtual int computeVectorPetsc(const CartMesh *const m, DM da,
 	                               const std::function<sreal(const sreal[NDIM])> func,
+	                               //const std::array<BCType,6> btypes, const std::array<sreal,6> bvals,
 	                               Vec f) const;
 
 	/// Computes a grid vector same as computeVectorPetsc, but using our native SVec instead
 	virtual SVec computeVector(const CartMesh *const m,
-	                           const std::function<sreal(const sreal[NDIM])> func) const;
+	                           const std::function<sreal(const sreal[NDIM])> func/*,
+	                           const std::array<BCType,6> btypes, const std::array<sreal,6> bvals*/) const;
 
 	/// Prescribes computation of the left-hand side operator for specific PDEs
 	virtual int computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const = 0;
@@ -41,6 +43,15 @@ public:
 	/// Prescribes generation of a pair of functions: the first being the solution and
 	///  the second being the right hand side
 	virtual std::array<std::function<sreal(const sreal[NDIM])>,2> manufactured_solution() const = 0;
+
+protected:
+	sreal rhs_kernel(const sint i, const sint j, const sint k,
+	                 const CartMesh *const m,
+	                 const std::function<sreal(const sreal[NDIM])> func) const;
+
+	sreal rhs_boundary_kernel(const sint i, const sint j, const sint k,
+	                          const CartMesh *const m, const BCType btype, const sreal bval,
+	                          const std::function<sreal(const sreal[NDIM])> func) const;
 };
 
 #endif
