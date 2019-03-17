@@ -15,11 +15,8 @@ public:
 	 * \param advel Advection velocity magnitude
 	 * \param diffusion_coeff Diffusion coefficient
 	 */
-	ConvDiffCirc(const sreal advelmag, const sreal diffusion_coeff);
-
-	int computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const;
-
-	SMat computeLHS(const CartMesh *const m) const;
+	ConvDiffCirc(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals,
+	             const sreal advelmag, const sreal diffusion_coeff);
 
 	/// Return the solution sin(2pi x)sin(2pi y)sin(2pi z) and the corresponding source term
 	/** The first component is the solution and the second is the right hand side.
@@ -36,10 +33,13 @@ protected:
 	std::array<sreal,NDIM> advectionVel(const sreal r[NDIM]) const;
 
 	/// Kernel used for assembling the matrix
-	void assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
-	                     const sint nghost,
-	                     sreal& v0, sreal& v1, sreal& v2, sreal& v3, sreal& v4, sreal& v5, sreal& v6)
-		const __attribute__((always_inline));
+	void lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
+	                   const sint nghost,
+	                   sreal& v0, sreal& v1, sreal& v2, sreal& v3, sreal& v4, sreal& v5, sreal& v6)
+		const;
+
+	sreal rhs_kernel(const CartMesh *const m, const std::function<sreal(const sreal[NDIM])>& func,
+	                 const sint i, const sint j, const sint k) const;
 };
 
 #endif

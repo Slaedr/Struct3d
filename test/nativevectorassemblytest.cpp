@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		m2.generateMesh_UniformDistribution(cdata.rmin,cdata.rmax);
 	}
 
-	Poisson pde;
+	Poisson pde(cdata.btypes, cdata.bvals);
 
 	const SVec u1 = pde.computeVector(&m2, pde.manufactured_solution()[0]);
 

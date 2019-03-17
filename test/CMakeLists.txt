@@ -1,10 +1,10 @@
 # test executables
 
 add_executable(testnativeassembly nativevectorassemblytest.cpp)
-target_link_libraries(testnativeassembly base poisson)
+target_link_libraries(testnativeassembly pdes)
 
 add_executable(testmatvec matvectest.cpp)
-target_link_libraries(testmatvec base poisson convdiff)
+target_link_libraries(testmatvec pdes)
 
 add_test(NAME Assembly
   COMMAND ${MPIEXEC} -n 1 ./testnativeassembly

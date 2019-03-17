@@ -1,9 +1,9 @@
 
 add_executable(gridconv-petsc gridconv-petsc.cpp)
-target_link_libraries(gridconv-petsc poisson convdiff base)
+target_link_libraries(gridconv-petsc pdes)
 
 add_executable(gridconv gridconv.cpp)
-target_link_libraries(gridconv linalg poisson convdiff base)
+target_link_libraries(gridconv linalg pdes)
 
 add_test(NAME Poisson_NativeGridConv_UniformGrid
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/poisson-conv.control

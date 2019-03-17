@@ -1,5 +1,5 @@
 
-add_library(base case.cpp pde/pdebase.cpp linalg/matvec.cpp cartmesh.cpp common_utils.cpp)
+add_library(base case.cpp linalg/matvec.cpp cartmesh.cpp common_utils.cpp)
 target_link_libraries(base ${PETSC_LIB} ${MPI_C_LIBRARIES} ${MPI_C_LINK_FLAGS})
 
 add_library(linalg linalg/solverfactory.cpp
@@ -9,11 +9,9 @@ target_link_libraries(linalg base)
 
 add_library(cases case.cpp)
 
-add_library(poisson pde/poisson.cpp)
-target_link_libraries(poisson base)
-
-add_library(convdiff pde/convdiff.cpp pde/convdiff_circular.cpp)
-target_link_libraries(convdiff base)
+add_library(pdes pde/pdefactory.cpp pde/convdiff.cpp pde/convdiff_circular.cpp pde/poisson.cpp
+  pde/pdebase.cpp)
+target_link_libraries(pdes base)
 
 add_subdirectory(perftesting)
 

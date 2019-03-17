@@ -13,8 +13,7 @@
 
 #include <blasted_petsc.h>
 
-#include "pde/poisson.hpp"
-#include "pde/convdiff.hpp"
+#include "pde/pdefactory.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 
@@ -51,13 +50,7 @@ int main(int argc, char* argv[])
 	const CaseData cdata = readCtrl(conf);
 	fclose(conf);
 	
-	PDEBase *pde = nullptr;
-	if(cdata.pdetype == "poisson")
-		pde = new Poisson();
-	else {
-		std::printf("PDE type not recognized!\n");
-		std::abort();
-	}
+	const PDEBase *const pde = construct_pde(cdata);
 
 	if(mpirank == 0) {
 		printf("Domain boundaries in each dimension:\n");

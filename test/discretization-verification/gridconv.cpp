@@ -5,9 +5,7 @@
 #include <vector>
 #include <cassert>
 
-#include "pde/poisson.hpp"
-#include "pde/convdiff.hpp"
-#include "pde/convdiff_circular.hpp"
+#include "pde/pdefactory.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 #include "linalg/solverfactory.hpp"
@@ -53,17 +51,7 @@ int main(int argc, char* argv[])
 	printf("Refinement in %d directions.\n", nrefinedirs);
 
 	printf("PDE: %s\n", cdata.pdetype.c_str());
-	PDEBase *pde = nullptr;
-	if(cdata.pdetype == "poisson")
-		pde = new Poisson();
-	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff(cdata.vel, cdata.diffcoeff);
-	else if(cdata.pdetype == "convdiff_circular")
-		pde = new ConvDiffCirc(cdata.vel[0], cdata.diffcoeff);
-	else {
-		std::printf("PDE type not recognized!\n");
-		std::abort();
-	}
+	const PDEBase *const pde = construct_pde(cdata);
 
 	if(rank == 0) {
 		printf("Domain boundaries in each dimension:\n");

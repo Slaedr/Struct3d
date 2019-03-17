@@ -6,8 +6,7 @@
 #include <cassert>
 #include <algorithm>
 #include "common_utils.hpp"
-#include "pde/poisson.hpp"
-#include "pde/convdiff.hpp"
+#include "pde/pdefactory.hpp"
 #include "linalg/matvec.hpp"
 #include "case.hpp"
 
@@ -26,15 +25,7 @@ int main(int argc, char *argv[])
 	const int nmesh = cdata.nruns;
 	const int nrefinedirs = 3;
 
-	PDEBase *pde = nullptr;
-	if(cdata.pdetype == "poisson")
-		pde = new Poisson();
-	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff({1.0,0.0,0}, 0.1);
-	else {
-		std::printf("PDE type not recognized!\n");
-		std::abort();
-	}
+	const PDEBase *const pde = construct_pde(cdata);
 
 	printf("Domain boundaries in each dimension:\n");
 	for(int i = 0; i < NDIM; i++)

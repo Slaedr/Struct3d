@@ -6,8 +6,7 @@
 #include <vector>
 #include <cassert>
 
-#include "pde/poisson.hpp"
-#include "pde/convdiff.hpp"
+#include "pde/pdefactory.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 
@@ -50,15 +49,7 @@ int main(int argc, char* argv[])
 	assert(nmesh >= 2);
 	assert(nrefinedirs == 1 || nrefinedirs == 2 || nrefinedirs == 3);
 
-	PDEBase *pde = nullptr;
-	if(cdata.pdetype == "poisson")
-		pde = new Poisson();
-	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff({1.0,0.0,0}, 0.1);
-	else {
-		std::printf("PDE type not recognized!\n");
-		std::abort();
-	}
+	const PDEBase *const pde = construct_pde(cdata);
 
 	if(rank == 0) {
 		printf("Domain boundaries in each dimension:\n");

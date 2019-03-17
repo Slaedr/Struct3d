@@ -14,7 +14,8 @@
 class PDEBase
 {
 public:
-	PDEBase() { }
+	PDEBase(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals);
+
 	virtual ~PDEBase() { }
 
 	/// Computes a grid vector from a given function of space coordinates
@@ -24,34 +25,39 @@ public:
 	 * \param func The function whose discrete representation is desired
 	 * \param[in,out] f The vec that must be written to
 	 */
-	virtual int computeVectorPetsc(const CartMesh *const m, DM da,
-	                               const std::function<sreal(const sreal[NDIM])> func,
-	                               //const std::array<BCType,6> btypes, const std::array<sreal,6> bvals,
-	                               Vec f) const;
+	int computeVectorPetsc(const CartMesh *const m, DM da,
+	                       const std::function<sreal(const sreal[NDIM])> func, Vec f) const;
 
 	/// Computes a grid vector same as computeVectorPetsc, but using our native SVec instead
-	virtual SVec computeVector(const CartMesh *const m,
-	                           const std::function<sreal(const sreal[NDIM])> func/*,
-	                           const std::array<BCType,6> btypes, const std::array<sreal,6> bvals*/) const;
+	SVec computeVector(const CartMesh *const m,
+	                   const std::function<sreal(const sreal[NDIM])> func) const;
 
 	/// Prescribes computation of the left-hand side operator for specific PDEs
-	virtual int computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const = 0;
+	int computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const;
 
 	/// Prescribes computation of the left-hand side operator for specific PDEs, using native format
-	virtual SMat computeLHS(const CartMesh *const m) const = 0;
+	SMat computeLHS(const CartMesh *const m) const;
 
 	/// Prescribes generation of a pair of functions: the first being the solution and
 	///  the second being the right hand side
 	virtual std::array<std::function<sreal(const sreal[NDIM])>,2> manufactured_solution() const = 0;
 
 protected:
-	sreal rhs_kernel(const sint i, const sint j, const sint k,
-	                 const CartMesh *const m,
-	                 const std::function<sreal(const sreal[NDIM])> func) const;
+	/// Boundary conditions at each of the 6 faces
+	std::array<BCType,6> bctypes;
+	/// Boundary values at each of the 6 faces
+	std::array<sreal,6> bvals;
 
-	sreal rhs_boundary_kernel(const sint i, const sint j, const sint k,
-	                          const CartMesh *const m, const BCType btype, const sreal bval,
-	                          const std::function<sreal(const sreal[NDIM])> func) const;
+	/// Kernel used for assembling the matrix
+	virtual void lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
+	                           const sint nghost,
+	                           sreal& v0, sreal& v1, sreal& v2, sreal& v3, sreal& v4, sreal& v5, sreal& v6)
+		const = 0;
+
+	/// Should return the value of the right-hand side vector at the (i,j,k) node
+	virtual sreal rhs_kernel(const CartMesh *const m,
+	                         const std::function<sreal(const sreal[NDIM])>& source_function,
+	                         const sint i, const sint j, const sint k) const = 0;
 };
 
 #endif

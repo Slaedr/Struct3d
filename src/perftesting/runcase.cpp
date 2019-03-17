@@ -9,8 +9,7 @@
 
 #include <petscsys.h>
 
-#include "pde/poisson.hpp"
-#include "pde/convdiff.hpp"
+#include "pde/pdefactory.hpp"
 #include "common_utils.hpp"
 #include "case.hpp"
 #include "linalg/solverfactory.hpp"
@@ -56,15 +55,8 @@ int main(int argc, char* argv[])
 	fclose(conf);
 
 	printf("PDE: %s\n", cdata.pdetype.c_str());
-	PDEBase *pde = nullptr;
-	if(cdata.pdetype == "poisson")
-		pde = new Poisson();
-	else if(cdata.pdetype == "convdiff")
-		pde = new ConvDiff(cdata.vel, cdata.diffcoeff);
-	else {
-		std::printf("PDE type not recognized!\n");
-		std::abort();
-	}
+
+	const PDEBase *const pde = construct_pde(cdata);
 
 	if(mpirank == 0) {
 		printf("Domain boundaries in each dimension:\n");

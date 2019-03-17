@@ -1,6 +1,6 @@
 
 add_executable(comparewithpetsc compare.cpp)
-target_link_libraries(comparewithpetsc linalg base poisson convdiff)
+target_link_libraries(comparewithpetsc linalg pdes)
 
 add_test(NAME StructSolver_VsPetsc_Poisson_Jacobi
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./comparewithpetsc 
