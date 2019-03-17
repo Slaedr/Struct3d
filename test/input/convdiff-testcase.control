@@ -14,3 +14,7 @@ Advection-velocity
 0.7 0.577350269189626 0.3
 Diffusion-coeff
 0.05
+BC-types
+D D D D D D
+BC-values
+0 0 0 0 0 0

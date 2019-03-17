@@ -61,5 +61,28 @@ CaseData readCtrl(FILE *const conf)
 		std::abort();
 	}
 
+	// BC types
+	fstatus = fscanf(conf, "%s", temp);
+	for(int j = 0; j < 6; j++) {
+		char bct[3];
+		fstatus = fscanf(conf, "%s", bct);
+		if(!strcmp(bct,"D"))
+			cas.btypes[j] = S3D_DIRICHLET;
+		else if(!strcmp(bct,"E"))
+			cas.btypes[j] = S3D_EXTRAPOLATION;
+		else
+			printf("Invalid BC type! Must be D or E");
+	}
+
+	// BC values
+	fstatus = fscanf(conf, "%s", temp);
+	for(int j = 0; j < 6; j++)
+		fstatus = fscanf(conf, "%lf", &cas.bvals[j]);
+
+	if(!fstatus) {
+		std::printf("! Error reading control file!\n");
+		std::abort();
+	}
+
 	return cas;
 }

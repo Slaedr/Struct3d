@@ -1,350 +1,5 @@
 
-src/pde/convdiff.hpp,254
-#define STRUCT3D_CONVDIFF_HSTRUCT3D_CONVDIFF_H6,92
-class ConvDiff : public PDEBaseConvDiff11,184
-	const sreal mu;                      ///< Diffusion coeffmu30,809
-	const std::array<sreal,NDIM> b;      ///< Advection velocity (normalized)b31,868
-
-src/pde/convdiff_circular.cpp,748
-ConvDiffCirc::ConvDiffCirc(const sreal advel, const sreal diffc) : mu{diffc}, bmag(advel)ConvDiffCirc10,220
-ConvDiffCirc::ConvDiffCirc(const sreal advel, const sreal diffc) : mu{diffc}, bmag(advel)bmag10,220
-inline std::array<sreal,NDIM> ConvDiffCirc::advectionVel(const sreal r[NDIM]) constadvectionVel18,445
-std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiffCirc::manufactured_solution() constmanufactured_solution27,664
-int ConvDiffCirc::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) constcomputeLHSPetsc54,1496
-SMat ConvDiffCirc::computeLHS(const CartMesh *const m) constcomputeLHS98,2855
-ConvDiffCirc::assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,assembly_kernel124,3567
-
-src/pde/pdebase.hpp,132
-#define PDEBASE_HPDEBASE_H6,77
-class PDEBasePDEBase14,255
-	PDEBase() { }PDEBase17,279
-	virtual ~PDEBase() { }~PDEBase18,294
-
-src/pde/poisson.cpp,297
-std::array<std::function<sreal(const sreal[NDIM])>,2> Poisson::manufactured_solution() constmanufactured_solution39,1276
-int Poisson::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) constcomputeLHSPetsc50,1751
-SMat Poisson::computeLHS(const CartMesh *const m) constcomputeLHS121,4411
-
-src/pde/poisson.hpp,128
-#define STRUCT3D_POISSON_HSTRUCT3D_POISSON_H9,230
-class Poisson : public PDEBasePoisson16,402
-	Poisson() { }Poisson19,443
-
-src/pde/convdiff_circular.hpp,285
-#define STRUCT3D_CONVDIFF_CIRCULAR_HSTRUCT3D_CONVDIFF_CIRCULAR_H6,127
-class ConvDiffCirc : public PDEBaseConvDiffCirc11,274
-	const sreal mu;                      ///< Diffusion coeffmu31,975
-	const sreal bmag;                    ///< Magnitude of advection velocitybmag32,1034
-
-src/pde/pdebase.cpp,164
-int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,computeVectorPetsc8,137
-SVec PDEBase::computeVector(const CartMesh *const m,computeVector41,1249
-
-src/pde/convdiff.cpp,633
-ConvDiff::ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffc) : mu{diffc}, b(advel)ConvDiff10,211
-ConvDiff::ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffc) : mu{diffc}, b(advel)b10,211
-std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_solution() constmanufactured_solution18,460
-int ConvDiff::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) constcomputeLHSPetsc44,1227
-SMat ConvDiff::computeLHS(const CartMesh *const m) constcomputeLHS88,2582
-ConvDiff::assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,assembly_kernel114,3282
-
-src/common_utils.cpp,961
-#define PETSCOPTION_STR_MAX_LEN PETSCOPTION_STR_MAX_LEN4,46
-PetscReal computeNorm(const CartMesh *const m, Vec v, DM da)computeNorm6,83
-PetscReal compute_error(const CartMesh& m, const DM da, const Vec u, const Vec uexact)compute_error37,1143
-int get_mpi_rank(MPI_Comm comm) {get_mpi_rank51,1491
-int get_mpi_size(MPI_Comm comm) {get_mpi_size57,1582
-NonExistentPetscOpion::NonExistentPetscOpion(const std::string& msg)NonExistentPetscOpion63,1673
-std::string petscoptions_get_string(const std::string optionname, const size_t sz)petscoptions_get_string67,1774
-sreal petscoptions_get_real(const std::string optionname)petscoptions_get_real81,2218
-int petscoptions_get_int(const std::string optionname)petscoptions_get_int94,2582
-bool petscoptions_get_bool(const std::string optionname)petscoptions_get_bool107,2940
-std::vector<int> petscoptions_get_array_int(const std::string optionname, const int maxlen)petscoptions_get_array_int120,3321
-
-src/case.cpp,51
-CaseData readCtrl(FILE *const conf)readCtrl8,114
-
-src/perftesting/scaling_openmp.cpp,621
-void runtests_openmp(const PDEBase *const pde, const CartMesh& m)runtests_openmp28,926
-ThreadCaseInfo runcase(const CartMesh& m, const SMat& A, const SVec& b, const int nruns)runcase84,3031
-T average(const std::vector<T>& arr)average143,4736
-double relative_deviation(const std::vector<T> arr, const T avg)relative_deviation154,4994
-void setSweeps(const int nbswp, const int naswp)setSweeps165,5233
-void writeReportHeader(const ThreadCaseInfo refrun, FILE *const fp)writeReportHeader185,6038
-void writeReportLine(const ThreadCaseInfo run, const ThreadCaseInfo refrun, FILE *const fp)writeReportLine203,7089
-
-src/perftesting/scaling_openmp.hpp,621
-#define STRUCT3D_SCALING_OPENMP_HSTRUCT3D_SCALING_OPENMP_H6,94
-struct ThreadCaseInfoThreadCaseInfo13,322
-	int nthreads;nthreads15,346
-	int nbuildsweeps;nbuildsweeps16,361
-	int napplysweeps;napplysweeps17,380
-	int avg_niter;avg_niter19,400
-	sreal avg_residual;avg_residual20,416
-	double avg_precbuildtime;avg_precbuildtime22,438
-	double avg_precapplytime;avg_precapplytime23,465
-	double avg_solvetime;avg_solvetime24,492
-	double dev_precbuildtime;dev_precbuildtime26,516
-	double dev_precapplytime;dev_precapplytime27,543
-	double dev_niter;dev_niter28,570
-	sreal dev_residual;dev_residual29,589
-
-src/perftesting/runcase.cpp,126
-#undef NDEBUGNDEBUG1,0
-#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN20,287
-int main(int argc, char* argv[])main22,319
-
-src/perftesting/runtest_openmp.cpp,70
-#undef NDEBUGNDEBUG1,0
-int main(int argc, char* argv[])main17,265
-
-src/cartmesh.hpp,1235
-#define STRUCT3D_CARTMESH_HSTRUCT3D_CARTMESH_H7,176
-class CartMeshCartMesh28,842
-	sint npoind[NDIM];npoind32,934
-	sreal ** coords;			coords36,1059
-	sint npointotal;                ///< Total number of points in the gridnpointotal38,1082
-	sint ninpoin;                   ///< Number of internal (non-boundary) pointsninpoin39,1155
-	PetscReal h;                    ///< Mesh size parameterh40,1234
-	PetscMPIInt nprocs[NDIM];		///< Number of processors in each dimensionnprocs43,1327
-	PetscMPIInt ntprocs;			///< Total number of processorsntprocs44,1399
-	PetscInt gnpoind(const int idim) constgnpoind70,2372
-	PetscReal gcoords(const int idim, const sint ipoin) constgcoords85,2774
-	PetscInt gnpointotal() const { return npointotal; }gnpointotal102,3112
-	PetscInt gninpoin() const { return ninpoin; }gninpoin103,3165
-	PetscReal gh() const { return h; }gh104,3212
-	const sint *pointer_npoind() constpointer_npoind106,3249
-	const sreal *const *pointer_coords() constpointer_coords111,3309
-	sint localFlattenedIndexReal(const sint k, const sint j, const sint i) constlocalFlattenedIndexReal137,4491
-	sint localFlattenedIndexAll(const sint k, const sint j, const sint i) constlocalFlattenedIndexAll146,4839
-
-src/common_utils.hpp,147
-#define STRUCT3D_COMMON_UTILS_HSTRUCT3D_COMMON_UTILS_H6,104
-class NonExistentPetscOpion : public std::runtime_errorNonExistentPetscOpion28,817
-
-src/linalg/s3d_solverbase.hpp,1075
-#define STRUCT3D_SOLVER_BASE_HSTRUCT3D_SOLVER_BASE_H6,79
-struct SolveParams {SolveParams11,158
-	sreal rtol;rtol12,179
-	int maxiter;maxiter13,192
-struct PreconParams {PreconParams16,210
-	int nbuildsweeps;nbuildsweeps17,232
-	int napplysweeps;napplysweeps18,251
-	int thread_chunk_size;thread_chunk_size19,270
-	bool threadedbuild;threadedbuild20,294
-	bool threadedapply;threadedapply21,315
-struct SolveInfo {SolveInfo25,389
-	bool converged;                 ///< Whether the solve converged to required toleranceconverged26,408
-	int iters;                      ///< Number of iterations performediters27,496
-	sreal resnorm;                  ///< 2-norm of the final residual vectorresnorm28,565
-	double precapplywtime;          ///< Total wall time taken by preconditioner applicationprecapplywtime29,639
-class SolverBaseSolverBase33,789
-	const SMat& A;A50,1225
-	SolverBase *const prec;prec52,1269
-class NoSolver : public SolverBaseNoSolver58,1420
-class Richardson : public SolverBaseRichardson69,1675
-	SolveParams sparams;sparams80,1953
-
-src/linalg/s3d_ilu.hpp,133
-#define STRUCT3D_ILU_HSTRUCT3D_ILU_H6,68
-class StrILU_preconditioner : public SGS_like_preconditionerStrILU_preconditioner10,131
-
-src/linalg/s3d_sgspreconditioners.hpp,326
-#define STRUCT3D_SGS_PRECONDITIONERS_HSTRUCT3D_SGS_PRECONDITIONERS_H6,89
-class SGS_like_preconditioner : public SolverBaseSGS_like_preconditioner11,226
-	s3d::vector<sreal> diaginv;diaginv19,488
-	const PreconParams params;params21,564
-class SGS_preconditioner : public SGS_like_preconditionerSGS_preconditioner25,644
-
-src/linalg/s3d_jacobi.cpp,233
-JacobiPreconditioner::JacobiPreconditioner(const SMat& lhs)JacobiPreconditioner7,74
-void JacobiPreconditioner::updateOperator()updateOperator11,167
-SolveInfo JacobiPreconditioner::apply(const SVec& r, SVec& z) constapply14,216
-
-src/linalg/matvec.hpp,507
-#define STRUCT3D_MATVEC_HSTRUCT3D_MATVEC_H6,101
-namespace s3d {s3d13,233
-struct SVecSVec23,475
-	const CartMesh *const m;m32,744
-	const sint start;start38,1003
-	const int nghost;nghost40,1063
-	const std::array<sint,NDIM> sz;sz42,1157
-	s3d::vector<sreal> vals;vals47,1323
-struct SMatSMat56,1657
-	const CartMesh *const m;m68,2041
-	const sint start;start74,2269
-	const int nghost;nghost76,2329
-	const std::array<sint,NDIM> sz;sz78,2431
-	s3d::vector<sreal> vals[NSTENCIL];vals83,2602
-
-src/linalg/solverfactory.cpp,62
-SolverBase *createSolver(const SMat& lhs)createSolver13,246
-
-src/linalg/s3d_jacobi.hpp,124
-#define STRUCT3D_JACOBI_HSTRUCT3D_JACOBI_H6,88
-class JacobiPreconditioner : public SolverBaseJacobiPreconditioner10,146
-
-src/linalg/s3d_sgspreconditioners.cpp,382
-SGS_like_preconditioner::SGS_like_preconditioner(const SMat& lhs, const PreconParams parms)SGS_like_preconditioner8,145
-SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) constapply14,363
-SGS_preconditioner::SGS_preconditioner(const SMat& lhs, const PreconParams parms)SGS_preconditioner113,4350
-void SGS_preconditioner::updateOperator()updateOperator118,4476
-
-src/linalg/solverfactory.hpp,64
-#define STRUCT3D_SOLVERFACTORY_HSTRUCT3D_SOLVERFACTORY_H6,118
-
-src/linalg/s3d_solverbase.cpp,623
-SolverBase::SolverBase(const SMat& lhs, SolverBase *const precond) : A(lhs), prec{precond}SolverBase8,114
-SolverBase::~SolverBase()~SolverBase11,210
-NoSolver::NoSolver(const SMat& lhs, SolverBase *const precond) : SolverBase(lhs,nullptr)NoSolver16,255
-void NoSolver::updateOperator() { }updateOperator19,349
-SolveInfo NoSolver::apply(const SVec& b, SVec& x) constapply21,386
-Richardson::Richardson(const SMat& lhs, SolverBase *const precond, const SolveParams params)Richardson35,736
-void Richardson::updateOperator()updateOperator39,879
-SolveInfo Richardson::apply(const SVec& b, SVec& x) constapply45,954
-
-src/linalg/s3d_ilu.cpp,389
-StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams parms)StrILU_preconditioner7,69
-void StrILU_preconditioner::updateOperator()updateOperator12,201
-void StrILU_preconditioner::updateOperatorWithBranchingInLoop()updateOperatorWithBranchingInLoop18,327
-void StrILU_preconditioner::updateOperatorWithSeparateLoops()updateOperatorWithSeparateLoops67,1943
-
-src/linalg/matvec.cpp,563
-SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},SVec8,119
-SMat::SMat(const CartMesh *const mesh) : m{mesh}, start{0}, nghost{1},SMat21,545
-void SMat::apply(const SVec& x, SVec& y) constapply28,824
-void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) constapply_res71,2224
-void vecaxpy(const sreal a, const SVec& x, SVec& y)vecaxpy116,3718
-sreal norm_L2(const SVec& x)norm_L2134,4261
-sreal norm_vector_l2(const SVec& x)norm_vector_l2153,4924
-sreal compute_error_L2(const SVec& x, const SVec& y)compute_error_L2170,5427
-
-src/struct3d_config.h,301
-#define STRUCT3D_CONFIG_HSTRUCT3D_CONFIG_H6,76
-#define S3D_CACHE_LINE_LEN S3D_CACHE_LINE_LEN9,146
-#define NDIM NDIM12,199
-#define NSTENCIL NSTENCIL15,282
-#define STENCIL_DIAG STENCIL_DIAG17,368
-#define PI PI19,392
-typedef PetscScalar sreal;sreal24,472
-typedef PetscInt sint;sint26,522
-
-src/cartmesh.cpp,570
-void CartMesh::computeMeshSize()computeMeshSize10,220
-CartMesh::CartMesh()CartMesh35,724
-PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt npdim[NDIM], createMeshAndDMDA39,766
-PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])createMesh102,2826
-CartMesh::~CartMesh()~CartMesh152,4259
-void CartMesh::generateMesh_ChebyshevDistribution(const sreal rmin[NDIM], generateMesh_ChebyshevDistribution159,4361
-void CartMesh::generateMesh_UniformDistribution(const sreal rmin[NDIM], generateMesh_UniformDistribution181,5032
-
-src/case.hpp,954
-#define STRUCT3D_CASE_HSTRUCT3D_CASE_H7,92
-enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };GridType13,215
-enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };S3D_UNIFORM13,215
-enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };S3D_CHEBYSHEV13,215
-struct CaseData {CaseData15,262
-	sint npdim[NDIM];                ///< Number of grid points in each dimensionnpdim16,280
-	sreal rmin[NDIM];                ///< Starting coordinate of the domain in each directionrmin17,359
-	sreal rmax[NDIM];                ///< Ending coordinate of the domain in each directionrmax18,450
-	GridType gridtype;               ///< Type of Cartesian gridgridtype19,539
-	std::string pdetype;             ///< PDE to solvepdetype20,601
-	int nruns;                       ///< Number of times to repeat the experimentnruns21,653
-	std::array<sreal,NDIM> vel;      ///< Advection velocityvel23,734
-	sreal diffcoeff;                 ///< Diffusion coefficientdiffcoeff24,792
-
-test/matvectest.cpp,71
-#undef NDEBUGNDEBUG5,88
-int main(int argc, char *argv[])main14,275
-
-test/structsolvers/compare.cpp,126
-#undef NDEBUGNDEBUG1,0
-#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN20,295
-int main(int argc, char* argv[])main22,327
-
-test/discretization-verification/gridconv-petsc.cpp,128
-#undef NDEBUGNDEBUG4,102
-#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN14,280
-int main(int argc, char* argv[])main16,312
-
-test/discretization-verification/gridconv.cpp,72
-#undef NDEBUGNDEBUG4,102
-int main(int argc, char* argv[])main14,294
-
-test/compare_blasted.cpp,126
-#undef NDEBUGNDEBUG1,0
-#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN21,287
-int main(int argc, char* argv[])main23,319
-
-test/compare-threaded_blasted.cpp,154
-#undef NDEBUGNDEBUG4,88
-#define DEBUG DEBUG5,102
-#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN24,363
-int main(int argc, char* argv[])main26,395
-
-test/nativevectorassemblytest.cpp,71
-#undef NDEBUGNDEBUG5,54
-int main(int argc, char *argv[])main11,153
-
-build/Makefile,334
-SUFFIXES =SUFFIXES21,545
-SHELL = /bin/shSHELL39,903
-CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
-RM = /usr/bin/cmake -E remove -fRM45,1008
-EQUALS = =EQUALS48,1077
-CMAKE_SOURCE_DIR = /home/akashi/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
-CMAKE_BINARY_DIR = /home/akashi/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1253
-
-build/src/Makefile,334
-SUFFIXES =SUFFIXES21,545
-SHELL = /bin/shSHELL39,903
-CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
-RM = /usr/bin/cmake -E remove -fRM45,1008
-EQUALS = =EQUALS48,1077
-CMAKE_SOURCE_DIR = /home/akashi/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
-CMAKE_BINARY_DIR = /home/akashi/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1253
-
-build/src/perftesting/Makefile,334
-SUFFIXES =SUFFIXES21,545
-SHELL = /bin/shSHELL39,903
-CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
-RM = /usr/bin/cmake -E remove -fRM45,1008
-EQUALS = =EQUALS48,1077
-CMAKE_SOURCE_DIR = /home/akashi/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
-CMAKE_BINARY_DIR = /home/akashi/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1253
-
-build/test/Makefile,334
-SUFFIXES =SUFFIXES21,545
-SHELL = /bin/shSHELL39,903
-CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
-RM = /usr/bin/cmake -E remove -fRM45,1008
-EQUALS = =EQUALS48,1077
-CMAKE_SOURCE_DIR = /home/akashi/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
-CMAKE_BINARY_DIR = /home/akashi/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1253
-
-build/test/structsolvers/Makefile,334
-SUFFIXES =SUFFIXES21,545
-SHELL = /bin/shSHELL39,903
-CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
-RM = /usr/bin/cmake -E remove -fRM45,1008
-EQUALS = =EQUALS48,1077
-CMAKE_SOURCE_DIR = /home/akashi/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
-CMAKE_BINARY_DIR = /home/akashi/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1253
-
-build/test/discretization-verification/Makefile,334
-SUFFIXES =SUFFIXES21,545
-SHELL = /bin/shSHELL39,903
-CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
-RM = /usr/bin/cmake -E remove -fRM45,1008
-EQUALS = =EQUALS48,1077
-CMAKE_SOURCE_DIR = /home/akashi/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
-CMAKE_BINARY_DIR = /home/akashi/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1253
-
-build/CMakeFiles/feature_tests.c,128
-  const char features[] = {"\n"features2,1
-int main(int argc, char** argv) { (void)argv; return features[argc]; }main34,617
-
-build/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c,11185
+/media/aditya/data/Projects/Struct3d/build/CMakeFiles/3.12.1/CompilerIdC/CMakeCCompilerId.c,11995
 # define ID_VOID_MAINID_VOID_MAIN6,98
 # define constconst10,197
 # define volatilevolatile11,212
@@ -392,161 +47,173 @@ build/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c,11185
 # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR104,3433
 # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH105,3495
 # define COMPILER_ID COMPILER_ID108,3613
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR110,3663
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR111,3713
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH112,3767
-# define COMPILER_ID COMPILER_ID115,3895
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR117,3944
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR118,3994
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH119,4048
-# define COMPILER_ID COMPILER_ID122,4175
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR124,4231
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR125,4281
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH126,4335
-# define COMPILER_ID COMPILER_ID129,4411
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR130,4438
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR131,4484
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH133,4570
-# define COMPILER_ID COMPILER_ID137,4659
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR138,4687
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR139,4739
-# define COMPILER_ID COMPILER_ID142,4831
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR144,4901
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR145,4970
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH146,5045
-# define COMPILER_ID COMPILER_ID149,5198
-# define COMPILER_ID COMPILER_ID152,5255
-# define COMPILER_ID COMPILER_ID155,5309
-# define COMPILER_ID COMPILER_ID158,5370
-# define COMPILER_ID COMPILER_ID161,5459
-#  define SIMULATE_ID SIMULATE_ID163,5516
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR165,5553
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR166,5606
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH167,5659
-#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR170,5765
-#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR171,5818
-# define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK173,5879
-# define COMPILER_ID COMPILER_ID176,5966
-#  define SIMULATE_ID SIMULATE_ID178,6018
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR180,6055
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR181,6108
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH182,6161
-#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR185,6267
-#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR186,6320
-# define COMPILER_ID COMPILER_ID190,6406
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR191,6433
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR193,6508
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH196,6603
-# define COMPILER_ID COMPILER_ID200,6694
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR202,6746
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR203,6798
-#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH207,6937
-#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH210,7042
-#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK214,7145
-# define COMPILER_ID COMPILER_ID218,7317
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR221,7421
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR222,7483
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH223,7552
-# define COMPILER_ID COMPILER_ID227,7694
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR229,7743
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR230,7801
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH231,7865
-#  define COMPILER_VERSION_INTERNAL COMPILER_VERSION_INTERNAL232,7920
-# define COMPILER_ID COMPILER_ID236,8021
-  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR239,8115
-  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR240,8178
-  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH241,8245
-  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR244,8351
-  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR245,8413
-  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH246,8479
-# define COMPILER_ID COMPILER_ID251,8607
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR253,8670
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR254,8729
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH255,8788
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR258,8873
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR259,8920
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH260,8971
-# define COMPILER_ID COMPILER_ID264,9098
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR267,9201
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR268,9265
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH269,9333
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR272,9440
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR273,9500
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH274,9564
-# define COMPILER_ID COMPILER_ID282,9825
-# define COMPILER_ID COMPILER_ID285,9898
-# define COMPILER_ID COMPILER_ID288,9954
-char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";info_compiler295,10252
-char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";info_simulate297,10339
-char const* qnxnto = "INFO" ":" "qnxnto[]";qnxnto301,10433
-char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";info_cray305,10528
-#define STRINGIFY_HELPER(STRINGIFY_HELPER308,10603
-#define STRINGIFY(STRINGIFY309,10634
-# define PLATFORM_ID PLATFORM_ID313,10778
-# define PLATFORM_ID PLATFORM_ID316,10834
-# define PLATFORM_ID PLATFORM_ID319,10892
-# define PLATFORM_ID PLATFORM_ID322,10947
-# define PLATFORM_ID PLATFORM_ID325,11040
-# define PLATFORM_ID PLATFORM_ID328,11121
-# define PLATFORM_ID PLATFORM_ID331,11200
-# define PLATFORM_ID PLATFORM_ID334,11280
-# define PLATFORM_ID PLATFORM_ID337,11349
-# define PLATFORM_ID PLATFORM_ID340,11475
-# define PLATFORM_ID PLATFORM_ID343,11561
-# define PLATFORM_ID PLATFORM_ID346,11633
-# define PLATFORM_ID PLATFORM_ID349,11688
-# define PLATFORM_ID PLATFORM_ID352,11779
-# define PLATFORM_ID PLATFORM_ID355,11854
-# define PLATFORM_ID PLATFORM_ID358,11946
-# define PLATFORM_ID PLATFORM_ID361,12023
-# define PLATFORM_ID PLATFORM_ID364,12121
-# define PLATFORM_ID PLATFORM_ID367,12178
-# define PLATFORM_ID PLATFORM_ID370,12235
-# define PLATFORM_ID PLATFORM_ID373,12305
-# define PLATFORM_ID PLATFORM_ID376,12377
-# define PLATFORM_ID PLATFORM_ID379,12467
-# define PLATFORM_ID PLATFORM_ID382,12565
-# define PLATFORM_ID PLATFORM_ID385,12658
-#  define PLATFORM_ID PLATFORM_ID389,12739
-#  define PLATFORM_ID PLATFORM_ID392,12794
-#  define PLATFORM_ID PLATFORM_ID395,12847
-#  define PLATFORM_ID PLATFORM_ID398,12904
-#  define PLATFORM_IDPLATFORM_ID401,12969
-# define PLATFORM_IDPLATFORM_ID405,13029
-#  define ARCHITECTURE_ID ARCHITECTURE_ID416,13369
-#  define ARCHITECTURE_ID ARCHITECTURE_ID419,13447
-#  define ARCHITECTURE_ID ARCHITECTURE_ID422,13504
-#  define ARCHITECTURE_ID ARCHITECTURE_ID425,13562
-#   define ARCHITECTURE_ID ARCHITECTURE_ID429,13638
-#   define ARCHITECTURE_ID ARCHITECTURE_ID431,13694
-#   define ARCHITECTURE_ID ARCHITECTURE_ID433,13738
-#  define ARCHITECTURE_ID ARCHITECTURE_ID437,13824
-#  define ARCHITECTURE_ID ARCHITECTURE_ID440,13880
-#  define ARCHITECTURE_ID ARCHITECTURE_ID443,13947
-#  define ARCHITECTURE_ID ARCHITECTURE_ID448,14033
-#  define ARCHITECTURE_ID ARCHITECTURE_ID451,14090
-#  define ARCHITECTURE_ID ARCHITECTURE_ID454,14157
-#  define ARCHITECTURE_ID ARCHITECTURE_ID459,14285
-#  define ARCHITECTURE_ID ARCHITECTURE_ID462,14345
-#  define ARCHITECTURE_ID ARCHITECTURE_ID465,14412
-#  define ARCHITECTURE_IDARCHITECTURE_ID468,14455
-#define DEC(DEC472,14539
-#define HEX(HEX483,14888
-char const info_version[] = {info_version495,15250
-char const info_version_internal[] = {info_version_internal513,15748
-char const info_simulate_version[] = {info_simulate_version522,16074
-char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";info_platform542,16743
-char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";info_arch543,16811
-#  define C_DIALECT C_DIALECT550,16948
-#  define C_DIALECTC_DIALECT552,16980
-# define C_DIALECT C_DIALECT555,17042
-# define C_DIALECT C_DIALECT557,17100
-# define C_DIALECT C_DIALECT559,17130
-const char* info_language_dialect_default =info_language_dialect_default561,17161
-void main() {}main567,17353
-int main(argc, argv) int argc; char *argv[];main570,17402
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR110,3664
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR111,3720
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH112,3776
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK113,3837
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR116,3930
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR117,3981
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH118,4036
+# define COMPILER_ID COMPILER_ID123,4198
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR125,4248
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR126,4304
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH127,4360
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK128,4421
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR131,4514
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR132,4565
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH133,4620
+# define COMPILER_ID COMPILER_ID138,4757
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR140,4814
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR141,4870
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH142,4926
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK143,4987
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR146,5080
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR147,5131
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH148,5186
+# define COMPILER_ID COMPILER_ID153,5272
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR154,5299
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR155,5345
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH157,5431
+# define COMPILER_ID COMPILER_ID161,5520
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR162,5548
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR163,5600
+# define COMPILER_ID COMPILER_ID166,5692
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR168,5762
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR169,5831
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH170,5906
+# define COMPILER_ID COMPILER_ID173,6059
+# define COMPILER_ID COMPILER_ID176,6116
+# define COMPILER_ID COMPILER_ID179,6170
+# define COMPILER_ID COMPILER_ID182,6231
+# define COMPILER_ID COMPILER_ID185,6320
+#  define SIMULATE_ID SIMULATE_ID187,6377
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR189,6414
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR190,6467
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH191,6520
+#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR194,6626
+#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR195,6679
+# define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK197,6740
+# define COMPILER_ID COMPILER_ID200,6827
+#  define SIMULATE_ID SIMULATE_ID202,6879
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR204,6916
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR205,6969
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH206,7022
+#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR209,7128
+#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR210,7181
+# define COMPILER_ID COMPILER_ID214,7267
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR215,7294
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR217,7369
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH220,7464
+# define COMPILER_ID COMPILER_ID224,7555
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR226,7607
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR227,7659
+#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH231,7798
+#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH234,7903
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK238,8006
+# define COMPILER_ID COMPILER_ID242,8178
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR245,8282
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR246,8344
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH247,8413
+# define COMPILER_ID COMPILER_ID251,8555
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR253,8604
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR254,8662
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH255,8726
+#  define COMPILER_VERSION_INTERNAL COMPILER_VERSION_INTERNAL256,8781
+# define COMPILER_ID COMPILER_ID260,8882
+  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR263,8976
+  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR264,9039
+  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH265,9106
+  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR268,9212
+  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR269,9274
+  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH270,9340
+# define COMPILER_ID COMPILER_ID275,9468
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR277,9531
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR278,9590
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH279,9649
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR282,9734
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR283,9781
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH284,9832
+# define COMPILER_ID COMPILER_ID288,9959
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR291,10062
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR292,10126
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH293,10194
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR296,10301
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR297,10361
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH298,10425
+# define COMPILER_ID COMPILER_ID306,10686
+# define COMPILER_ID COMPILER_ID309,10759
+# define COMPILER_ID COMPILER_ID312,10815
+char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";info_compiler319,11113
+char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";info_simulate321,11200
+char const* qnxnto = "INFO" ":" "qnxnto[]";qnxnto325,11294
+char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";info_cray329,11389
+#define STRINGIFY_HELPER(STRINGIFY_HELPER332,11464
+#define STRINGIFY(STRINGIFY333,11495
+# define PLATFORM_ID PLATFORM_ID337,11639
+# define PLATFORM_ID PLATFORM_ID340,11695
+# define PLATFORM_ID PLATFORM_ID343,11753
+# define PLATFORM_ID PLATFORM_ID346,11808
+# define PLATFORM_ID PLATFORM_ID349,11901
+# define PLATFORM_ID PLATFORM_ID352,11982
+# define PLATFORM_ID PLATFORM_ID355,12061
+# define PLATFORM_ID PLATFORM_ID358,12141
+# define PLATFORM_ID PLATFORM_ID361,12210
+# define PLATFORM_ID PLATFORM_ID364,12336
+# define PLATFORM_ID PLATFORM_ID367,12422
+# define PLATFORM_ID PLATFORM_ID370,12494
+# define PLATFORM_ID PLATFORM_ID373,12549
+# define PLATFORM_ID PLATFORM_ID376,12640
+# define PLATFORM_ID PLATFORM_ID379,12715
+# define PLATFORM_ID PLATFORM_ID382,12807
+# define PLATFORM_ID PLATFORM_ID385,12884
+# define PLATFORM_ID PLATFORM_ID388,12982
+# define PLATFORM_ID PLATFORM_ID391,13039
+# define PLATFORM_ID PLATFORM_ID394,13096
+# define PLATFORM_ID PLATFORM_ID397,13166
+# define PLATFORM_ID PLATFORM_ID400,13238
+# define PLATFORM_ID PLATFORM_ID403,13328
+# define PLATFORM_ID PLATFORM_ID406,13426
+# define PLATFORM_ID PLATFORM_ID409,13519
+#  define PLATFORM_ID PLATFORM_ID413,13600
+#  define PLATFORM_ID PLATFORM_ID416,13655
+#  define PLATFORM_ID PLATFORM_ID419,13708
+#  define PLATFORM_ID PLATFORM_ID422,13765
+#  define PLATFORM_IDPLATFORM_ID425,13830
+# define PLATFORM_IDPLATFORM_ID429,13890
+#  define ARCHITECTURE_ID ARCHITECTURE_ID440,14230
+#  define ARCHITECTURE_ID ARCHITECTURE_ID443,14308
+#  define ARCHITECTURE_ID ARCHITECTURE_ID446,14365
+#  define ARCHITECTURE_ID ARCHITECTURE_ID449,14423
+#   define ARCHITECTURE_ID ARCHITECTURE_ID453,14499
+#   define ARCHITECTURE_ID ARCHITECTURE_ID455,14555
+#   define ARCHITECTURE_ID ARCHITECTURE_ID457,14599
+#  define ARCHITECTURE_ID ARCHITECTURE_ID461,14685
+#  define ARCHITECTURE_ID ARCHITECTURE_ID464,14741
+#  define ARCHITECTURE_ID ARCHITECTURE_ID467,14808
+#  define ARCHITECTURE_ID ARCHITECTURE_ID472,14894
+#  define ARCHITECTURE_ID ARCHITECTURE_ID475,14951
+#  define ARCHITECTURE_ID ARCHITECTURE_ID478,15018
+#  define ARCHITECTURE_ID ARCHITECTURE_ID483,15146
+#  define ARCHITECTURE_ID ARCHITECTURE_ID486,15206
+#  define ARCHITECTURE_ID ARCHITECTURE_ID489,15273
+#  define ARCHITECTURE_IDARCHITECTURE_ID492,15316
+#define DEC(DEC496,15400
+#define HEX(HEX507,15749
+char const info_version[] = {info_version519,16111
+char const info_version_internal[] = {info_version_internal537,16609
+char const info_simulate_version[] = {info_simulate_version546,16935
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";info_platform566,17604
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";info_arch567,17672
+#  define C_DIALECT C_DIALECT575,17860
+#  define C_DIALECTC_DIALECT577,17892
+# define C_DIALECT C_DIALECT580,17954
+# define C_DIALECT C_DIALECT582,18012
+# define C_DIALECT C_DIALECT584,18042
+const char* info_language_dialect_default =info_language_dialect_default586,18073
+void main() {}main592,18265
+int main(argc, argv) int argc; char *argv[];main595,18314
 
-build/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp,10650
+/media/aditya/data/Projects/Struct3d/build/CMakeFiles/3.12.1/CompilerIdCXX/CMakeCXXCompilerId.cpp,11457
 # define COMPILER_ID COMPILER_ID13,390
 # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR15,451
 # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR16,511
@@ -594,152 +261,514 @@ build/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp,10650
 # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR104,3662
 # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH105,3726
 # define COMPILER_ID COMPILER_ID108,3848
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR110,3900
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR111,3952
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH112,4008
-# define COMPILER_ID COMPILER_ID115,4142
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR117,4193
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR118,4245
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH119,4301
-# define COMPILER_ID COMPILER_ID122,4434
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR124,4492
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR125,4544
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH126,4600
-# define COMPILER_ID COMPILER_ID129,4678
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR130,4705
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR131,4751
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH133,4837
-# define COMPILER_ID COMPILER_ID137,4926
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR138,4954
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR139,5006
-# define COMPILER_ID COMPILER_ID142,5098
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR144,5168
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR145,5237
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH146,5312
-# define COMPILER_ID COMPILER_ID149,5465
-# define COMPILER_ID COMPILER_ID152,5528
-# define COMPILER_ID COMPILER_ID155,5617
-#  define SIMULATE_ID SIMULATE_ID157,5674
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR159,5711
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR160,5764
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH161,5817
-#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR164,5923
-#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR165,5976
-# define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK167,6037
-# define COMPILER_ID COMPILER_ID170,6124
-#  define SIMULATE_ID SIMULATE_ID172,6176
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR174,6213
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR175,6266
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH176,6319
-#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR179,6425
-#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR180,6478
-# define COMPILER_ID COMPILER_ID184,6585
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR186,6635
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR188,6689
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR191,6773
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH194,6868
-# define COMPILER_ID COMPILER_ID198,6959
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR200,7011
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR201,7063
-#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH205,7202
-#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH208,7307
-#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK212,7410
-# define COMPILER_ID COMPILER_ID216,7582
-# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR219,7686
-# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR220,7748
-# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH221,7817
-# define COMPILER_ID COMPILER_ID225,7959
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR227,8008
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR228,8066
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH229,8130
-#  define COMPILER_VERSION_INTERNAL COMPILER_VERSION_INTERNAL230,8185
-# define COMPILER_ID COMPILER_ID234,8286
-  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR237,8380
-  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR238,8443
-  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH239,8510
-  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR242,8616
-  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR243,8678
-  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH244,8744
-# define COMPILER_ID COMPILER_ID249,8886
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR252,8989
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR253,9053
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH254,9121
-#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR257,9228
-#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR258,9288
-#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH259,9352
-# define COMPILER_ID COMPILER_ID267,9613
-# define COMPILER_ID COMPILER_ID270,9686
-# define COMPILER_ID COMPILER_ID273,9742
-char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";info_compiler280,10040
-char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";info_simulate282,10127
-char const* qnxnto = "INFO" ":" "qnxnto[]";qnxnto286,10221
-char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";info_cray290,10316
-#define STRINGIFY_HELPER(STRINGIFY_HELPER293,10391
-#define STRINGIFY(STRINGIFY294,10422
-# define PLATFORM_ID PLATFORM_ID298,10566
-# define PLATFORM_ID PLATFORM_ID301,10622
-# define PLATFORM_ID PLATFORM_ID304,10680
-# define PLATFORM_ID PLATFORM_ID307,10735
-# define PLATFORM_ID PLATFORM_ID310,10828
-# define PLATFORM_ID PLATFORM_ID313,10909
-# define PLATFORM_ID PLATFORM_ID316,10988
-# define PLATFORM_ID PLATFORM_ID319,11068
-# define PLATFORM_ID PLATFORM_ID322,11137
-# define PLATFORM_ID PLATFORM_ID325,11263
-# define PLATFORM_ID PLATFORM_ID328,11349
-# define PLATFORM_ID PLATFORM_ID331,11421
-# define PLATFORM_ID PLATFORM_ID334,11476
-# define PLATFORM_ID PLATFORM_ID337,11567
-# define PLATFORM_ID PLATFORM_ID340,11642
-# define PLATFORM_ID PLATFORM_ID343,11734
-# define PLATFORM_ID PLATFORM_ID346,11811
-# define PLATFORM_ID PLATFORM_ID349,11909
-# define PLATFORM_ID PLATFORM_ID352,11966
-# define PLATFORM_ID PLATFORM_ID355,12023
-# define PLATFORM_ID PLATFORM_ID358,12093
-# define PLATFORM_ID PLATFORM_ID361,12165
-# define PLATFORM_ID PLATFORM_ID364,12255
-# define PLATFORM_ID PLATFORM_ID367,12353
-# define PLATFORM_ID PLATFORM_ID370,12446
-#  define PLATFORM_ID PLATFORM_ID374,12527
-#  define PLATFORM_ID PLATFORM_ID377,12582
-#  define PLATFORM_ID PLATFORM_ID380,12635
-#  define PLATFORM_ID PLATFORM_ID383,12692
-#  define PLATFORM_IDPLATFORM_ID386,12757
-# define PLATFORM_IDPLATFORM_ID390,12817
-#  define ARCHITECTURE_ID ARCHITECTURE_ID401,13157
-#  define ARCHITECTURE_ID ARCHITECTURE_ID404,13235
-#  define ARCHITECTURE_ID ARCHITECTURE_ID407,13292
-#  define ARCHITECTURE_ID ARCHITECTURE_ID410,13350
-#   define ARCHITECTURE_ID ARCHITECTURE_ID414,13426
-#   define ARCHITECTURE_ID ARCHITECTURE_ID416,13482
-#   define ARCHITECTURE_ID ARCHITECTURE_ID418,13526
-#  define ARCHITECTURE_ID ARCHITECTURE_ID422,13612
-#  define ARCHITECTURE_ID ARCHITECTURE_ID425,13668
-#  define ARCHITECTURE_ID ARCHITECTURE_ID428,13735
-#  define ARCHITECTURE_ID ARCHITECTURE_ID433,13821
-#  define ARCHITECTURE_ID ARCHITECTURE_ID436,13878
-#  define ARCHITECTURE_ID ARCHITECTURE_ID439,13945
-#  define ARCHITECTURE_ID ARCHITECTURE_ID444,14073
-#  define ARCHITECTURE_ID ARCHITECTURE_ID447,14133
-#  define ARCHITECTURE_ID ARCHITECTURE_ID450,14200
-#  define ARCHITECTURE_IDARCHITECTURE_ID453,14243
-#define DEC(DEC457,14327
-#define HEX(HEX468,14676
-char const info_version[] = {info_version480,15038
-char const info_version_internal[] = {info_version_internal498,15536
-char const info_simulate_version[] = {info_simulate_version507,15862
-char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";info_platform527,16531
-char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";info_arch528,16599
-#define CXX_STD CXX_STD534,16712
-#define CXX_STD CXX_STD536,16745
-const char* info_language_dialect_default = "INFO" ":" "dialect_default["info_language_dialect_default539,16781
-int main(int argc, char* argv[])main553,17054
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR110,3899
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR111,3955
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH112,4011
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK113,4072
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR116,4167
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR117,4220
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH118,4277
+# define COMPILER_ID COMPILER_ID123,4445
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR125,4495
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR126,4551
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH127,4607
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK128,4668
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR131,4763
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR132,4816
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH133,4873
+# define COMPILER_ID COMPILER_ID138,5016
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR140,5073
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR141,5129
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH142,5185
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK143,5246
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR146,5341
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR147,5394
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH148,5451
+# define COMPILER_ID COMPILER_ID153,5539
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR154,5566
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR155,5612
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH157,5698
+# define COMPILER_ID COMPILER_ID161,5787
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR162,5815
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR163,5867
+# define COMPILER_ID COMPILER_ID166,5959
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR168,6029
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR169,6098
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH170,6173
+# define COMPILER_ID COMPILER_ID173,6326
+# define COMPILER_ID COMPILER_ID176,6389
+# define COMPILER_ID COMPILER_ID179,6478
+#  define SIMULATE_ID SIMULATE_ID181,6535
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR183,6572
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR184,6625
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH185,6678
+#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR188,6784
+#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR189,6837
+# define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK191,6898
+# define COMPILER_ID COMPILER_ID194,6985
+#  define SIMULATE_ID SIMULATE_ID196,7037
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR198,7074
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR199,7127
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH200,7180
+#  define SIMULATE_VERSION_MAJOR SIMULATE_VERSION_MAJOR203,7286
+#  define SIMULATE_VERSION_MINOR SIMULATE_VERSION_MINOR204,7339
+# define COMPILER_ID COMPILER_ID208,7446
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR210,7496
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR212,7550
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR215,7634
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH218,7729
+# define COMPILER_ID COMPILER_ID222,7820
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR224,7872
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR225,7924
+#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH229,8063
+#   define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH232,8168
+#  define COMPILER_VERSION_TWEAK COMPILER_VERSION_TWEAK236,8271
+# define COMPILER_ID COMPILER_ID240,8443
+# define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR243,8547
+# define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR244,8609
+# define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH245,8678
+# define COMPILER_ID COMPILER_ID249,8820
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR251,8869
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR252,8927
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH253,8991
+#  define COMPILER_VERSION_INTERNAL COMPILER_VERSION_INTERNAL254,9046
+# define COMPILER_ID COMPILER_ID258,9147
+  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR261,9241
+  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR262,9304
+  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH263,9371
+  # define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR266,9477
+  # define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR267,9539
+  # define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH268,9605
+# define COMPILER_ID COMPILER_ID273,9747
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR276,9850
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR277,9914
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH278,9982
+#  define COMPILER_VERSION_MAJOR COMPILER_VERSION_MAJOR281,10089
+#  define COMPILER_VERSION_MINOR COMPILER_VERSION_MINOR282,10149
+#  define COMPILER_VERSION_PATCH COMPILER_VERSION_PATCH283,10213
+# define COMPILER_ID COMPILER_ID291,10474
+# define COMPILER_ID COMPILER_ID294,10547
+# define COMPILER_ID COMPILER_ID297,10603
+char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";info_compiler304,10901
+char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";info_simulate306,10988
+char const* qnxnto = "INFO" ":" "qnxnto[]";qnxnto310,11082
+char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";info_cray314,11177
+#define STRINGIFY_HELPER(STRINGIFY_HELPER317,11252
+#define STRINGIFY(STRINGIFY318,11283
+# define PLATFORM_ID PLATFORM_ID322,11427
+# define PLATFORM_ID PLATFORM_ID325,11483
+# define PLATFORM_ID PLATFORM_ID328,11541
+# define PLATFORM_ID PLATFORM_ID331,11596
+# define PLATFORM_ID PLATFORM_ID334,11689
+# define PLATFORM_ID PLATFORM_ID337,11770
+# define PLATFORM_ID PLATFORM_ID340,11849
+# define PLATFORM_ID PLATFORM_ID343,11929
+# define PLATFORM_ID PLATFORM_ID346,11998
+# define PLATFORM_ID PLATFORM_ID349,12124
+# define PLATFORM_ID PLATFORM_ID352,12210
+# define PLATFORM_ID PLATFORM_ID355,12282
+# define PLATFORM_ID PLATFORM_ID358,12337
+# define PLATFORM_ID PLATFORM_ID361,12428
+# define PLATFORM_ID PLATFORM_ID364,12503
+# define PLATFORM_ID PLATFORM_ID367,12595
+# define PLATFORM_ID PLATFORM_ID370,12672
+# define PLATFORM_ID PLATFORM_ID373,12770
+# define PLATFORM_ID PLATFORM_ID376,12827
+# define PLATFORM_ID PLATFORM_ID379,12884
+# define PLATFORM_ID PLATFORM_ID382,12954
+# define PLATFORM_ID PLATFORM_ID385,13026
+# define PLATFORM_ID PLATFORM_ID388,13116
+# define PLATFORM_ID PLATFORM_ID391,13214
+# define PLATFORM_ID PLATFORM_ID394,13307
+#  define PLATFORM_ID PLATFORM_ID398,13388
+#  define PLATFORM_ID PLATFORM_ID401,13443
+#  define PLATFORM_ID PLATFORM_ID404,13496
+#  define PLATFORM_ID PLATFORM_ID407,13553
+#  define PLATFORM_IDPLATFORM_ID410,13618
+# define PLATFORM_IDPLATFORM_ID414,13678
+#  define ARCHITECTURE_ID ARCHITECTURE_ID425,14018
+#  define ARCHITECTURE_ID ARCHITECTURE_ID428,14096
+#  define ARCHITECTURE_ID ARCHITECTURE_ID431,14153
+#  define ARCHITECTURE_ID ARCHITECTURE_ID434,14211
+#   define ARCHITECTURE_ID ARCHITECTURE_ID438,14287
+#   define ARCHITECTURE_ID ARCHITECTURE_ID440,14343
+#   define ARCHITECTURE_ID ARCHITECTURE_ID442,14387
+#  define ARCHITECTURE_ID ARCHITECTURE_ID446,14473
+#  define ARCHITECTURE_ID ARCHITECTURE_ID449,14529
+#  define ARCHITECTURE_ID ARCHITECTURE_ID452,14596
+#  define ARCHITECTURE_ID ARCHITECTURE_ID457,14682
+#  define ARCHITECTURE_ID ARCHITECTURE_ID460,14739
+#  define ARCHITECTURE_ID ARCHITECTURE_ID463,14806
+#  define ARCHITECTURE_ID ARCHITECTURE_ID468,14934
+#  define ARCHITECTURE_ID ARCHITECTURE_ID471,14994
+#  define ARCHITECTURE_ID ARCHITECTURE_ID474,15061
+#  define ARCHITECTURE_IDARCHITECTURE_ID477,15104
+#define DEC(DEC481,15188
+#define HEX(HEX492,15537
+char const info_version[] = {info_version504,15899
+char const info_version_internal[] = {info_version_internal522,16397
+char const info_simulate_version[] = {info_simulate_version531,16723
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";info_platform551,17392
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";info_arch552,17460
+#define CXX_STD CXX_STD558,17573
+#define CXX_STD CXX_STD560,17606
+const char* info_language_dialect_default = "INFO" ":" "dialect_default["info_language_dialect_default563,17642
+int main(int argc, char* argv[])main579,17947
 
-build/CMakeFiles/feature_tests.cxx,130
+/media/aditya/data/Projects/Struct3d/build/CMakeFiles/feature_tests.c,128
+  const char features[] = {"\n"features2,1
+int main(int argc, char** argv) { (void)argv; return features[argc]; }main34,617
+
+/media/aditya/data/Projects/Struct3d/build/CMakeFiles/feature_tests.cxx,130
   const char features[] = {"\n"features2,1
 int main(int argc, char** argv) { (void)argv; return features[argc]; }main405,9940
 
-build/CMakeFiles/FindMPI/test_mpi.cpp,101
-const char mpiver_str[] = { 'I', 'N',mpiver_str10,140
-int main(int argc, char* argv[])main21,528
+/media/aditya/data/Projects/Struct3d/build/CMakeFiles/FindMPI/test_mpi.cpp,101
+const char mpiver_str[] = { 'I', 'N',mpiver_str10,144
+int main(int argc, char* argv[])main21,532
+
+/media/aditya/data/Projects/Struct3d/build/Makefile,346
+SUFFIXES =SUFFIXES21,545
+SHELL = /bin/shSHELL39,903
+CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
+RM = /usr/bin/cmake -E remove -fRM45,1008
+EQUALS = =EQUALS48,1077
+CMAKE_SOURCE_DIR = /media/aditya/data/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
+CMAKE_BINARY_DIR = /media/aditya/data/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1259
+
+/media/aditya/data/Projects/Struct3d/build/src/Makefile,346
+SUFFIXES =SUFFIXES21,545
+SHELL = /bin/shSHELL39,903
+CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
+RM = /usr/bin/cmake -E remove -fRM45,1008
+EQUALS = =EQUALS48,1077
+CMAKE_SOURCE_DIR = /media/aditya/data/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
+CMAKE_BINARY_DIR = /media/aditya/data/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1259
+
+/media/aditya/data/Projects/Struct3d/build/src/perftesting/Makefile,346
+SUFFIXES =SUFFIXES21,545
+SHELL = /bin/shSHELL39,903
+CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
+RM = /usr/bin/cmake -E remove -fRM45,1008
+EQUALS = =EQUALS48,1077
+CMAKE_SOURCE_DIR = /media/aditya/data/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
+CMAKE_BINARY_DIR = /media/aditya/data/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1259
+
+/media/aditya/data/Projects/Struct3d/build/test/discretization-verification/Makefile,346
+SUFFIXES =SUFFIXES21,545
+SHELL = /bin/shSHELL39,903
+CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
+RM = /usr/bin/cmake -E remove -fRM45,1008
+EQUALS = =EQUALS48,1077
+CMAKE_SOURCE_DIR = /media/aditya/data/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
+CMAKE_BINARY_DIR = /media/aditya/data/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1259
+
+/media/aditya/data/Projects/Struct3d/build/test/Makefile,346
+SUFFIXES =SUFFIXES21,545
+SHELL = /bin/shSHELL39,903
+CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
+RM = /usr/bin/cmake -E remove -fRM45,1008
+EQUALS = =EQUALS48,1077
+CMAKE_SOURCE_DIR = /media/aditya/data/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
+CMAKE_BINARY_DIR = /media/aditya/data/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1259
+
+/media/aditya/data/Projects/Struct3d/build/test/structsolvers/Makefile,346
+SUFFIXES =SUFFIXES21,545
+SHELL = /bin/shSHELL39,903
+CMAKE_COMMAND = /usr/bin/cmakeCMAKE_COMMAND42,944
+RM = /usr/bin/cmake -E remove -fRM45,1008
+EQUALS = =EQUALS48,1077
+CMAKE_SOURCE_DIR = /media/aditya/data/Projects/Struct3dCMAKE_SOURCE_DIR51,1146
+CMAKE_BINARY_DIR = /media/aditya/data/Projects/Struct3d/buildCMAKE_BINARY_DIR54,1259
+
+/media/aditya/data/Projects/Struct3d/src/cartmesh.cpp,570
+void CartMesh::computeMeshSize()computeMeshSize10,220
+CartMesh::CartMesh()CartMesh35,724
+PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt npdim[NDIM], createMeshAndDMDA39,766
+PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])createMesh102,2826
+CartMesh::~CartMesh()~CartMesh152,4259
+void CartMesh::generateMesh_ChebyshevDistribution(const sreal rmin[NDIM], generateMesh_ChebyshevDistribution159,4361
+void CartMesh::generateMesh_UniformDistribution(const sreal rmin[NDIM], generateMesh_UniformDistribution181,5032
+
+/media/aditya/data/Projects/Struct3d/src/cartmesh.hpp,1235
+#define STRUCT3D_CARTMESH_HSTRUCT3D_CARTMESH_H7,176
+class CartMeshCartMesh28,842
+	sint npoind[NDIM];npoind32,934
+	sreal ** coords;			coords36,1059
+	sint npointotal;                ///< Total number of points in the gridnpointotal38,1082
+	sint ninpoin;                   ///< Number of internal (non-boundary) pointsninpoin39,1155
+	PetscReal h;                    ///< Mesh size parameterh40,1234
+	PetscMPIInt nprocs[NDIM];		///< Number of processors in each dimensionnprocs43,1327
+	PetscMPIInt ntprocs;			///< Total number of processorsntprocs44,1399
+	PetscInt gnpoind(const int idim) constgnpoind70,2372
+	PetscReal gcoords(const int idim, const sint ipoin) constgcoords85,2774
+	PetscInt gnpointotal() const { return npointotal; }gnpointotal102,3112
+	PetscInt gninpoin() const { return ninpoin; }gninpoin103,3165
+	PetscReal gh() const { return h; }gh104,3212
+	const sint *pointer_npoind() constpointer_npoind106,3249
+	const sreal *const *pointer_coords() constpointer_coords111,3309
+	sint localFlattenedIndexReal(const sint k, const sint j, const sint i) constlocalFlattenedIndexReal137,4491
+	sint localFlattenedIndexAll(const sint k, const sint j, const sint i) constlocalFlattenedIndexAll146,4839
+
+/media/aditya/data/Projects/Struct3d/src/case.cpp,51
+CaseData readCtrl(FILE *const conf)readCtrl8,114
+
+/media/aditya/data/Projects/Struct3d/src/case.hpp,1356
+#define STRUCT3D_CASE_HSTRUCT3D_CASE_H7,92
+enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };GridType13,215
+enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };S3D_UNIFORM13,215
+enum GridType { S3D_UNIFORM, S3D_CHEBYSHEV };S3D_CHEBYSHEV13,215
+enum BCType { S3D_EXTRAPOLATION, S3D_DIRICHLET };BCType16,311
+enum BCType { S3D_EXTRAPOLATION, S3D_DIRICHLET };S3D_EXTRAPOLATION16,311
+enum BCType { S3D_EXTRAPOLATION, S3D_DIRICHLET };S3D_DIRICHLET16,311
+struct CaseData {CaseData22,566
+	sint npdim[NDIM];                ///< Number of grid points in each dimensionnpdim23,584
+	sreal rmin[NDIM];                ///< Starting coordinate of the domain in each directionrmin24,663
+	sreal rmax[NDIM];                ///< Ending coordinate of the domain in each directionrmax25,754
+	GridType gridtype;               ///< Type of Cartesian gridgridtype26,843
+	std::string pdetype;             ///< PDE to solvepdetype27,905
+	int nruns;                       ///< Number of times to repeat the experimentnruns28,957
+	std::array<sreal,NDIM> vel;      ///< Advection velocityvel30,1038
+	sreal diffcoeff;                 ///< Diffusion coefficientdiffcoeff31,1096
+	std::array<BCType,6> btypes;     ///< Type of BC at each of the 6 boundariesbtypes33,1158
+	std::array<sreal,6> bvals;       ///< Boundary values at each of the 6 boundariesbvals34,1236
+
+/media/aditya/data/Projects/Struct3d/src/common_utils.cpp,961
+#define PETSCOPTION_STR_MAX_LEN PETSCOPTION_STR_MAX_LEN4,46
+PetscReal computeNorm(const CartMesh *const m, Vec v, DM da)computeNorm6,83
+PetscReal compute_error(const CartMesh& m, const DM da, const Vec u, const Vec uexact)compute_error37,1143
+int get_mpi_rank(MPI_Comm comm) {get_mpi_rank51,1491
+int get_mpi_size(MPI_Comm comm) {get_mpi_size57,1582
+NonExistentPetscOpion::NonExistentPetscOpion(const std::string& msg)NonExistentPetscOpion63,1673
+std::string petscoptions_get_string(const std::string optionname, const size_t sz)petscoptions_get_string67,1774
+sreal petscoptions_get_real(const std::string optionname)petscoptions_get_real81,2218
+int petscoptions_get_int(const std::string optionname)petscoptions_get_int94,2582
+bool petscoptions_get_bool(const std::string optionname)petscoptions_get_bool107,2940
+std::vector<int> petscoptions_get_array_int(const std::string optionname, const int maxlen)petscoptions_get_array_int120,3321
+
+/media/aditya/data/Projects/Struct3d/src/common_utils.hpp,147
+#define STRUCT3D_COMMON_UTILS_HSTRUCT3D_COMMON_UTILS_H6,104
+class NonExistentPetscOpion : public std::runtime_errorNonExistentPetscOpion28,817
+
+/media/aditya/data/Projects/Struct3d/src/linalg/matvec.cpp,563
+SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},SVec8,119
+SMat::SMat(const CartMesh *const mesh) : m{mesh}, start{0}, nghost{1},SMat21,545
+void SMat::apply(const SVec& x, SVec& y) constapply28,824
+void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) constapply_res71,2224
+void vecaxpy(const sreal a, const SVec& x, SVec& y)vecaxpy116,3718
+sreal norm_L2(const SVec& x)norm_L2134,4261
+sreal norm_vector_l2(const SVec& x)norm_vector_l2153,4924
+sreal compute_error_L2(const SVec& x, const SVec& y)compute_error_L2170,5427
+
+/media/aditya/data/Projects/Struct3d/src/linalg/matvec.hpp,507
+#define STRUCT3D_MATVEC_HSTRUCT3D_MATVEC_H6,101
+namespace s3d {s3d13,233
+struct SVecSVec23,475
+	const CartMesh *const m;m32,744
+	const sint start;start38,1003
+	const int nghost;nghost40,1063
+	const std::array<sint,NDIM> sz;sz42,1157
+	s3d::vector<sreal> vals;vals47,1323
+struct SMatSMat56,1657
+	const CartMesh *const m;m68,2041
+	const sint start;start74,2269
+	const int nghost;nghost76,2329
+	const std::array<sint,NDIM> sz;sz78,2431
+	s3d::vector<sreal> vals[NSTENCIL];vals83,2602
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_ilu.cpp,389
+StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams parms)StrILU_preconditioner7,69
+void StrILU_preconditioner::updateOperator()updateOperator12,201
+void StrILU_preconditioner::updateOperatorWithBranchingInLoop()updateOperatorWithBranchingInLoop18,327
+void StrILU_preconditioner::updateOperatorWithSeparateLoops()updateOperatorWithSeparateLoops67,1943
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_ilu.hpp,133
+#define STRUCT3D_ILU_HSTRUCT3D_ILU_H6,68
+class StrILU_preconditioner : public SGS_like_preconditionerStrILU_preconditioner10,131
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_jacobi.cpp,233
+JacobiPreconditioner::JacobiPreconditioner(const SMat& lhs)JacobiPreconditioner7,74
+void JacobiPreconditioner::updateOperator()updateOperator11,167
+SolveInfo JacobiPreconditioner::apply(const SVec& r, SVec& z) constapply14,216
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_jacobi.hpp,124
+#define STRUCT3D_JACOBI_HSTRUCT3D_JACOBI_H6,88
+class JacobiPreconditioner : public SolverBaseJacobiPreconditioner10,146
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_sgspreconditioners.cpp,382
+SGS_like_preconditioner::SGS_like_preconditioner(const SMat& lhs, const PreconParams parms)SGS_like_preconditioner8,145
+SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) constapply14,363
+SGS_preconditioner::SGS_preconditioner(const SMat& lhs, const PreconParams parms)SGS_preconditioner113,4350
+void SGS_preconditioner::updateOperator()updateOperator118,4476
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_sgspreconditioners.hpp,326
+#define STRUCT3D_SGS_PRECONDITIONERS_HSTRUCT3D_SGS_PRECONDITIONERS_H6,89
+class SGS_like_preconditioner : public SolverBaseSGS_like_preconditioner11,226
+	s3d::vector<sreal> diaginv;diaginv19,488
+	const PreconParams params;params21,564
+class SGS_preconditioner : public SGS_like_preconditionerSGS_preconditioner25,644
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_solverbase.cpp,623
+SolverBase::SolverBase(const SMat& lhs, SolverBase *const precond) : A(lhs), prec{precond}SolverBase8,114
+SolverBase::~SolverBase()~SolverBase11,210
+NoSolver::NoSolver(const SMat& lhs, SolverBase *const precond) : SolverBase(lhs,nullptr)NoSolver16,255
+void NoSolver::updateOperator() { }updateOperator19,349
+SolveInfo NoSolver::apply(const SVec& b, SVec& x) constapply21,386
+Richardson::Richardson(const SMat& lhs, SolverBase *const precond, const SolveParams params)Richardson35,736
+void Richardson::updateOperator()updateOperator39,879
+SolveInfo Richardson::apply(const SVec& b, SVec& x) constapply45,954
+
+/media/aditya/data/Projects/Struct3d/src/linalg/s3d_solverbase.hpp,1075
+#define STRUCT3D_SOLVER_BASE_HSTRUCT3D_SOLVER_BASE_H6,79
+struct SolveParams {SolveParams11,158
+	sreal rtol;rtol12,179
+	int maxiter;maxiter13,192
+struct PreconParams {PreconParams16,210
+	int nbuildsweeps;nbuildsweeps17,232
+	int napplysweeps;napplysweeps18,251
+	int thread_chunk_size;thread_chunk_size19,270
+	bool threadedbuild;threadedbuild20,294
+	bool threadedapply;threadedapply21,315
+struct SolveInfo {SolveInfo25,389
+	bool converged;                 ///< Whether the solve converged to required toleranceconverged26,408
+	int iters;                      ///< Number of iterations performediters27,496
+	sreal resnorm;                  ///< 2-norm of the final residual vectorresnorm28,565
+	double precapplywtime;          ///< Total wall time taken by preconditioner applicationprecapplywtime29,639
+class SolverBaseSolverBase33,789
+	const SMat& A;A50,1225
+	SolverBase *const prec;prec52,1269
+class NoSolver : public SolverBaseNoSolver58,1420
+class Richardson : public SolverBaseRichardson69,1675
+	SolveParams sparams;sparams80,1953
+
+/media/aditya/data/Projects/Struct3d/src/linalg/solverfactory.cpp,62
+SolverBase *createSolver(const SMat& lhs)createSolver13,246
+
+/media/aditya/data/Projects/Struct3d/src/linalg/solverfactory.hpp,64
+#define STRUCT3D_SOLVERFACTORY_HSTRUCT3D_SOLVERFACTORY_H6,118
+
+/media/aditya/data/Projects/Struct3d/src/pde/convdiff.cpp,633
+ConvDiff::ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffc) : mu{diffc}, b(advel)ConvDiff10,211
+ConvDiff::ConvDiff(const std::array<sreal,NDIM> advel, const sreal diffc) : mu{diffc}, b(advel)b10,211
+std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiff::manufactured_solution() constmanufactured_solution18,460
+int ConvDiff::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) constcomputeLHSPetsc44,1227
+SMat ConvDiff::computeLHS(const CartMesh *const m) constcomputeLHS88,2582
+ConvDiff::assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,assembly_kernel114,3282
+
+/media/aditya/data/Projects/Struct3d/src/pde/convdiff.hpp,254
+#define STRUCT3D_CONVDIFF_HSTRUCT3D_CONVDIFF_H6,92
+class ConvDiff : public PDEBaseConvDiff11,184
+	const sreal mu;                      ///< Diffusion coeffmu30,809
+	const std::array<sreal,NDIM> b;      ///< Advection velocity (normalized)b31,868
+
+/media/aditya/data/Projects/Struct3d/src/pde/convdiff_circular.cpp,748
+ConvDiffCirc::ConvDiffCirc(const sreal advel, const sreal diffc) : mu{diffc}, bmag(advel)ConvDiffCirc10,220
+ConvDiffCirc::ConvDiffCirc(const sreal advel, const sreal diffc) : mu{diffc}, bmag(advel)bmag10,220
+inline std::array<sreal,NDIM> ConvDiffCirc::advectionVel(const sreal r[NDIM]) constadvectionVel18,445
+std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiffCirc::manufactured_solution() constmanufactured_solution27,664
+int ConvDiffCirc::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) constcomputeLHSPetsc54,1496
+SMat ConvDiffCirc::computeLHS(const CartMesh *const m) constcomputeLHS98,2855
+ConvDiffCirc::assembly_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,assembly_kernel124,3567
+
+/media/aditya/data/Projects/Struct3d/src/pde/convdiff_circular.hpp,285
+#define STRUCT3D_CONVDIFF_CIRCULAR_HSTRUCT3D_CONVDIFF_CIRCULAR_H6,127
+class ConvDiffCirc : public PDEBaseConvDiffCirc11,274
+	const sreal mu;                      ///< Diffusion coeffmu31,975
+	const sreal bmag;                    ///< Magnitude of advection velocitybmag32,1034
+
+/media/aditya/data/Projects/Struct3d/src/pde/pdebase.cpp,164
+int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,computeVectorPetsc8,137
+SVec PDEBase::computeVector(const CartMesh *const m,computeVector41,1249
+
+/media/aditya/data/Projects/Struct3d/src/pde/pdebase.hpp,132
+#define PDEBASE_HPDEBASE_H6,77
+class PDEBasePDEBase14,255
+	PDEBase() { }PDEBase17,279
+	virtual ~PDEBase() { }~PDEBase18,294
+
+/media/aditya/data/Projects/Struct3d/src/pde/poisson.cpp,297
+std::array<std::function<sreal(const sreal[NDIM])>,2> Poisson::manufactured_solution() constmanufactured_solution39,1276
+int Poisson::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) constcomputeLHSPetsc50,1751
+SMat Poisson::computeLHS(const CartMesh *const m) constcomputeLHS121,4411
+
+/media/aditya/data/Projects/Struct3d/src/pde/poisson.hpp,128
+#define STRUCT3D_POISSON_HSTRUCT3D_POISSON_H9,230
+class Poisson : public PDEBasePoisson16,402
+	Poisson() { }Poisson19,443
+
+/media/aditya/data/Projects/Struct3d/src/perftesting/runcase.cpp,126
+#undef NDEBUGNDEBUG1,0
+#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN20,287
+int main(int argc, char* argv[])main22,319
+
+/media/aditya/data/Projects/Struct3d/src/perftesting/runtest_openmp.cpp,70
+#undef NDEBUGNDEBUG1,0
+int main(int argc, char* argv[])main17,265
+
+/media/aditya/data/Projects/Struct3d/src/perftesting/scaling_openmp.cpp,621
+void runtests_openmp(const PDEBase *const pde, const CartMesh& m)runtests_openmp28,926
+ThreadCaseInfo runcase(const CartMesh& m, const SMat& A, const SVec& b, const int nruns)runcase84,3031
+T average(const std::vector<T>& arr)average143,4736
+double relative_deviation(const std::vector<T> arr, const T avg)relative_deviation154,4994
+void setSweeps(const int nbswp, const int naswp)setSweeps165,5233
+void writeReportHeader(const ThreadCaseInfo refrun, FILE *const fp)writeReportHeader185,6038
+void writeReportLine(const ThreadCaseInfo run, const ThreadCaseInfo refrun, FILE *const fp)writeReportLine203,7089
+
+/media/aditya/data/Projects/Struct3d/src/perftesting/scaling_openmp.hpp,621
+#define STRUCT3D_SCALING_OPENMP_HSTRUCT3D_SCALING_OPENMP_H6,94
+struct ThreadCaseInfoThreadCaseInfo13,322
+	int nthreads;nthreads15,346
+	int nbuildsweeps;nbuildsweeps16,361
+	int napplysweeps;napplysweeps17,380
+	int avg_niter;avg_niter19,400
+	sreal avg_residual;avg_residual20,416
+	double avg_precbuildtime;avg_precbuildtime22,438
+	double avg_precapplytime;avg_precapplytime23,465
+	double avg_solvetime;avg_solvetime24,492
+	double dev_precbuildtime;dev_precbuildtime26,516
+	double dev_precapplytime;dev_precapplytime27,543
+	double dev_niter;dev_niter28,570
+	sreal dev_residual;dev_residual29,589
+
+/media/aditya/data/Projects/Struct3d/src/struct3d_config.h,301
+#define STRUCT3D_CONFIG_HSTRUCT3D_CONFIG_H6,76
+#define S3D_CACHE_LINE_LEN S3D_CACHE_LINE_LEN9,146
+#define NDIM NDIM12,199
+#define NSTENCIL NSTENCIL15,282
+#define STENCIL_DIAG STENCIL_DIAG17,368
+#define PI PI19,392
+typedef PetscScalar sreal;sreal24,472
+typedef PetscInt sint;sint26,522
+
+/media/aditya/data/Projects/Struct3d/test/compare-threaded_blasted.cpp,154
+#undef NDEBUGNDEBUG4,88
+#define DEBUG DEBUG5,102
+#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN24,363
+int main(int argc, char* argv[])main26,395
+
+/media/aditya/data/Projects/Struct3d/test/compare_blasted.cpp,126
+#undef NDEBUGNDEBUG1,0
+#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN21,287
+int main(int argc, char* argv[])main23,319
+
+/media/aditya/data/Projects/Struct3d/test/discretization-verification/gridconv-petsc.cpp,128
+#undef NDEBUGNDEBUG4,102
+#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN14,280
+int main(int argc, char* argv[])main16,312
+
+/media/aditya/data/Projects/Struct3d/test/discretization-verification/gridconv.cpp,72
+#undef NDEBUGNDEBUG4,102
+int main(int argc, char* argv[])main14,294
+
+/media/aditya/data/Projects/Struct3d/test/matvectest.cpp,71
+#undef NDEBUGNDEBUG5,88
+int main(int argc, char *argv[])main14,275
+
+/media/aditya/data/Projects/Struct3d/test/nativevectorassemblytest.cpp,71
+#undef NDEBUGNDEBUG5,54
+int main(int argc, char *argv[])main11,153
+
+/media/aditya/data/Projects/Struct3d/test/structsolvers/compare.cpp,126
+#undef NDEBUGNDEBUG1,0
+#define PETSCOPTION_STR_LEN PETSCOPTION_STR_LEN20,295
+int main(int argc, char* argv[])main22,327
