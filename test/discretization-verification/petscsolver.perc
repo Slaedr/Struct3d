@@ -2,7 +2,7 @@
 -ksp_final_residual
 -ksp_monitor
 
--ksp_type richardson
+-ksp_type gmres
 
 -ksp_rtol 1e-6
 -ksp_max_it 500

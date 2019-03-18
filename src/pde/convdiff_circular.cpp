@@ -59,32 +59,29 @@ ConvDiffCirc::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j,
 	// 1-offset indices for mesh coords access
 	const sint I = i + nghost, J = j + nghost, K = k + nghost;
 
-	sreal drp[NDIM];
-	drp[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
-	drp[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
-	drp[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
+	sreal drm[NDIM], drp[NDIM], drs[NDIM];
+	drm[0] = m->gcoords(0,I)-m->gcoords(0,I-1);
+	drm[1] = m->gcoords(1,J)-m->gcoords(1,J-1);
+	drm[2] = m->gcoords(2,K)-m->gcoords(2,K-1);
+	drp[0] = m->gcoords(0,I+1)-m->gcoords(0,I);
+	drp[1] = m->gcoords(1,J+1)-m->gcoords(1,J);
+	drp[2] = m->gcoords(2,K+1)-m->gcoords(2,K);
+	drs[0] = m->gcoords(0,I+1)-m->gcoords(0,I-1);
+	drs[1] = m->gcoords(1,J+1)-m->gcoords(1,J-1);
+	drs[2] = m->gcoords(2,K+1)-m->gcoords(2,K-1);
 
 	// diffusion
-	v0 = -1.0/( (m->gcoords(0,I)-m->gcoords(0,I-1)) 
-	            * 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
-	v1 = -1.0/( (m->gcoords(1,J)-m->gcoords(1,J-1)) 
-	            * 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
-	v2 = -1.0/( (m->gcoords(2,K)-m->gcoords(2,K-1)) 
-	            * 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+	v0 = -1.0/( drm[0]*0.5*drs[0] );
+	v1 = -1.0/( drm[1]*0.5*drs[1] );
+	v2 = -1.0/( drm[2]*0.5*drs[2] );
 
-	v3 =  2.0/(m->gcoords(0,I+1)-m->gcoords(0,I-1))*
-		(1.0/(m->gcoords(0,I+1)-m->gcoords(0,I))+1.0/(m->gcoords(0,I)-m->gcoords(0,I-1)));
-	v3 += 2.0/(m->gcoords(1,J+1)-m->gcoords(1,J-1))*
-		(1.0/(m->gcoords(1,J+1)-m->gcoords(1,J))+1.0/(m->gcoords(1,J)-m->gcoords(1,J-1)));
-	v3 += 2.0/(m->gcoords(2,K+1)-m->gcoords(2,K-1))*
-		(1.0/(m->gcoords(2,K+1)-m->gcoords(2,K))+1.0/(m->gcoords(2,K)-m->gcoords(2,K-1)));
+	v3 =  2.0/drs[0]*(1.0/drp[0]+1.0/drm[0]);
+	v3 += 2.0/drs[1]*(1.0/drp[1]+1.0/drm[1]);
+	v3 += 2.0/drs[2]*(1.0/drp[2]+1.0/drm[2]);
 
-	v4 = -1.0/( (m->gcoords(0,I+1)-m->gcoords(0,I)) 
-	            * 0.5*(m->gcoords(0,I+1)-m->gcoords(0,I-1)) );
-	v5 = -1.0/( (m->gcoords(1,J+1)-m->gcoords(1,J)) 
-	            * 0.5*(m->gcoords(1,J+1)-m->gcoords(1,J-1)) );
-	v6 = -1.0/( (m->gcoords(2,K+1)-m->gcoords(2,K)) 
-	            * 0.5*(m->gcoords(2,K+1)-m->gcoords(2,K-1)) );
+	v4 = -1.0/( drp[0]*0.5*drs[0] );
+	v5 = -1.0/( drp[1]*0.5*drs[1] );
+	v6 = -1.0/( drp[2]*0.5*drs[2] );
 
 	v0 *= mu;
 	v1 *= mu;

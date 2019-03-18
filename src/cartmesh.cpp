@@ -33,7 +33,7 @@ void CartMesh::computeMeshSize()
 }
 
 CartMesh::CartMesh()
-	: coords{NULL}
+	: coords{NULL}, nghost{1}
 { }
 
 PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt npdim[NDIM], 

@@ -8,6 +8,10 @@
 SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
                                          sz{m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2}
 {
+	if(m->gnghost() != nghost) {
+		throw std::runtime_error("Num ghost points don't match between SVec and mesh!");
+	}
+
 	// allocate space for all points, real and ghost
 	vals.resize((m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0)));
 
@@ -21,6 +25,9 @@ SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
 SMat::SMat(const CartMesh *const mesh) : m{mesh}, start{0}, nghost{1},
                                          sz{m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2}
 {
+	if(m->gnghost() != nghost) {
+		throw std::runtime_error("Num ghost points don't match between SMat and mesh!");
+	}
 	for(int i = 0; i < NSTENCIL; i++)
 		vals[i].resize((m->gnpoind(2)-2)*(m->gnpoind(1)-2)*(m->gnpoind(0)-2));
 }

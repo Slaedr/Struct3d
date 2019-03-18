@@ -43,6 +43,8 @@ protected:
 	PetscMPIInt nprocs[NDIM];		///< Number of processors in each dimension
 	PetscMPIInt ntprocs;			///< Total number of processors
 
+	sint nghost;                    ///< Number of ghost points at each boundary, currently 1
+
 	/// Computes the mesh size parameter h
 	/** Sets h as the length of the longest diagonal of all cells.
 	 */
@@ -77,6 +79,8 @@ public:
 #endif
 		return npoind[idim];
 	}
+
+	sint gnghost() const { return nghost; }
 
 	/// Returns a coordinate of a grid point
 	/** \param[in] idim The coordinate line along which the point to be queried lies

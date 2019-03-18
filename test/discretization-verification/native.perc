@@ -5,7 +5,7 @@
 -ksp_rtol 1e-6
 -ksp_max_it 1000
 
--s3d_pc_type sgs
+-s3d_pc_type strilu
 -s3d_pc_use_threaded_build false
 -s3d_pc_use_threaded_apply false
 -s3d_pc_build_sweeps 1
