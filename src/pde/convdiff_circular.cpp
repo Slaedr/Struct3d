@@ -50,6 +50,7 @@ std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiffCirc::manufactured
 	return soln;
 }
 
+/// TODO: Correct convection part!!!
 inline void
 ConvDiffCirc::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
                             const sint nghost,

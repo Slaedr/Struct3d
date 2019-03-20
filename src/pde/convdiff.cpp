@@ -95,14 +95,28 @@ sreal ConvDiff::rhs_kernel(const CartMesh *const m, const std::function<sreal(co
 	sreal rhs = func(crds);
 
 	// Add BCs
-	sreal drm[NDIM];
+	sreal drm[NDIM], drp[NDIM], drs[NDIM];
 	drm[0] = m->gcoords(0,i)-m->gcoords(0,i-1);
 	drm[1] = m->gcoords(1,j)-m->gcoords(1,j-1);
 	drm[2] = m->gcoords(2,k)-m->gcoords(2,k-1);
+	drp[0] = m->gcoords(0,I+1)-m->gcoords(0,I);
+	drp[1] = m->gcoords(1,J+1)-m->gcoords(1,J);
+	drp[2] = m->gcoords(2,K+1)-m->gcoords(2,K);
+	drs[0] = m->gcoords(0,I+1)-m->gcoords(0,I-1);
+	drs[1] = m->gcoords(1,J+1)-m->gcoords(1,J-1);
+	drs[2] = m->gcoords(2,K+1)-m->gcoords(2,K-1);
 	if(i == m->gnghost()) {
 		if(bctypes[0] == S3D_DIRICHLET) {
 			rhs += bvals[0]*(b[0]/drm[0] + 1.0/( (m->gcoords(0,i)-m->gcoords(0,i-1)) 
 			                                     * 0.5*(m->gcoords(0,i+1)-m->gcoords(0,i-1)) ));
+		}
+		else {
+			printf("! Invalid BC!\n");
+		}
+	}
+	else if(i == m->gnpoind(0)-nghost-1) {
+		if(bctypes[0] == S3D_DIRICHLET) {
+			rhs += bvals[1]/(drp[0]*0.5*drs[0]);
 		}
 		else {
 			printf("! Invalid BC!\n");
