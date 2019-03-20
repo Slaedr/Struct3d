@@ -50,9 +50,7 @@ protected:
 
 	/// Kernel used for assembling the matrix
 	virtual void lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
-	                           const sint nghost,
-	                           sreal& v0, sreal& v1, sreal& v2, sreal& v3, sreal& v4, sreal& v5, sreal& v6)
-		const = 0;
+	                           const sint nghost, sreal *const __restrict v) const = 0;
 
 	/// Should return the value of the right-hand side vector at the (i,j,k) node
 	virtual sreal rhs_kernel(const CartMesh *const m,

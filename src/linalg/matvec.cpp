@@ -16,6 +16,7 @@ SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
 	vals.resize((m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0)));
 
 	// initialize to zero
+#pragma omp parallel for simd
 	for(size_t i = 0; i < vals.size(); i++)
 		vals[i] = 0;
 }

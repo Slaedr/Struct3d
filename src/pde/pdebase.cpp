@@ -7,7 +7,11 @@
 
 PDEBase::PDEBase(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals)
 	: bctypes(bc_types), bvals(bc_vals)
-{ }
+{
+	printf("Boundary conditions:\n");
+	for(int i = 0; i < 6; i++)
+		printf("  %c : %f\n", (bctypes[i]==S3D_DIRICHLET ? 'D':'O'), bvals[i]);
+}
 
 int PDEBase::computeVectorPetsc(const CartMesh *const m, DM da,
                                 const std::function<sreal(const sreal[NDIM])> func,
@@ -102,10 +106,12 @@ int PDEBase::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 				cindices[5] = {k,j+1,i,0};
 				cindices[6] = {k+1,j,i,0};
 
-				lhsmat_kernel(m, i,j,k, 1, values[0], values[1], values[2], values[3], values[4],
-				              values[5], values[6]);
+				lhsmat_kernel(m, i,j,k, 1, values);
 
-				MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
+#pragma omp critical
+				{
+					MatSetValuesStencil(A, mm, rindices, n, cindices, values, INSERT_VALUES);
+				}
 			}
 
 	if(rank == 0)
@@ -123,14 +129,18 @@ SMat PDEBase::computeLHS(const CartMesh *const m) const
 	if(rank == 0)	
 		printf("PDEBase: ComputeLHS: Setting values of the LHS matrix...\n");
 
+#pragma omp parallel for collapse(2) default(shared)
 	for(PetscInt k = A.start; k < A.start+A.sz[2]; k++)
 		for(PetscInt j = A.start; j < A.start+A.sz[1]; j++)
 			for(PetscInt i = A.start; i < A.start+A.sz[0]; i++)
 			{
 				const sint idx = m->localFlattenedIndexReal(k,j,i);
 
-				lhsmat_kernel(m, i,j,k, A.nghost, A.vals[0][idx], A.vals[1][idx], A.vals[2][idx],
-				              A.vals[3][idx], A.vals[4][idx], A.vals[5][idx], A.vals[6][idx]);
+				sreal values[NSTENCIL];
+				lhsmat_kernel(m, i,j,k, A.nghost, values);
+
+				for(int j = 0; j < NSTENCIL; j++)
+					A.vals[j][idx] = values[j];
 			}
 
 	if(rank == 0)

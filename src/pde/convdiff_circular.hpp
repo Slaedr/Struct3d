@@ -34,9 +34,7 @@ protected:
 
 	/// Kernel used for assembling the matrix
 	void lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
-	                   const sint nghost,
-	                   sreal& v0, sreal& v1, sreal& v2, sreal& v3, sreal& v4, sreal& v5, sreal& v6)
-		const;
+	                   const sint nghost, sreal *const __restrict v) const;
 
 	sreal rhs_kernel(const CartMesh *const m, const std::function<sreal(const sreal[NDIM])>& func,
 	                 const sint i, const sint j, const sint k) const;
