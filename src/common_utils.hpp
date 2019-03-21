@@ -6,6 +6,7 @@
 #define STRUCT3D_COMMON_UTILS_H
 
 #include <vector>
+#include <stdexcept>
 #include <petscmat.h>
 #include "cartmesh.hpp"
 

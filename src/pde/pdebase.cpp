@@ -129,7 +129,7 @@ SMat PDEBase::computeLHS(const CartMesh *const m) const
 	if(rank == 0)	
 		printf("PDEBase: ComputeLHS: Setting values of the LHS matrix...\n");
 
-#pragma omp parallel for collapse(2) default(shared)
+#pragma omp parallel for default(shared)
 	for(PetscInt k = A.start; k < A.start+A.sz[2]; k++)
 		for(PetscInt j = A.start; j < A.start+A.sz[1]; j++)
 			for(PetscInt i = A.start; i < A.start+A.sz[0]; i++)
