@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 
 	// Prepare native solver
 	
-	const SVec b = pde->computeVector(&m, pde->manufactured_solution()[0]);
+	const SVec b = pde->computeVector(&m, pde->test_rhs());
 	const SMat A = pde->computeLHS(&m);
 
 	// run the solve to be tested as many times as requested

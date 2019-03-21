@@ -23,6 +23,8 @@ public:
 	 */
 	std::array<std::function<sreal(const sreal[NDIM])>,2> manufactured_solution() const;
 
+	std::function<sreal(const sreal[NDIM])> test_rhs() const;
+
 protected:
 	/// Kernel used for assembling the matrix
 	void lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,

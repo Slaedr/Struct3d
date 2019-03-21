@@ -28,7 +28,7 @@ static void writeReportLine(const ThreadCaseInfo run, const ThreadCaseInfo refru
 void runtests_openmp(const PDEBase *const pde, const CartMesh& m)
 {
 	// Set up
-	const SVec b = pde->computeVector(&m, pde->manufactured_solution()[0]);
+	const SVec b = pde->computeVector(&m, pde->test_rhs());
 	const SMat A = pde->computeLHS(&m);
 
 	// Read test params

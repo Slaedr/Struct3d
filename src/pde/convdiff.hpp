@@ -23,6 +23,8 @@ public:
 	 */
 	std::array<std::function<sreal(const sreal[NDIM])>,2> manufactured_solution() const;
 
+	std::function<sreal(const sreal[NDIM])> test_rhs() const;
+
 protected:
 	const sreal mu;                      ///< Diffusion coeff
 	const std::array<sreal,NDIM> b;      ///< Advection velocity (normalized)

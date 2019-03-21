@@ -42,6 +42,9 @@ public:
 	///  the second being the right hand side
 	virtual std::array<std::function<sreal(const sreal[NDIM])>,2> manufactured_solution() const = 0;
 
+	/// A source term function to make for a relatively challenging test case
+	virtual std::function<sreal(const sreal[NDIM])> test_rhs() const = 0;
+
 protected:
 	/// Boundary conditions at each of the 6 faces
 	std::array<BCType,6> bctypes;
