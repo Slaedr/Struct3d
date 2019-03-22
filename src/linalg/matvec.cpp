@@ -173,8 +173,8 @@ void vec_multi_axpy(const int numvecs, const sreal *const a, const SVec *const x
 	
 	const sint idxmax[3] = {y.start + y.sz[0], y.start + y.sz[1], y.start + y.sz[2]};
 
-#pragma omp parallel for collapse(3) default(shared)
 	for(int l = 0; l < numvecs; l++)
+#pragma omp parallel for collapse(2) default(shared)
 		for(sint k = y.start; k < idxmax[2]; k++)
 			for(sint j = y.start; j < idxmax[1]; j++)
 #pragma omp simd
