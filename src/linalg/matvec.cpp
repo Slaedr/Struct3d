@@ -21,6 +21,28 @@ SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
 		vals[i] = 0;
 }
 
+SVec::SVec() : m{nullptr}, start{1}, nghost{1}
+{ }
+
+void SVec::init(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
+                                         sz{m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2}
+{
+	m = mesh;
+	sz = {m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2 };
+
+	if(m->gnghost() != nghost) {
+		throw std::runtime_error("Num ghost points don't match between SVec and mesh!");
+	}
+
+	// allocate space for all points, real and ghost
+	vals.resize((m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0)));
+
+	// initialize to zero
+#pragma omp parallel for simd
+	for(size_t i = 0; i < vals.size(); i++)
+		vals[i] = 0;
+}
+
 /** Assumes compact stencil. No extra space is allocated.
  */
 SMat::SMat(const CartMesh *const mesh) : m{mesh}, start{0}, nghost{1},
@@ -173,6 +195,30 @@ sreal norm_vector_l2(const SVec& x)
 				norm += x.vals[idx]*x.vals[idx];
 			}
 	return sqrt(norm);
+}
+
+sreal inner_vector_l2(const SVec& x, const SVec& y)
+{
+	if(x.m != y.m)
+		throw std::runtime_error("Both vectors should be defined over the same mesh!");
+	if(x.sz[0] != y.sz[0] || x.sz[1] != y.sz[1] || x.sz[2] != y.sz[2])
+		throw std::runtime_error("Sizes don't match!");
+	assert(x.nghost == y.nghost);
+	assert(x.start == y.start);
+
+	sreal dot = 0;
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
+
+#pragma omp parallel for collapse(2) default(shared) reduction(+:dot)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
+#pragma omp simd reduction(+:dot)
+			for(sint i = x.start; i < idxmax[0]; i++)
+			{
+				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
+				dot += x.vals[idx]*y.vals[idx];
+			}
+	return dot;
 }
 
 sreal compute_error_L2(const SVec& x, const SVec& y)

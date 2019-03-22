@@ -28,6 +28,12 @@ SolverBase *createSolver(const SMat& lhs)
 	SolveParams params;
 	params.rtol = petscoptions_get_real("-ksp_rtol");
 	params.maxiter = petscoptions_get_int("-ksp_max_it");
+	try {
+		params.restart = petscoptions_get_int("-ksp_restart");
+	} catch(NonExistentPetscOpion& e) {
+		printf(" No KSP restart specified, using 30 if necessary.\n");
+		params.restart = 30;
+	}
 
 	if(precstr == "jacobi")
 	{

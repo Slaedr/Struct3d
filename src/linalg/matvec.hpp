@@ -28,8 +28,13 @@ struct SVec
 	 */
 	SVec(const CartMesh *const mesh);
 
+	/// Default constructor
+	SVec();
+
+	void init(const CartMesh *const mesh);
+
 	/// Associated mesh
-	const CartMesh *const m;
+	const CartMesh *m;
 
 	/// Starting position of 'real' points along each direction; those before this are ghosts
 	/** This depends on the number of ghost points needed. Note that this is not a flattened index -
@@ -39,7 +44,7 @@ struct SVec
 	/// Number of ghost points per boundary
 	const int nghost;
 	/// Number of 'real' points in each direction (0 is i, 1 is j and 2 is k)
-	const std::array<sint,NDIM> sz;
+	std::array<sint,NDIM> sz;
 
 	/// 3D storage - access the value at point (i,j,k) as vals[localFlattenedIndex(k,j,i)]
 	/** \sa CartMesh::localFlattenedIndex
@@ -93,6 +98,9 @@ sreal norm_L2(const SVec& x);
 
 /// Computes the l2 vector norm over the real points
 sreal norm_vector_l2(const SVec& x);
+
+/// Computes the l2 vector dot product over real points
+sreal inner_vector_l2(const SVec& x, const SVec& y)
 
 /// L2 function norm of the difference between two vectors
 sreal compute_error_L2(const SVec& x, const SVec& y);

@@ -11,6 +11,7 @@
 struct SolveParams {
 	sreal rtol;
 	int maxiter;
+	int restart;
 };
 
 struct PreconParams {
