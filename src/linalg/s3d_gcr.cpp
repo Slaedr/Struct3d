@@ -34,8 +34,34 @@ SolveInfo GCR::apply(const SVec& b, SVec& x) const
 		A.apply_res(b, x, res);
 		sreal resnorm = norm_vector_l2(res);
 
+		sreal starttime = MPI_Wtime();
 		prec->apply(res,p[0]);
+		info.precapplywtime += MPI_Wtime()-starttime;
+
+		vecset(0,q[0]);
 		A.apply(p[0],q[0]);
+
+		for(int k = 0; k < north; k++)
+		{
+			const sreal alpha = inner_vector_l2(res,q[k])/inner_vector_l2(q[k],q[k]);
+			vecaxpy(alpha, p[k], x);
+			vecaxpy(-alpha, q[k], res);
+
+			resnorm = norm_vector_l2(res);
+			if(resnorm/bnorm < sparams.rtol)
+				break;
+
+			starttime = MPI_Wtime();
+			prec->apply(res, z);
+			info.precapplywtime += MPI_Wtime()-starttime;
+
+			//std::vector<sreal> beta(k);
+
+			step++;
+		}
+
+		if(resnorm/bnorm < sparams.rtol)
+			break;
 	}
 
 	return info;

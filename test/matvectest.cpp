@@ -62,6 +62,14 @@ int main(int argc, char *argv[])
 
 		A.apply_res(b, uexact, res);
 
+		SVec tempv(&m);
+		A.apply(uexact,tempv);
+		vecaxpy(-1.0, b, tempv);
+		vecaxpy(1.0,res,tempv);
+		const sreal diffnorm = norm_vector_l2(tempv);
+		printf("  Difference between apply_res and apply = %g.\n", diffnorm);
+		assert(diffnorm < 1e-14);
+
 		const sreal defectnorm = norm_vector_l2(res)/sqrt(m.gnpointotal());
 		printf("Defect = %f\n", defectnorm);
 

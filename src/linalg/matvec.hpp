@@ -63,7 +63,7 @@ struct SMat
 	/// Construct the matrix over the given Cartesian grid
 	SMat(const CartMesh *const mesh);
 
-	/// Compute a matrix-vector product y += Ax (\warning the result is ADDED TO, not overwritten)
+	/// Compute a matrix-vector product y = Ax (\warning the result is overwritten)
 	void apply(const SVec& x, SVec& y) const;
 
 	/// Computes y = b - Ax (the results is overwritten)
@@ -88,6 +88,9 @@ struct SMat
 	s3d::vector<sreal> vals[NSTENCIL];
 };
 
+/// x[:] <- a
+void vecset(const sreal a, SVec& x);
+
 /// y <- y + a*x
 void vecaxpy(const sreal a, const SVec& x, SVec& y);
 
@@ -100,7 +103,7 @@ sreal norm_L2(const SVec& x);
 sreal norm_vector_l2(const SVec& x);
 
 /// Computes the l2 vector dot product over real points
-sreal inner_vector_l2(const SVec& x, const SVec& y)
+sreal inner_vector_l2(const SVec& x, const SVec& y);
 
 /// L2 function norm of the difference between two vectors
 sreal compute_error_L2(const SVec& x, const SVec& y);

@@ -24,8 +24,7 @@ SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
 SVec::SVec() : m{nullptr}, start{1}, nghost{1}
 { }
 
-void SVec::init(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
-                                         sz{m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2}
+void SVec::init(const CartMesh *const mesh)
 {
 	m = mesh;
 	sz = {m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2 };
@@ -84,11 +83,12 @@ void SMat::apply(const SVec& x, SVec& y) const
 
 				/* It turns out both GCC 8.2 and Clang 7 need the following loop manually unrolled
 				 * in order to vectorize the i loop.
-				 */ 
+				 */
+				// y.vals[jdx[3]] = 0;
 				// for(int is = 0; is < NSTENCIL; is++)
 				// 	y.vals[jdx[3]] += vals[is][idxr] * x.vals[jdx[is]];
 
-				y.vals[jdx[3]] += vals[0][idxr]*x.vals[jdx[0]]
+				y.vals[jdx[3]] = vals[0][idxr]*x.vals[jdx[0]]
 					+ vals[1][idxr]*x.vals[jdx[1]]
 					+ vals[2][idxr]*x.vals[jdx[2]]
 					+ vals[3][idxr]*x.vals[jdx[3]]
@@ -158,6 +158,21 @@ void vecaxpy(const sreal a, const SVec& x, SVec& y)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				y.vals[idx] += a*x.vals[idx];
+			}
+}
+
+void vecset(const sreal a, SVec& x)
+{
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
+
+#pragma omp parallel for collapse(2) default(shared)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
+#pragma omp simd
+			for(sint i = x.start; i < idxmax[0]; i++)
+			{
+				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
+				x.vals[idx] = a;
 			}
 }
 
