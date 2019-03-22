@@ -15,7 +15,7 @@ public:
 
 protected:
 	void updateOperatorWithBranchingInLoop();
-	void updateOperatorWithSeparateLoops();
+	//void updateOperatorWithSeparateLoops();
 };
 
 #endif

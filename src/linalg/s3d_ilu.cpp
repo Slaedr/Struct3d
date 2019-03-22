@@ -12,7 +12,6 @@ StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams
 void StrILU_preconditioner::updateOperator()
 {
 	updateOperatorWithBranchingInLoop();
-	//updateOperatorWithSeparateLoops();
 }
 
 void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
@@ -64,6 +63,7 @@ void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
 		diaginv[i] = 1.0/diaginv[i];
 }
 
+#if 0
 void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 {
 	// initialize
@@ -195,3 +195,4 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
 		diaginv[i] = 1.0/diaginv[i];
 }
+#endif
