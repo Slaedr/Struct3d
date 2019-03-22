@@ -13,11 +13,12 @@ SVec::SVec(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
 	}
 
 	// allocate space for all points, real and ghost
-	vals.resize((m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0)));
+	const sint ssize = (m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0));
+	vals.resize(ssize);
 
 	// initialize to zero
 #pragma omp parallel for simd
-	for(size_t i = 0; i < vals.size(); i++)
+	for(sint i = 0; i < ssize; i++)
 		vals[i] = 0;
 }
 
@@ -34,11 +35,12 @@ void SVec::init(const CartMesh *const mesh)
 	}
 
 	// allocate space for all points, real and ghost
-	vals.resize((m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0)));
+	const sint ssize = (m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0));
+	vals.resize(ssize);
 
 	// initialize to zero
 #pragma omp parallel for simd
-	for(size_t i = 0; i < vals.size(); i++)
+	for(sint i = 0; i < ssize; i++)
 		vals[i] = 0;
 }
 
@@ -161,6 +163,28 @@ void vecaxpy(const sreal a, const SVec& x, SVec& y)
 			}
 }
 
+void vec_multi_axpy(const int numvecs, const sreal *const a, const SVec *const x, SVec& y)
+{
+	if(numvecs == 0)
+		return;
+
+	if(x[0].m != y.m)
+		throw std::runtime_error("Both vectors should be defined over the same mesh!");
+	
+	const sint idxmax[3] = {y.start + y.sz[0], y.start + y.sz[1], y.start + y.sz[2]};
+
+#pragma omp parallel for collapse(3) default(shared)
+	for(int l = 0; l < numvecs; l++)
+		for(sint k = y.start; k < idxmax[2]; k++)
+			for(sint j = y.start; j < idxmax[1]; j++)
+#pragma omp simd
+				for(sint i = y.start; i < idxmax[0]; i++)
+				{
+					const sint idx = y.m->localFlattenedIndexAll(k,j,i);
+					y.vals[idx] += a[l]*x[l].vals[idx];
+				}
+}
+
 void vecset(const sreal a, SVec& x)
 {
 	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
@@ -173,6 +197,24 @@ void vecset(const sreal a, SVec& x)
 			{
 				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				x.vals[idx] = a;
+			}
+}
+
+void vecassign(const SVec& x, SVec& y)
+{
+	if(x.m != y.m)
+		throw std::runtime_error("Both vectors should be defined over the same mesh!");
+	
+	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
+
+#pragma omp parallel for collapse(2) default(shared)
+	for(sint k = x.start; k < idxmax[2]; k++)
+		for(sint j = x.start; j < idxmax[1]; j++)
+#pragma omp simd
+			for(sint i = x.start; i < idxmax[0]; i++)
+			{
+				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
+				y.vals[idx] = x.vals[idx];
 			}
 }
 

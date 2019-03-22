@@ -91,8 +91,14 @@ struct SMat
 /// x[:] <- a
 void vecset(const sreal a, SVec& x);
 
+/// y <- x
+void vecassign(const SVec& x, SVec& y);
+
 /// y <- y + a*x
 void vecaxpy(const sreal a, const SVec& x, SVec& y);
+
+/// y <- y + \sum_{i=1}^{n} a[i]*x_i
+void vec_multi_axpy(const int numvecs, const sreal *const a, const SVec *const x, SVec& y);
 
 /// Computes the L2 function norm over the underlying mesh
 /** Only considers real points, not ghost points.
