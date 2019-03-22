@@ -11,7 +11,7 @@ Number-of-repititions-of-solver
 PDE-type
 convdiff
 Advection-velocity
-0.577350269189626 0.577350269189626 0.577350269189626
+-0.577350269189626 0.577350269189626 0.577350269189626
 Diffusion-coeff
 0.1
 BC-types
