@@ -52,6 +52,8 @@ SolveInfo GCR::apply(const SVec& b, SVec& x) const
 				printf("      Step %d: Rel res = %g\n", step, resnorm/bnorm);
 				fflush(stdout);
 			}
+			step++;
+
 			if(resnorm/bnorm < sparams.rtol)
 				break;
 			if(k == north-1)
@@ -66,13 +68,11 @@ SolveInfo GCR::apply(const SVec& b, SVec& x) const
 
 			std::vector<sreal> beta(k+1);
 			for(int i = 0; i < k+1; i++) {
-				beta[i] = inner_vector_l2(q[k+1], q[i]) / inner_vector_l2(q[i], q[i]);
+				beta[i] = -inner_vector_l2(q[k+1], q[i]) / inner_vector_l2(q[i], q[i]);
 			}
 
 			vec_multi_axpy(k+1, &beta[0], &p[0], p[k+1]);
 			vec_multi_axpy(k+1, &beta[0], &q[0], q[k+1]);
-
-			step++;
 		}
 
 		if(resnorm/bnorm < sparams.rtol)

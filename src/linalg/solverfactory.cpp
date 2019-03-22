@@ -8,6 +8,7 @@
 #include "s3d_jacobi.hpp"
 #include "s3d_sgspreconditioners.hpp"
 #include "s3d_ilu.hpp"
+#include "s3d_gcr.hpp"
 #include "solverfactory.hpp"
 
 SolverBase *createSolver(const SMat& lhs)
@@ -86,6 +87,10 @@ SolverBase *createSolver(const SMat& lhs)
 	{
 		printf("  Using Richardson solver\n");
 		solver = new Richardson(lhs, prec, params);
+	}
+	else if(tlsolver == "gcr") {
+		printf("  Using GCR solver\n");
+		solver = new GCR(lhs, prec, params);
 	}
 	else {
 		throw std::runtime_error("Need a valid solver option!");

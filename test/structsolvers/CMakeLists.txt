@@ -12,7 +12,15 @@ add_test(NAME StructSolver_VsPetsc_Poisson_Jacobi
 add_test(NAME StructSolver_VsPetsc_CD_Jacobi
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./comparewithpetsc 
   ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
+  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc -ksp_view
+  -pc_type jacobi -s3d_pc_type jacobi
+  )
+
+add_test(NAME StructSolver_VsPetsc_CD_GCR_Jacobi
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./comparewithpetsc 
+  ${CMAKE_CURRENT_SOURCE_DIR}/input/convdiff.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
+  -ksp_type gcr -ksp_view -s3d_ksp_type gcr
   -pc_type jacobi -s3d_pc_type jacobi
   )
 
