@@ -105,6 +105,12 @@ if(NOVECTORIZE)
   endif()
 endif(NOVECTORIZE)
 
+if(NOFORCESIMD)
+  # Disable OpenMP SIMD in SGS application kernels
+  add_definitions(-DNOFORCESIMD)
+  message(STATUS "OpenMP SIMD will not be used for SGS application")
+endif()
+
 # to compile with OpenMP
 if(NOOMP)
   if(CXX_COMPILER_GNUCLANG OR CXX_COMPILER_INTEL)

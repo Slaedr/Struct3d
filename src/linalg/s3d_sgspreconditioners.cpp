@@ -53,7 +53,9 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp for collapse(2) nowait schedule(static, params.thread_chunk_size)
 			for(sint k = r.start; k < idxmax[2]; k++)
 				for(sint j = r.start; j < idxmax[1]; j++)
+#ifndef NOFORCESIMD
 #pragma omp simd
+#endif
 					for(sint i = r.start; i < idxmax[0]; i++)
 					{
 						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
@@ -84,7 +86,9 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp for collapse(2) nowait schedule(static, params.thread_chunk_size)
 			for(sint k = idxmax[2]-1; k >= r.start; k--)
 				for(sint j = idxmax[1]-1; j >= r.start; j--)
+#ifndef NOFORCESIMD
 #pragma omp simd
+#endif
 					for(sint i = idxmax[0]-1; i >= r.start; i--)
 					{
 						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
