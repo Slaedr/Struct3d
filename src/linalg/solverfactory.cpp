@@ -9,6 +9,7 @@
 #include "s3d_sgspreconditioners.hpp"
 #include "s3d_ilu.hpp"
 #include "s3d_gcr.hpp"
+#include "s3d_mr.hpp"
 #include "solverfactory.hpp"
 
 SolverBase *createSolver(const SMat& lhs)
@@ -91,6 +92,10 @@ SolverBase *createSolver(const SMat& lhs)
 	else if(tlsolver == "gcr") {
 		printf("  Using GCR solver\n");
 		solver = new GCR(lhs, prec, params);
+	}
+	else if(tlsolver == "mr") {
+		printf("  Using MinRes solver\n");
+		solver = new MinRes(lhs, prec, params);
 	}
 	else {
 		throw std::runtime_error("Need a valid solver option!");
