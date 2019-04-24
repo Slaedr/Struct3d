@@ -143,7 +143,7 @@ class NonExistentPetscOpion : public std::runtime_errorNonExistentPetscOpion29
 src/linalg/s3d_mr.cpp,215
 MinRes::MinRes(const SMat& lhs, SolverBase *const precond, const SolveParams params)MinRes4,24
 void MinRes::updateOperator()updateOperator8,159
-SolveInfo MinRes::apply(const SVec& b, SVec& x) constapply14,230
+SolveInfo MinRes::apply(const SVec& b, SVec& x) constapply16,272
 
 src/linalg/s3d_solverbase.hpp,1104
 #define STRUCT3D_SOLVER_BASE_HSTRUCT3D_SOLVER_BASE_H6,79

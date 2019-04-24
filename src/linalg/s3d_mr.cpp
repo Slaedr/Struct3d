@@ -11,12 +11,18 @@ void MinRes::updateOperator()
 		prec->updateOperator();
 }
 
+/** The step-length is capped at 2.0.
+ */
 SolveInfo MinRes::apply(const SVec& b, SVec& x) const
 {
 	SolveInfo info;
 	info.precapplywtime = 0;
 
 	SVec res(A.m), p(A.m), v(A.m);
+
+	printf("      Step       Rel res     step length\n");
+	printf("----------------------------------------\n");
+	fflush(stdout);
 
 	const sreal bnorm = norm_vector_l2(b);
 	sreal resnorm = 1.0;
@@ -37,15 +43,17 @@ SolveInfo MinRes::apply(const SVec& b, SVec& x) const
 
 		A.apply(v,p);
 
-		const sreal alpha = inner_vector_l2(res, p) / inner_vector_l2(p,p);
+		sreal alpha = inner_vector_l2(res, p) / inner_vector_l2(p,p);
+
+		if(alpha > 2.0) alpha = 2.0;
 
 		vecaxpy(alpha, v, x);
 		vecaxpy(-alpha, p, res);
 
 		resnorm = norm_vector_l2(res);
 
-		if(step % 5 == 0) {
-			printf("      Step %d: Rel res = %g\n", step, resnorm/bnorm);
+		if(step % 10 == 0) {
+			printf("      %4d       %.6e         %5.3g\n", step, resnorm/bnorm, alpha);
 			fflush(stdout);
 		}
 		step++;
