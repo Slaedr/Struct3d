@@ -46,5 +46,5 @@ add_test(NAME StructSolver_VsPetsc_CD_Large_StrILU_1thread
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/input/struct-petsc.perc
   -pc_type ilu -s3d_pc_type strilu
   -s3d_pc_use_threaded_build true -s3d_pc_use_threaded_apply true
-  -s3d_pc_build_sweeps 1 -s3d_pc_apply_sweeps 1 -relative_iters_deviation 0.02
+  -s3d_pc_build_sweeps 2 -s3d_pc_apply_sweeps 5 -relative_iters_deviation 0.02
   )

@@ -4,21 +4,8 @@
 
 #include "s3d_ilu.hpp"
 
-StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams parms)
-	: SGS_like_preconditioner(lhs, parms)
+void async_ilu0(const SMat& A, const PreconParams params, s3d::vector<sreal>& diaginv)
 {
-}
-
-void StrILU_preconditioner::updateOperator()
-{
-	updateOperatorWithBranchingInLoop();
-	//updateOperatorWithSeparateLoops();
-}
-
-void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
-{
-	/* NOTE: We need to use a signed index type for LLVM's vectorizer to vectorize loops
-	 */
 	// initialize
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
@@ -62,6 +49,18 @@ void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
 		diaginv[i] = 1.0/diaginv[i];
+}
+
+StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams parms)
+	: SGS_like_preconditioner(lhs, parms)
+{
+}
+
+void StrILU_preconditioner::updateOperator()
+{
+	async_ilu0(A, params, diaginv);
+	//updateOperatorWithBranchingInLoop();
+	//updateOperatorWithSeparateLoops();
 }
 
 void StrILU_preconditioner::updateOperatorWithSeparateLoops()
