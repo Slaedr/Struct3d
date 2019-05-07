@@ -62,13 +62,12 @@ SolverBase *createSolver(const SMat& lhs)
 			prec = new SGS_preconditioner(lhs, pparams);
 		}
 		else {
-			printf("  Using SGS ISAI preconditioner\n");
+			printf("  Using SGS-ISAI preconditioner\n");
 			prec = new SGS_ISAI_preconditioner(lhs, pparams);
 		}
 	}
-	else if(precstr == "strilu")
+	else if(precstr == "ilu" || precstr == "ilu_isai")
 	{
-		printf("  Using StrILU preconditioner\n");
 		PreconParams pparams;
 		pparams.nbuildsweeps = petscoptions_get_int("-s3d_pc_build_sweeps");
 		pparams.napplysweeps = petscoptions_get_int("-s3d_pc_apply_sweeps");
@@ -85,7 +84,14 @@ SolverBase *createSolver(const SMat& lhs)
 			pparams.threadedapply = true;
 			printf(" WARNING: SolverFactory: Using threaded apply.\n");
 		}
-		prec = new StrILU_preconditioner(lhs, pparams);
+		if(precstr == "ilu") {
+			printf("  Using AILU preconditioner\n");
+			prec = new StrILU_preconditioner(lhs, pparams);
+		}
+		else {
+			printf("  Using AILU-ISAI preconditioner\n");
+			prec = new AILU_ISAI_preconditioner(lhs, pparams);
+		}
 	}
 	else {
 		prec = new NoSolver(lhs);

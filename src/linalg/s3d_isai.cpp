@@ -37,7 +37,7 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp for collapse(2) schedule(static, params.thread_chunk_size)
 			for(sint k = r.start; k < idxmax[2]; k++)
 				for(sint j = r.start; j < idxmax[1]; j++)
-					//#pragma omp simd
+#pragma omp simd
 					for(sint i = r.start; i < idxmax[0]; i++)
 					{
 						const sint idx = r.m->localFlattenedIndexAll(k,j,i);
@@ -58,7 +58,7 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp for collapse(2) schedule(static, params.thread_chunk_size)
 			for(sint k = r.start; k < idxmax[2]; k++)
 				for(sint j = r.start; j < idxmax[1]; j++)
-					//#pragma omp simd
+#pragma omp simd
 					for(sint i = r.start; i < idxmax[0]; i++)
 					{
 						const sint idx = r.m->localFlattenedIndexAll(k,j,i);
@@ -97,7 +97,7 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp for collapse(2) schedule(static, params.thread_chunk_size)
 			for(sint k = r.start; k < idxmax[2]; k++)
 				for(sint j = r.start; j < idxmax[1]; j++)
-					//#pragma omp simd
+#pragma omp simd
 					for(sint i = r.start; i < idxmax[0]; i++)
 					{
 						const sint idx = r.m->localFlattenedIndexAll(k,j,i);
@@ -117,7 +117,7 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp for collapse(2) schedule(static, params.thread_chunk_size)
 			for(sint k = r.start; k < idxmax[2]; k++)
 				for(sint j = r.start; j < idxmax[1]; j++)
-					//#pragma omp simd
+#pragma omp simd
 					for(sint i = r.start; i < idxmax[0]; i++)
 					{
 						const sint idx = r.m->localFlattenedIndexAll(k,j,i);

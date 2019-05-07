@@ -4,7 +4,7 @@
 -ksp_max_it 1000
 
 -s3d_ksp_type richardson
--s3d_pc_type strilu
+-s3d_pc_type ilu
 
 -s3d_pc_use_threaded_build true
 -s3d_pc_use_threaded_apply true

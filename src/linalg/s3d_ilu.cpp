@@ -61,9 +61,19 @@ void StrILU_preconditioner::updateOperator()
 	async_ilu0(A, params, diaginv);
 }
 
+AILU_ISAI_preconditioner::AILU_ISAI_preconditioner(const SMat& lhs, const PreconParams parms)
+	: ISAI_preconditioner(lhs, parms)
+{
+}
+
+void AILU_ISAI_preconditioner::updateOperator()
+{
+	async_ilu0(A, params, diaginv);
+}
+
+#if 0
 void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 {
-#if 0
 	// initialize
 	/* NOTE: We need to use a signed index type for LLVM's vectorizer to vectorize loops
 	 */
@@ -192,5 +202,5 @@ void StrILU_preconditioner::updateOperatorWithSeparateLoops()
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
 		diaginv[i] = 1.0/diaginv[i];
-#endif
 }
+#endif

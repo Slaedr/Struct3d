@@ -136,7 +136,7 @@ endif()
 
 # set verbosity options
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopt-info-inline-vec-optimized-omp=optimizations.info")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopt-info-vec-omp-optimized")
 elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Rpass=inline -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize")
 elseif(CXX_COMPILER_INTEL)
