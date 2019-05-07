@@ -8,7 +8,9 @@
 SGS_like_preconditioner::SGS_like_preconditioner(const SMat& lhs, const PreconParams parms)
 	: SolverBase(lhs, nullptr), params(parms)
 {
-	diaginv.resize((A.m->gnpoind(0)-2)*(A.m->gnpoind(1)-2)*(A.m->gnpoind(2)-2));
+	assert(A.m->gnPoinTotal() == A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
+
+	diaginv.resize(A.m->gnPoinTotal());
 }
 
 SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
@@ -16,15 +18,12 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 	if(r.m != z.m || r.m != A.m)
 		throw std::runtime_error("apply: Vectors and matrix must be defined over the same mesh!");
 
-	const int ng = r.nghost;
-	assert(ng == 1);
-
 	/* Temporary vector for application. Same size as arguments to apply().
 	 * It's best for this vector to be initialized to zero before every application.
 	 */
-	s3d::vector<sreal> y(A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
+	s3d::vector<sreal> y(A.m->gnPoinTotal());
 #pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
 		y[i] = 0;
 	
 	const sint idxmax[3] = {r.start + r.sz[0], r.start + r.sz[1], r.start + r.sz[2]};
@@ -56,7 +55,7 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp simd
 					for(sint i = r.start; i < idxmax[0]; i++)
 					{
-						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
+						const sint idx = r.m->localFlattenedIndexAll(k,j,i);
 						const sint jdx[] = {
 							r.m->localFlattenedIndexAll(k,j,i-1),
 							r.m->localFlattenedIndexAll(k,j-1,i),
@@ -68,10 +67,10 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 						// for(int is = 0; is < STENCIL_DIAG; is++)
 						// 	y[jdx[3]] -= A.vals[is][idxr] * y[jdx[is]];
 
-						y[jdx[3]] = r.vals[jdx[3]] - A.vals[0][idxr]*y[jdx[0]]
-							- A.vals[1][idxr]*y[jdx[1]] - A.vals[2][idxr]*y[jdx[2]];
+						y[idx] = r.vals[idx] - A.vals[0][idx]*y[jdx[0]]
+							- A.vals[1][idx]*y[jdx[1]] - A.vals[2][idx]*y[jdx[2]];
 
-						y[jdx[3]] *= diaginv[idxr];
+						y[idx] *= diaginv[idx];
 					}
 		}
 
@@ -87,7 +86,7 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp simd
 					for(sint i = idxmax[0]-1; i >= r.start; i--)
 					{
-						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
+						const sint idx = r.m->localFlattenedIndexAll(k,j,i);
 						const sint jdx[] = {
 							-1, -1, -1,
 							r.m->localFlattenedIndexAll(k,j,i),
@@ -100,9 +99,9 @@ SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const
 						// for(int is = STENCIL_DIAG + 1; is < NSTENCIL; is++)
 						// 	z.vals[jdx[3]] -= diaginv[idxr]*A.vals[is][idxr] * z.vals[jdx[is]];
 
-						z.vals[jdx[3]] = y[jdx[3]] - diaginv[idxr]*(A.vals[4][idxr]*z.vals[jdx[4]]
-						                                            + A.vals[5][idxr]*z.vals[jdx[5]]
-						                                            + A.vals[6][idxr]*z.vals[jdx[6]]);
+						z.vals[idx] = y[idx] - diaginv[idx] * ( A.vals[4][idx]*z.vals[jdx[4]]
+						                                        + A.vals[5][idx]*z.vals[jdx[5]]
+						                                        + A.vals[6][idx]*z.vals[jdx[6]]);
 					}
 		}
 	}
@@ -125,8 +124,8 @@ void SGS_preconditioner::updateOperator()
 #pragma omp simd
 			for(sint i = A.start; i < idxmax[0]; i++)
 			{
-				const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
-				diaginv[idxr] = 1.0/A.vals[STENCIL_DIAG][idxr];
+				const sint idx = A.m->localFlattenedIndexAll(k,j,i);
+				diaginv[idx] = 1.0/A.vals[STENCIL_DIAG][idx];
 			}
 }
 

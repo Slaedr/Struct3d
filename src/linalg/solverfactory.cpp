@@ -7,6 +7,7 @@
 #include "common_utils.hpp"
 #include "s3d_jacobi.hpp"
 #include "s3d_sgspreconditioners.hpp"
+#include "s3d_isai.hpp"
 #include "s3d_ilu.hpp"
 #include "s3d_gcr.hpp"
 #include "s3d_mr.hpp"
@@ -30,6 +31,7 @@ SolverBase *createSolver(const SMat& lhs)
 	SolveParams params;
 	params.rtol = petscoptions_get_real("-ksp_rtol");
 	params.maxiter = petscoptions_get_int("-ksp_max_it");
+	printf(" Max solver its = %d\n", params.maxiter);
 	try {
 		params.restart = petscoptions_get_int("-ksp_restart");
 	} catch(NonExistentPetscOpion& e) {
@@ -42,9 +44,8 @@ SolverBase *createSolver(const SMat& lhs)
 		printf("  Using Jacobi preconditioner\n");
 		prec = new JacobiPreconditioner(lhs);
 	}
-	else if(precstr == "sgs")
+	else if(precstr == "sgs" || precstr == "sgs_isai")
 	{
-		printf("  Using SGS preconditioner\n");
 		PreconParams pparams;
 		pparams.nbuildsweeps = 0;
 		pparams.napplysweeps = petscoptions_get_int("-s3d_pc_apply_sweeps");
@@ -56,7 +57,14 @@ SolverBase *createSolver(const SMat& lhs)
 			pparams.threadedapply = true;
 			printf(" WARNING: SolverFactory: Using threaded apply.\n");
 		}
-		prec = new SGS_preconditioner(lhs, pparams);
+		if(precstr == "sgs") {
+			printf("  Using SGS preconditioner\n");
+			prec = new SGS_preconditioner(lhs, pparams);
+		}
+		else {
+			printf("  Using SGS ISAI preconditioner\n");
+			prec = new SGS_ISAI_preconditioner(lhs, pparams);
+		}
 	}
 	else if(precstr == "strilu")
 	{

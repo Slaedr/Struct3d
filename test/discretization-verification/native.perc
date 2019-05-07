@@ -3,7 +3,7 @@
 -s3d_ksp_type richardson
 
 -ksp_rtol 1e-6
--ksp_max_it 1000
+-ksp_max_it 500
 
 -s3d_pc_type strilu
 -s3d_pc_use_threaded_build false

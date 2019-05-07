@@ -106,7 +106,7 @@ int PDEBase::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 				cindices[5] = {k,j+1,i,0};
 				cindices[6] = {k+1,j,i,0};
 
-				lhsmat_kernel(m, i,j,k, 1, values);
+				lhsmat_kernel(m, i+1,j+1,k+1, 1, values);
 
 #pragma omp critical
 				{
@@ -116,7 +116,7 @@ int PDEBase::computeLHSPetsc(const CartMesh *const m, DM da, Mat A) const
 
 	if(rank == 0)
 		printf("PDEBase: ComputeLHSPetsc: Done.\n");
-	
+
 	return ierr;
 }
 
@@ -126,15 +126,15 @@ SMat PDEBase::computeLHS(const CartMesh *const m) const
 
 	SMat A(m);
 
-	if(rank == 0)	
+	if(rank == 0)
 		printf("PDEBase: ComputeLHS: Setting values of the LHS matrix...\n");
 
-#pragma omp parallel for default(shared)
+#pragma omp parallel for collapse(2) default(shared)
 	for(PetscInt k = A.start; k < A.start+A.sz[2]; k++)
 		for(PetscInt j = A.start; j < A.start+A.sz[1]; j++)
 			for(PetscInt i = A.start; i < A.start+A.sz[0]; i++)
 			{
-				const sint idx = m->localFlattenedIndexReal(k,j,i);
+				const sint idx = m->localFlattenedIndexAll(k,j,i);
 
 				sreal values[NSTENCIL];
 				lhsmat_kernel(m, i,j,k, A.nghost, values);

@@ -61,9 +61,9 @@ PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt n
 	for(int i = 0; i < NDIM; i++)
 		npointotal *= npoind[i];
 
-	PetscInt nbpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
+	PetscInt ngpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
 		(npoind[1]-2)*(npoind[2]-2)*2;
-	ninpoin = npointotal-nbpoints;
+	nDomPoin = npointotal-ngpoints;
 
 	if(rank == 0)
 		std::printf("CartMesh: Setting up DMDA\n");
@@ -92,8 +92,8 @@ PetscErrorCode CartMesh::createMeshAndDMDA(const MPI_Comm comm, const PetscInt n
 		            M,N,P);
 		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
 		            nprocs[0], nprocs[1], nprocs[2]);
-		std::printf("CartMesh: Total points = %d, interior points = %d, partitions = %d\n", 
-		            npointotal, ninpoin, ntprocs);
+		std::printf("CartMesh: Total points = %d, domain points = %d, partitions = %d\n", 
+		            npointotal, nDomPoin, ntprocs);
 	}
 
 	return ierr;
@@ -124,9 +124,9 @@ PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])
 	for(int i = 0; i < NDIM; i++)
 		npointotal *= npoind[i];
 
-	sint nbpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
+	sint ngpoints = npoind[0]*npoind[1]*2 + (npoind[2]-2)*npoind[0]*2 + 
 		(npoind[1]-2)*(npoind[2]-2)*2;
-	ninpoin = npointotal-nbpoints;
+	nDomPoin = npointotal-ngpoints;
 	
 	nprocs[0] = nprocs[1] = nprocs[2] = 1;
 
@@ -142,8 +142,8 @@ PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])
 		            npoind[0], npoind[1], npoind[2]);
 		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
 		            nprocs[0], nprocs[1], nprocs[2]);
-		std::printf("CartMesh: Total points = %d, interior points = %d, partitions = %d\n", 
-		            npointotal, ninpoin, ntprocs);
+		std::printf("CartMesh: Total points = %d, domain points = %d, partitions = %d\n", 
+		            npointotal, nDomPoin, ntprocs);
 	}
 
 	return ierr;

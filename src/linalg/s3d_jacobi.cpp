@@ -20,9 +20,8 @@ SolveInfo JacobiPreconditioner::apply(const SVec& r, SVec& z) const
 #pragma omp simd
 			for(sint i = r.start; i < idxmax[0]; i++)
 			{
-				const sint idxr = r.m->localFlattenedIndexReal(k-1,j-1,i-1);
 				const sint idx = r.m->localFlattenedIndexAll(k,j,i);
-				z.vals[idx] = r.vals[idx] / A.vals[3][idxr];
+				z.vals[idx] = r.vals[idx] / A.vals[3][idx];
 			}
 
 	return {false, 1, 1.0};

@@ -13,7 +13,7 @@ convdiff
 Advection-velocity
 0.3 0.7 0
 Diffusion-coeff
-0.05
+0.07
 BC-types
 D D D D D D
 BC-values

@@ -92,14 +92,14 @@ int main(int argc, char* argv[])
 
 		SVec res(&m);
 		A.apply_res(b, uexact, res);
-		ress[imesh] = norm_vector_l2(res)/sqrt(m.gnpointotal());
+		ress[imesh] = norm_vector_l2(res)/sqrt(m.gnPoinTotal());
 
 		SolverBase *const solver = createSolver(A);
 		solver->updateOperator();
 		
 		SVec u(&m);
 		const SolveInfo sinfo = solver->apply(b, u);
-		//assert(sinfo.converged);
+		assert(sinfo.converged);
 
 		errors[imesh] = compute_error_L2(u,uexact);
 
@@ -133,13 +133,19 @@ int main(int argc, char* argv[])
 
 	if(cdata.pdetype == "poisson")
 		assert(resslope >= 1.9 && resslope <= 2.1);
-	else
-		assert(resslope >= 0.9 && resslope <= 1.1);
+	else {
+		assert(resslope >= 0.9);
+		if(cdata.gridtype == S3D_UNIFORM)
+			assert(resslope <= 1.1);
+	}
 
 	if(cdata.pdetype == "poisson")
 		assert(slope >= 1.9 && slope <= 2.1);
-	else
-		assert(slope >= 0.9 && slope <= 1.1);
+	else {
+		assert(slope >= 0.9);
+		if(cdata.gridtype == S3D_UNIFORM)
+			assert(slope <= 1.1);
+	}
 
 	PetscFinalize();
 	return ierr;

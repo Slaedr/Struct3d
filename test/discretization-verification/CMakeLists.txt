@@ -15,11 +15,6 @@ add_test(NAME CD_NativeGridConv_UniformGrid
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
   )
 
-add_test(NAME CDCirc_NativeGridConv_UniformGrid
-  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cdcirc-conv.control
-  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
-  )
-
 add_test(NAME Poisson_PetscGridConv_UniformGrid
   COMMAND ${MPIEXEC} -n 1 gridconv-petsc ${CMAKE_CURRENT_SOURCE_DIR}/poisson-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/petscsolver.perc
@@ -33,4 +28,18 @@ add_test(NAME Poisson_PetscGridConv_ChebyshevGrid
 add_test(NAME CD_PetscGridConv_UniformGrid
   COMMAND ${MPIEXEC} -n 2 gridconv-petsc ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/gen.perc
+  )
+
+# The following are kinda supposed to be solver tests
+
+add_test(NAME StructSolver_GridConv_CDCirc_UniformGrid_ILU0
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cdcirc-conv.control
+  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
+  -ksp_max_it 500 -s3d_ksp_type gcr -s3d_pc_apply_sweeps 2
+  )
+
+add_test(NAME StructSolver_GridConv_Poisson_UniformGrid_SGS-ISAI
+  COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/poisson-conv.control
+  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
+  -ksp_max_it 1000 -s3d_ksp_type richardson -s3d_pc_type sgs_isai -s3d_pc_apply_sweeps 1
   )

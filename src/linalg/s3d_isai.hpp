@@ -22,13 +22,7 @@ protected:
 
 private:
 	/// Temporary vector
-	SVec tres;
-
-	/// Multiply with the sparse approximate inverse of the unit lower triangular matrix
-	void multiply_isai_lower(const SVec& x, SVec& y) const;
-
-	/// Multiply with the sparse approximate inverse of the upper triangular matrix
-	void multiply_isai_upper(const SVec& x, SVec& y) const;
+	mutable std::vector<sreal> tres;
 };
 
 /// Symmetric Gauss-Seidel (SGS) preconditioner approximately applied by ISAI

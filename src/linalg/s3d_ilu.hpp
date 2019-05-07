@@ -16,6 +16,7 @@ public:
 	void updateOperator();
 
 protected:
+	[[deprecated]]
 	void updateOperatorWithSeparateLoops();
 };
 

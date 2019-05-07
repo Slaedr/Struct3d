@@ -4,26 +4,12 @@
 ISAI_preconditioner::ISAI_preconditioner(const SMat& lhs, const PreconParams parms)
 	: SolverBase(lhs, nullptr), params(parms)
 {
-	// FIXME: This size of diaginv will not do! Need padding for ghost points.
-	diaginv.reize((A.m->gnpoind(0)-2)*(A.m->gnpoind(1)-2)*(A.m->gnpoind(2)-2));
-	temp.init(A.m);
-}
+	diaginv.resize(A.m->gnPoinTotal());
 
-sreal ISAI_preconditioner::multiply_isai_lower(const sint idx, const sint idxr, const sint jdx[3],
-                                               const SVec& x) const
-{
-	return x[idx] - A.vals[0][idxr]*x[jdx[0]] - A.vals[1][idxr]*x[jdx[1]]
-		- A.vals[2][idxr]*x[jdx[2]];
-}
-
-sreal ISAI_preconditioner::multiply_isai_upper(const sint idx,const sint idxr,
-                                               const sint jdx[3], const sint jdxr[3],
-                                               const SVec& x) const
-{
-	return diaginv[idxr] * ( x[idx]
-	                         - A.vals[4][idxr]*x[jdx[0]] * diaginv[jdxr[0]]
-	                         - A.vals[5][idxr]*x[jdx[1]] * diaginv[jdxr[1]]
-	                         - A.vals[6][idxr]*x[jdx[2]] * diaginv[jdxr[2]] );
+	tres.resize(A.m->gnPoinTotal());
+#pragma omp parallel for simd default(shared)
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+		tres[i] = 0;
 }
 
 SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
@@ -31,22 +17,20 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 	if(r.m != z.m || r.m != A.m)
 		throw std::runtime_error("apply: Vectors and matrix must be defined over the same mesh!");
 
-	const int ng = r.nghost;
-	assert(ng == 1);
-
 	/* Temporary vector for application. Same size as arguments to apply().
 	 * It's best for this vector to be initialized to zero before every application.
 	 */
-	s3d::vector<sreal> y(A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
+	s3d::vector<sreal> y(A.m->gnPoinTotal());
 #pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
 		y[i] = 0;
 	
 	const sint idxmax[3] = {r.start + r.sz[0], r.start + r.sz[1], r.start + r.sz[2]};
 
-#pragma omp parallel default(shared) if(params.threadedapply)
+	// Lower triangular solve
+	for(int iswp = 0; iswp < params.napplysweeps; iswp++)
 	{
-		for(int iswp = 0; iswp < params.napplysweeps; iswp++)
+#pragma omp parallel default(shared) if(params.threadedapply)
 		{
 			// Compute the triangular solve residual
 			//  tres = r - y - L D^{-1} y
@@ -62,17 +46,11 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 							r.m->localFlattenedIndexAll(k,j-1,i),
 							r.m->localFlattenedIndexAll(k-1,j,i),
 						};
-						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
-						const sint jdxr[] = {
-							x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng-1),
-							x.m->localFlattenedIndexReal(k-ng,j-ng-1,i-ng),
-							x.m->localFlattenedIndexReal(k-ng-1,j-ng,i-ng),
-						};
 
-						tres[idx] = r.vals[idx] - y.vals[idx]
-							- A.vals[0][idxr]*y[jdx[0]] * diaginv[jdxr[0]]
-							- A.vals[1][idxr]*y[jdx[1]] * diaginv[jdxr[1]]
-							- A.vals[2][idxr]*y[jdx[2]] * diaginv[jdxr[2]];
+						tres[idx] = r.vals[idx] - y[idx]
+							- A.vals[0][idx]*y[jdx[0]] * diaginv[jdx[0]]
+							- A.vals[1][idx]*y[jdx[1]] * diaginv[jdx[1]]
+							- A.vals[2][idx]*y[jdx[2]] * diaginv[jdx[2]];
 					}
 
 			// multiply the residual temp with the approximate inverse and update, as
@@ -89,20 +67,31 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 							r.m->localFlattenedIndexAll(k,j-1,i),
 							r.m->localFlattenedIndexAll(k-1,j,i),
 						};
-						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 
 						y[idx] += tres[idx]
-							- A.vals[0][idxr]*tres[jdx[0]]
-							- A.vals[1][idxr]*tres[jdx[1]]
-							- A.vals[2][idxr]*tres[jdx[2]];
+							- A.vals[0][idx]*tres[jdx[0]]*diaginv[jdx[0]]
+							- A.vals[1][idx]*tres[jdx[1]]*diaginv[jdx[1]]
+							- A.vals[2][idx]*tres[jdx[2]]*diaginv[jdx[2]];
 					}
 		}
 
-#pragma omp parallel for simd default(shared)
-		for(sint i = 0; i < A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2); i++)
-			z.vals[i] = y[i];
+// 		sreal tresnorm = 0;
+// #pragma omp parallel for simd reduction(+:tresnorm)
+// 		for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+// 			tresnorm += tres[i]*tres[i];
+// 		tresnorm = std::sqrt(tresnorm);
+// 		printf("   ISAI lower: Iter %d, tresnorm = %6g\n", iswp, tresnorm);
+	}
 
-		for(int iswp = 0; iswp < params.napplysweeps; iswp++)
+#pragma omp parallel for simd default(shared)
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+		z.vals[i] = 0;
+
+		// Upper triangular solve
+
+	for(int iswp = 0; iswp < params.napplysweeps; iswp++)
+	{
+#pragma omp parallel default(shared) if(params.threadedapply)
 		{
 			// tres = y - D z - U z
 #pragma omp for collapse(2) schedule(static, params.thread_chunk_size)
@@ -117,12 +106,11 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 							r.m->localFlattenedIndexAll(k,j+1,i),
 							r.m->localFlattenedIndexAll(k+1,j,i)
 						};
-						const sint idxr = r.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
 
-						tres[idx] = y.vals[idx] - z.vals[idx]/diaginv[idxr]
-							- A.vals[0][idxr]*z[jdx[0]]
-							- A.vals[1][idxr]*z[jdx[1]]
-							- A.vals[2][idxr]*z[jdx[2]];
+						tres[idx] = y[idx] - z.vals[idx]/diaginv[idx]
+							- A.vals[4][idx]*z.vals[jdx[0]]
+							- A.vals[5][idx]*z.vals[jdx[1]]
+							- A.vals[6][idx]*z.vals[jdx[2]];
 					}
 
 			// z = z + M tres
@@ -138,18 +126,20 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 							r.m->localFlattenedIndexAll(k,j+1,i),
 							r.m->localFlattenedIndexAll(k+1,j,i)
 						};
-						const sint jdxr[] = {
-							x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng+1),
-							x.m->localFlattenedIndexReal(k-ng,j-ng+1,i-ng),
-							x.m->localFlattenedIndexReal(k-ng+1,j-ng,i-ng),
-						};
 
-						z.vals[jdx[3]] += diaginv[idxr] * ( tres[idx]
-						                                    - A.vals[4][idxr]*tres.vals[jdx[0]]
-						                                    - A.vals[5][idxr]*tres.vals[jdx[1]]
-						                                    - A.vals[6][idxr]*tres.vals[jdx[2]] );
+						z.vals[idx] += diaginv[idx]
+							* ( tres[idx] - (A.vals[4][idx]   *tres[jdx[0]]*diaginv[jdx[0]]
+							                 + A.vals[5][idx] *tres[jdx[1]]*diaginv[jdx[1]]
+							                 + A.vals[6][idx] *tres[jdx[2]]*diaginv[jdx[2]] ));
 					}
 		}
+
+// 		sreal tresnorm = 0;
+// #pragma omp parallel for simd reduction(+:tresnorm)
+// 		for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+// 			tresnorm += tres[i]*tres[i];
+// 		tresnorm = std::sqrt(tresnorm);
+// 		printf("   ISAI upper: Iter %d, tresnorm = %6g\n", iswp, tresnorm);
 	}
 
 	return {false, 1, -1.0};
@@ -170,7 +160,7 @@ void SGS_ISAI_preconditioner::updateOperator()
 #pragma omp simd
 			for(sint i = A.start; i < idxmax[0]; i++)
 			{
-				const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
-				diaginv[idxr] = 1.0/A.vals[STENCIL_DIAG][idxr];
+				const sint idx = A.m->localFlattenedIndexAll(k,j,i);
+				diaginv[idx] = 1.0/A.vals[STENCIL_DIAG][idx];
 			}
 }
