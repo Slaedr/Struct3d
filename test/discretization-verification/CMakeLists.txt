@@ -12,7 +12,7 @@ add_test(NAME Poisson_NativeGridConv_UniformGrid
 
 add_test(NAME CD_NativeGridConv_UniformGrid
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
-  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc -ksp_max_it 550
+  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
   )
 
 add_test(NAME Poisson_PetscGridConv_UniformGrid
