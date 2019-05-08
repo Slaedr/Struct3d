@@ -12,7 +12,7 @@ add_test(NAME Poisson_NativeGridConv_UniformGrid
 
 add_test(NAME CD_NativeGridConv_UniformGrid
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
-  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
+  -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc -ksp_max_it 550
   )
 
 add_test(NAME Poisson_PetscGridConv_UniformGrid
@@ -53,5 +53,6 @@ add_test(NAME StructSolver_GridConv_CD_UniformGrid_SGS-ISAI
 add_test(NAME StructSolver_GridConv_CD_UniformGrid_ILU0-ISAI
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
-  -ksp_max_it 1200 -s3d_ksp_type richardson -s3d_pc_type ilu_isai -s3d_pc_apply_sweeps 5
+  -ksp_max_it 1000 -s3d_ksp_type richardson -s3d_pc_type ilu_isai
+  -s3d_pc_build_sweeps 1 -s3d_pc_apply_sweeps 1
   )

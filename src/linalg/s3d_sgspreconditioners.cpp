@@ -11,6 +11,9 @@ SGS_like_preconditioner::SGS_like_preconditioner(const SMat& lhs, const PreconPa
 	assert(A.m->gnPoinTotal() == A.m->gnpoind(0)*A.m->gnpoind(1)*A.m->gnpoind(2));
 
 	diaginv.resize(A.m->gnPoinTotal());
+#pragma omp parallel for simd
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+		diaginv[i] = 1.0;
 }
 
 SolveInfo SGS_like_preconditioner::apply(const SVec& r, SVec& z) const

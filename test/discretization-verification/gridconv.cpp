@@ -4,6 +4,7 @@
 #undef NDEBUG
 #include <vector>
 #include <cassert>
+#include <fenv.h>
 
 #include "pde/pdefactory.hpp"
 #include "common_utils.hpp"
@@ -12,6 +13,10 @@
 
 int main(int argc, char* argv[])
 {
+#ifdef DEBUG
+	feenableexcept(FE_DIVBYZERO | FE_INVALID);
+#endif
+	
 	using namespace std;
 
 	if(argc < 3) {

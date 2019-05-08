@@ -5,13 +5,15 @@ ISAI_preconditioner::ISAI_preconditioner(const SMat& lhs, const PreconParams par
 	: SolverBase(lhs, nullptr), params(parms)
 {
 	diaginv.resize(A.m->gnPoinTotal());
-
 	tres.resize(A.m->gnPoinTotal());
 	y.resize(A.m->gnPoinTotal());
+
 #pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < A.m->gnPoinTotal(); i++) {
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+	{
 		tres[i] = 0;
 		y[i] = 0;
+		diaginv[i] = 1.0;
 	}
 }
 
@@ -81,7 +83,7 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 		}
 
 // 		sreal tresnorm = 0;
-// #pragma omp parallel for simd reduction(+:tresnorm)
+// #pragma omp parallel for default(shared) reduction(+:tresnorm)
 // 		for(sint i = 0; i < A.m->gnPoinTotal(); i++)
 // 			tresnorm += tres[i]*tres[i];
 // 		tresnorm = std::sqrt(tresnorm);
@@ -141,7 +143,7 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 		}
 
 // 		sreal tresnorm = 0;
-// #pragma omp parallel for simd reduction(+:tresnorm)
+// #pragma omp parallel for default(shared) reduction(+:tresnorm)
 // 		for(sint i = 0; i < A.m->gnPoinTotal(); i++)
 // 			tresnorm += tres[i]*tres[i];
 // 		tresnorm = std::sqrt(tresnorm);

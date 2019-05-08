@@ -6,12 +6,22 @@
 
 void async_ilu0(const SMat& A, const PreconParams params, s3d::vector<sreal>& diaginv)
 {
-	// initialize
-#pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
-		diaginv[i] = A.vals[STENCIL_DIAG][i];
-	
 	const sint idxmax[3] = {A.start + A.sz[0], A.start + A.sz[1], A.start + A.sz[2]};
+
+	// initialize
+// #pragma omp parallel for simd default(shared)
+// 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
+// 		diaginv[i] = A.vals[STENCIL_DIAG][i];
+
+#pragma omp for collapse(2) schedule(static)
+	for(sint k = A.start; k < idxmax[2]; k++)
+		for(sint j = A.start; j < idxmax[1]; j++)
+#pragma omp simd
+			for(sint i = A.start; i < idxmax[0]; i++)
+			{
+				const sint idx = A.m->localFlattenedIndexAll(k,j,i);
+				diaginv[idx] = A.vals[STENCIL_DIAG][idx];
+			}
 
 #pragma omp parallel default(shared) if(params.threadedbuild)
 	{
