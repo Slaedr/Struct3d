@@ -7,9 +7,12 @@ ISAI_preconditioner::ISAI_preconditioner(const SMat& lhs, const PreconParams par
 	diaginv.resize(A.m->gnPoinTotal());
 
 	tres.resize(A.m->gnPoinTotal());
+	y.resize(A.m->gnPoinTotal());
 #pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++) {
 		tres[i] = 0;
+		y[i] = 0;
+	}
 }
 
 SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
@@ -17,13 +20,15 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 	if(r.m != z.m || r.m != A.m)
 		throw std::runtime_error("apply: Vectors and matrix must be defined over the same mesh!");
 
-	/* Temporary vector for application. Same size as arguments to apply().
-	 * It's best for this vector to be initialized to zero before every application.
+	/** It is somewhat more reliable to initialize y to zero. It may sometimes work better
+	 * without that, though.
+	 * The z vector needs to be initialized to zero.
 	 */
-	s3d::vector<sreal> y(A.m->gnPoinTotal());
 #pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
+	for(sint i = 0; i < A.m->gnPoinTotal(); i++) {
 		y[i] = 0;
+		z.vals[i] = 0;
+	}
 	
 	const sint idxmax[3] = {r.start + r.sz[0], r.start + r.sz[1], r.start + r.sz[2]};
 
@@ -83,9 +88,10 @@ SolveInfo ISAI_preconditioner::apply(const SVec& r, SVec& z) const
 // 		printf("   ISAI lower: Iter %d, tresnorm = %6g\n", iswp, tresnorm);
 	}
 
-#pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < A.m->gnPoinTotal(); i++)
-		z.vals[i] = 0;
+// #pragma omp parallel for simd default(shared)
+// 	for(sint i = 0; i < A.m->gnPoinTotal(); i++) {
+// 		z.vals[i] = 0;
+// 	}
 
 		// Upper triangular solve
 

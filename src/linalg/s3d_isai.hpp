@@ -27,8 +27,10 @@ protected:
 	const PreconParams params;
 
 private:
-	/// Temporary vector
-	mutable std::vector<sreal> tres;
+	/// Temporary vector to store triangular system residual
+	mutable s3d::vector<sreal> tres;
+	/// Solution of forward triangular solve
+	mutable s3d::vector<sreal> y;
 };
 
 /// Symmetric Gauss-Seidel (SGS) preconditioner approximately applied by ISAI

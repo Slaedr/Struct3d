@@ -47,7 +47,7 @@ add_test(NAME StructSolver_GridConv_Poisson_UniformGrid_SGS-ISAI
 add_test(NAME StructSolver_GridConv_CD_UniformGrid_SGS-ISAI
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cd-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
-  -ksp_max_it 1200 -s3d_ksp_type mr -s3d_pc_type sgs_isai -s3d_pc_apply_sweeps 1
+  -ksp_max_it 200 -s3d_ksp_type gcr -s3d_pc_type sgs_isai -s3d_pc_apply_sweeps 1
   )
 
 add_test(NAME StructSolver_GridConv_CD_UniformGrid_ILU0-ISAI
