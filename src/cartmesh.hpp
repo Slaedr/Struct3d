@@ -6,12 +6,13 @@
 #ifndef STRUCT3D_CARTMESH_H
 #define STRUCT3D_CARTMESH_H
 
-#include <petscdm.h>
-#include <petscdmda.h>
-
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cassert>
+
+#include <petscdm.h>
+#include <petscdmda.h>
 
 #include "struct3d_config.h"
 
@@ -36,7 +37,7 @@ protected:
 	sreal ** coords;			
 	
 	sint npointotal;                ///< Total number of points in the grid
-	sint ninpoin;                   ///< Number of internal (non-boundary) points
+	sint nDomPoin;                   ///< Number of internal (non-boundary) points
 	PetscReal h;                    ///< Mesh size parameter
 
 	// Stuff related to multiprocess
@@ -71,12 +72,7 @@ public:
 	/// Returns the number of points along a coordinate direction
 	PetscInt gnpoind(const int idim) const
 	{
-#if DEBUG == 1
-		if(idim >= NDIM) {
-			std::printf("! Cartmesh: gnpoind(): Invalid dimension %d!\n", idim);
-			return 0;
-		}
-#endif
+		assert(idim < NDIM);
 		return npoind[idim];
 	}
 
@@ -88,23 +84,13 @@ public:
 	 */
 	PetscReal gcoords(const int idim, const sint ipoin) const
 	{
-#if DEBUG == 1
-		if(idim >= NDIM) 
-		{
-			std::printf("! Cartmesh: gcoords(): Invalid dimension!\n");
-			return 0;
-		}
-		if(ipoin >= npoind[idim]) 
-		{
-			std::printf("! Cartmesh: gcoords(): Point does not exist!\n");
-			return 0;
-		}
-#endif
+		assert(idim < NDIM);
+		assert(ipoin < npoind[idim]);
 		return coords[idim][ipoin];
 	}
 
-	PetscInt gnpointotal() const { return npointotal; }
-	PetscInt gninpoin() const { return ninpoin; }
+	PetscInt gnPoinTotal() const { return npointotal; }
+	PetscInt gnDomPoin() const { return nDomPoin; }
 	PetscReal gh() const { return h; }
 
 	const sint *pointer_npoind() const
@@ -138,6 +124,7 @@ public:
 
 	/// Returns the flattened 1D index of point at index (i,j,k). Excludes ghost points.
 	/// \warning Note the reversed argument order.
+	[[deprecated]]
 	sint localFlattenedIndexReal(const sint k, const sint j, const sint i) const
 		__attribute__((always_inline))
 	{

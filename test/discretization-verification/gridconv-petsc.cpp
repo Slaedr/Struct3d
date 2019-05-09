@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 		ierr = VecAXPY(res, -1.0, b); CHKERRQ(ierr);
 		sreal defect;
 		ierr = VecNorm(res, NORM_2, &defect); CHKERRQ(ierr);
-		defect /= sqrt(m.gnpointotal());
+		defect /= sqrt(m.gnPoinTotal());
 		if(rank==0)
 			printf("Defect = %f\n", defect);
 		ress[imesh] = defect;

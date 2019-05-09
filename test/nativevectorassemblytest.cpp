@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 		for(sint j = u1.start; j < u1.start+u1.sz[1]; j++)
 			for(sint i = u1.start; i < u1.start+u1.sz[0]; i++)
 			{
-				const sint idx = m2.localFlattenedIndexReal(k-1,j-1,i-1);
+				const sint idx = m2.localFlattenedIndexAll(k,j,i);
 
 				assert(std::abs(A1.vals[3][idx] - 6.0/(dx*dx))
 				       <= 100*std::numeric_limits<sreal>::epsilon());

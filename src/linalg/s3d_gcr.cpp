@@ -58,6 +58,8 @@ SolveInfo GCR::apply(const SVec& b, SVec& x) const
 				break;
 			if(k == north-1)
 				break;
+			if(step >= sparams.maxiter)
+				break;
 
 			starttime = MPI_Wtime();
 			prec->apply(res, z);

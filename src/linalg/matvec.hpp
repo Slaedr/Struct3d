@@ -46,8 +46,8 @@ struct SVec
 	/// Number of 'real' points in each direction (0 is i, 1 is j and 2 is k)
 	std::array<sint,NDIM> sz;
 
-	/// 3D storage - access the value at point (i,j,k) as vals[localFlattenedIndex(k,j,i)]
-	/** \sa CartMesh::localFlattenedIndex
+	/// 3D storage - access the value at point (i,j,k) as vals[localFlattenedIndexAll(k,j,i)]
+	/** \sa CartMesh::localFlattenedIndexAll
 	 */
 	s3d::vector<sreal> vals;
 };
@@ -88,7 +88,7 @@ struct SMat
 	s3d::vector<sreal> vals[NSTENCIL];
 };
 
-/// x[:] <- a
+/// x <- a
 void vecset(const sreal a, SVec& x);
 
 /// y <- x

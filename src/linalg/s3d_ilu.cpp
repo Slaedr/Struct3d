@@ -4,26 +4,24 @@
 
 #include "s3d_ilu.hpp"
 
-StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams parms)
-	: SGS_like_preconditioner(lhs, parms)
+void async_ilu0(const SMat& A, const PreconParams params, s3d::vector<sreal>& diaginv)
 {
-}
-
-void StrILU_preconditioner::updateOperator()
-{
-	updateOperatorWithBranchingInLoop();
-}
-
-void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
-{
-	/* NOTE: We need to use a signed index type for LLVM's vectorizer to vectorize loops
-	 */
-	// initialize
-#pragma omp parallel for simd default(shared)
-	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
-		diaginv[i] = A.vals[STENCIL_DIAG][i];
-	
 	const sint idxmax[3] = {A.start + A.sz[0], A.start + A.sz[1], A.start + A.sz[2]};
+
+	// initialize
+// #pragma omp parallel for simd default(shared)
+// 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
+// 		diaginv[i] = A.vals[STENCIL_DIAG][i];
+
+#pragma omp for collapse(2) schedule(static)
+	for(sint k = A.start; k < idxmax[2]; k++)
+		for(sint j = A.start; j < idxmax[1]; j++)
+#pragma omp simd
+			for(sint i = A.start; i < idxmax[0]; i++)
+			{
+				const sint idx = A.m->localFlattenedIndexAll(k,j,i);
+				diaginv[idx] = A.vals[STENCIL_DIAG][idx];
+			}
 
 #pragma omp parallel default(shared) if(params.threadedbuild)
 	{
@@ -35,23 +33,23 @@ void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
 #pragma omp simd
 					for(sint i = A.start; i < idxmax[0]; i++)
 					{
-						const sint idxr = A.m->localFlattenedIndexReal(k,j,i);
-						const sint jdx[] = { A.m->localFlattenedIndexReal(k,j,i-1),
-						                     A.m->localFlattenedIndexReal(k,j-1,i),
-						                     A.m->localFlattenedIndexReal(k-1,j,i)};
+						const sint idx = A.m->localFlattenedIndexAll(k,j,i);
+						const sint jdx[] = { A.m->localFlattenedIndexAll(k,j,i-1),
+						                     A.m->localFlattenedIndexAll(k,j-1,i),
+						                     A.m->localFlattenedIndexAll(k-1,j,i)};
 						// diag
-						diaginv[idxr] = A.vals[STENCIL_DIAG][idxr];
+						diaginv[idx] = A.vals[STENCIL_DIAG][idx];
 						// i-dir
-						if(i > 0)
-							diaginv[idxr] -= A.vals[0][idxr] * A.vals[4][jdx[0]]
+						if(i > A.start)
+							diaginv[idx] -= A.vals[0][idx] * A.vals[4][jdx[0]]
 								/ diaginv[jdx[0]];
 						// j-dir
-						if(j > 0)
-							diaginv[idxr] -= A.vals[1][idxr] * A.vals[5][jdx[1]]
+						if(j > A.start)
+							diaginv[idx] -= A.vals[1][idx] * A.vals[5][jdx[1]]
 								/ diaginv[jdx[1]];
 						// k-dir
-						if(k > 0)
-							diaginv[idxr] -= A.vals[2][idxr] * A.vals[6][jdx[2]]
+						if(k > A.start)
+							diaginv[idx] -= A.vals[2][idx] * A.vals[6][jdx[2]]
 								/ diaginv[jdx[2]];
 					}
 		}
@@ -61,6 +59,26 @@ void StrILU_preconditioner::updateOperatorWithBranchingInLoop()
 #pragma omp parallel for simd default(shared)
 	for(sint i = 0; i < static_cast<sint>(diaginv.size()); i++)
 		diaginv[i] = 1.0/diaginv[i];
+}
+
+StrILU_preconditioner::StrILU_preconditioner(const SMat& lhs, const PreconParams parms)
+	: SGS_like_preconditioner(lhs, parms)
+{
+}
+
+void StrILU_preconditioner::updateOperator()
+{
+	async_ilu0(A, params, diaginv);
+}
+
+AILU_ISAI_preconditioner::AILU_ISAI_preconditioner(const SMat& lhs, const PreconParams parms)
+	: ISAI_preconditioner(lhs, parms)
+{
+}
+
+void AILU_ISAI_preconditioner::updateOperator()
+{
+	async_ilu0(A, params, diaginv);
 }
 
 #if 0

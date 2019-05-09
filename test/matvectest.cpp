@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 		printf("  Difference between apply_res and apply = %g.\n", diffnorm);
 		assert(diffnorm < 1e-14);
 
-		const sreal defectnorm = norm_vector_l2(res)/sqrt(m.gnpointotal());
+		const sreal defectnorm = norm_vector_l2(res)/sqrt(m.gnPoinTotal());
 		printf("Defect = %f\n", defectnorm);
 
 		h[imesh] = 1.0/pow(2.0,imesh);

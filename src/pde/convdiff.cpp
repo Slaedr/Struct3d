@@ -50,7 +50,8 @@ ConvDiff::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, con
                         const sint nghost, sreal *const __restrict v) const
 {
 	// 1-offset indices for mesh coords access
-	const sint I = i + nghost, J = j + nghost, K = k + nghost;
+	//const sint I = i + nghost, J = j + nghost, K = k + nghost;
+	const sint I = i, J = j, K = k;
 
 	const sreal drm[NDIM] = { m->gcoords(0,I)-m->gcoords(0,I-1),
 	                          m->gcoords(1,J)-m->gcoords(1,J-1),

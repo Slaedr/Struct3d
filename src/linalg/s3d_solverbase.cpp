@@ -55,6 +55,10 @@ SolveInfo Richardson::apply(const SVec& b, SVec& x) const
 	SolveInfo info;
 	info.precapplywtime = 0;
 
+	printf("      Step        Rel res    \n");
+	printf("-----------------------------\n");
+	fflush(stdout);
+
 	while(resnorm/bnorm > sparams.rtol && step < sparams.maxiter)
 	{
 		sreal starttime = MPI_Wtime();
@@ -67,7 +71,7 @@ SolveInfo Richardson::apply(const SVec& b, SVec& x) const
 		resnorm = norm_vector_l2(res);
 
 		if(step % 10 == 0) {
-			printf("      Step %d: Rel res = %g\n", step, resnorm/bnorm);
+			printf("        %4d          %.6e\n", step, resnorm/bnorm);
 			fflush(stdout);
 		}
 		step++;

@@ -61,7 +61,8 @@ ConvDiffCirc::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j,
                             const sint nghost, sreal *const __restrict v) const
 {
 	// 1-offset indices for mesh coords access
-	const sint I = i + nghost, J = j + nghost, K = k + nghost;
+	//const sint I = i + nghost, J = j + nghost, K = k + nghost;
+	const sint I = i, J = j, K = k;
 
 	const sreal drm[NDIM] = { m->gcoords(0,I)-m->gcoords(0,I-1),
 	                          m->gcoords(1,J)-m->gcoords(1,J-1),
@@ -75,28 +76,28 @@ ConvDiffCirc::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j,
 
 	// diffusion
 	v[3] = 0;
-	for(int j = 0; j < NDIM; j++)
+	for(int jd = 0; jd < NDIM; jd++)
 	{
-		v[j] = -1.0/( drm[j]*0.5*drs[j] );            // lower
-		v[3] += 2.0/drs[j]*(1.0/drp[j]+1.0/drm[j]);   // diagonal
-		v[4+j] = -1.0/( drp[j]*0.5*drs[j] );          // upper
+		v[jd] = -1.0/( drm[jd]*0.5*drs[jd] );            // lower
+		v[3] += 2.0/drs[jd]*(1.0/drp[jd]+1.0/drm[jd]);   // diagonal
+		v[4+jd] = -1.0/( drp[jd]*0.5*drs[jd] );          // upper
 	}
 
-	for(int j = 0; j < NSTENCIL; j++)
-		v[j] *= mu;
+	for(int js = 0; js < NSTENCIL; js++)
+		v[js] *= mu;
 
 	const sreal r[NDIM] = {m->gcoords(0,I), m->gcoords(1,J), m->gcoords(2,K)};
 	const std::array<sreal,NDIM> b = advectionVel(r);
 
 	// upwind advection
-	for(int j = 0; j < NDIM; j++) {
+	for(int jd = 0; jd < NDIM; jd++) {
 		if(b[j]>=0) {
-			v[j] -= b[j]/drm[j];
-			v[3] += b[j]/drm[j];
+			v[jd] -= b[jd]/drm[jd];
+			v[3] += b[jd]/drm[jd];
 		}
 		else {
-			v[j+4] += b[j]/drp[j];
-			v[3] -= b[j]/drp[j];
+			v[jd+4] += b[jd]/drp[jd];
+			v[3] -= b[jd]/drp[jd];
 		}
 	}
 }

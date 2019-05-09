@@ -35,34 +35,34 @@ void SVec::init(const CartMesh *const mesh)
 	}
 
 	// allocate space for all points, real and ghost
-	const sint ssize = (m->gnpoind(2))*(m->gnpoind(1))*(m->gnpoind(0));
-	vals.resize(ssize);
+	vals.resize(m->gnPoinTotal());
 
 	// initialize to zero
 #pragma omp parallel for simd
-	for(sint i = 0; i < ssize; i++)
+	for(sint i = 0; i < m->gnPoinTotal(); i++)
 		vals[i] = 0;
 }
 
-/** Assumes compact stencil. No extra space is allocated.
+/** Assumes compact stencil. A row is allocated for each point, real or ghost.
  */
-SMat::SMat(const CartMesh *const mesh) : m{mesh}, start{0}, nghost{1},
+SMat::SMat(const CartMesh *const mesh) : m{mesh}, start{1}, nghost{1},
                                          sz{m->gnpoind(0)-2, m->gnpoind(1)-2, m->gnpoind(2)-2}
 {
 	if(m->gnghost() != nghost) {
 		throw std::runtime_error("Num ghost points don't match between SMat and mesh!");
 	}
 	for(int i = 0; i < NSTENCIL; i++)
-		vals[i].resize((m->gnpoind(2)-2)*(m->gnpoind(1)-2)*(m->gnpoind(0)-2));
+		vals[i].resize(m->gnPoinTotal());
+
+	for(int i = 0; i < NSTENCIL; i++)
+		for(int j = 0; j < m->gnPoinTotal(); j++)
+			vals[i][j] = 0;
 }
 
 void SMat::apply(const SVec& x, SVec& y) const
 {
 	if(x.m != y.m)
 		throw std::runtime_error("Both vectors should be defined over the same mesh!");
-
-	const int ng = x.nghost;
-	assert(ng == 1);
 
 	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
@@ -72,7 +72,7 @@ void SMat::apply(const SVec& x, SVec& y) const
 #pragma omp simd
 			for(sint i = x.start; i < idxmax[0]; i++)
 			{
-				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
+				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				const sint jdx[] = {
 					x.m->localFlattenedIndexAll(k,j,i-1),
 					x.m->localFlattenedIndexAll(k,j-1,i),
@@ -90,13 +90,13 @@ void SMat::apply(const SVec& x, SVec& y) const
 				// for(int is = 0; is < NSTENCIL; is++)
 				// 	y.vals[jdx[3]] += vals[is][idxr] * x.vals[jdx[is]];
 
-				y.vals[jdx[3]] = vals[0][idxr]*x.vals[jdx[0]]
-					+ vals[1][idxr]*x.vals[jdx[1]]
-					+ vals[2][idxr]*x.vals[jdx[2]]
-					+ vals[3][idxr]*x.vals[jdx[3]]
-					+ vals[4][idxr]*x.vals[jdx[4]]
-					+ vals[5][idxr]*x.vals[jdx[5]]
-					+ vals[6][idxr]*x.vals[jdx[6]];
+				y.vals[idx] = vals[0][idx]*x.vals[jdx[0]]
+					+ vals[1][idx]*x.vals[jdx[1]]
+					+ vals[2][idx]*x.vals[jdx[2]]
+					+ vals[3][idx]*x.vals[jdx[3]]
+					+ vals[4][idx]*x.vals[jdx[4]]
+					+ vals[5][idx]*x.vals[jdx[5]]
+					+ vals[6][idx]*x.vals[jdx[6]];
 			}
 }
 
@@ -104,9 +104,6 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 {
 	if(x.m != y.m || x.m != b.m || x.m != m)
 		throw std::runtime_error("All vectors and matrix should be defined over the same mesh!");
-
-	const int ng = x.nghost;
-	assert(ng == 1);
 	
 	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
@@ -116,7 +113,7 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 #pragma omp simd
 			for(sint i = x.start; i < idxmax[0]; i++)
 			{
-				const sint idxr = x.m->localFlattenedIndexReal(k-ng,j-ng,i-ng);
+				const sint idx = x.m->localFlattenedIndexAll(k,j,i);
 				const sint jdx[] = {
 					x.m->localFlattenedIndexAll(k,j,i-1),
 					x.m->localFlattenedIndexAll(k,j-1,i),
@@ -127,21 +124,20 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 					x.m->localFlattenedIndexAll(k+1,j,i)
 				};
 
-				y.vals[jdx[3]] = b.vals[jdx[3]];
-
 				/* It turns out both GCC 8.2 and Clang 7 need the following loop manually unrolled
 				 * in order to vectorize the i loop.
 				 */ 
+				// y.vals[idx] = b.vals[idx];
 				// for(int is = 0; is < NSTENCIL; is++)
 				// 	y.vals[jdx[3]] -= vals[is][idxr] * x.vals[jdx[is]];
 
-				y.vals[jdx[3]] -= vals[0][idxr]*x.vals[jdx[0]]
-					+ vals[1][idxr]*x.vals[jdx[1]]
-					+ vals[2][idxr]*x.vals[jdx[2]]
-					+ vals[3][idxr]*x.vals[jdx[3]]
-					+ vals[4][idxr]*x.vals[jdx[4]]
-					+ vals[5][idxr]*x.vals[jdx[5]]
-					+ vals[6][idxr]*x.vals[jdx[6]];
+				y.vals[idx] = b.vals[idx] - ( vals[0][idx]*x.vals[jdx[0]]
+				                              + vals[1][idx]*x.vals[jdx[1]]
+				                              + vals[2][idx]*x.vals[jdx[2]]
+				                              + vals[3][idx]*x.vals[jdx[3]]
+				                              + vals[4][idx]*x.vals[jdx[4]]
+				                              + vals[5][idx]*x.vals[jdx[5]]
+				                              + vals[6][idx]*x.vals[jdx[6]] );
 			}
 }
 
