@@ -252,21 +252,65 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(MPI REQUIRED)
 include_directories(${MPI_C_INCLUDE_PATH} ${MPI_CXX_INCLUDE_PATH})
 
+if(WITH_PETSC)
 # PETSc
-# If PETSc variables were not passed to CMake, set them from environment variables
-if(NOT DEFINED PETSC_DIR)
-  set(PETSC_DIR $ENV{PETSC_DIR} CACHE PATH "PETSc install directory")
+  # If PETSc variables were not passed to CMake, set them from environment variables
+  if(NOT DEFINED PETSC_DIR)
+	set(PETSC_DIR $ENV{PETSC_DIR} CACHE PATH "PETSc install directory")
+  endif()
+  if(NOT DEFINED PETSC_ARCH)
+	set(PETSC_ARCH $ENV{PETSC_ARCH} CACHE STRING "PETSc architecture to use")
+  endif()
+  find_library(PETSC_LIB NAMES petsc PATHS ${PETSC_DIR}/${PETSC_ARCH}/lib
+	DOC "Location of PETSc library")
+  include_directories(${PETSC_DIR}/include ${PETSC_DIR}/${PETSC_ARCH}/include)
+  message(STATUS "Building with PETSc found at ${PETSC_LIB}")
+else()
+  #Trilinos
+  if(NOT DEFINED TRILINOS_DIR)
+	set(TRILINOS_DIR $ENV{TRILINOS_DIR} CACHE PATH "Trilinos install directory")
+  endif()
+
+  # Tpetra
+  find_library(TPETRA_LIB NAMES tpetra PATHS ${TRILINOS_DIR}/lib
+	DOC "Location of Tpetra library")
+  if(${TPETRA_LIB} STREQUAL "TPETRA_LIB-NOTFOUND")
+	message(SEND_ERROR "Tpetra library not found!")
+  endif()
+
+  # Belos
+  find_library(BELOS_LIB NAMES belos PATHS ${TRILINOS_DIR}/lib
+	DOC "Location of Belos library")
+  if(${BELOS_LIB} STREQUAL "BELOS_LIB-NOTFOUND")
+	message(SEND_ERROR "Belos library not found!")
+  endif()
+
+  # Belos Tpetra
+  find_library(BELOSTPETRA_LIB NAMES belostpetra PATHS ${TRILINOS_DIR}/lib
+	DOC "Location of BelosTpetra library")
+  if(${BELOSTPETRA_LIB} STREQUAL "BELOSTPETRA_LIB-NOTFOUND")
+	message(SEND_ERROR "BelosTpetra library not found!")
+  endif()
+
+  #Ifpack 2
+  find_library(IFPACK2_LIB NAMES ifpack2 PATHS ${TRILINOS_DIR}/lib
+	DOC "Location of Ifpack2 library")
+  if(${IFPACK2_LIB} STREQUAL "IFPACK2_LIB-NOTFOUND")
+	message(SEND_ERROR "Ifpack2 library not found!")
+  endif()
+
+  find_library(IFPACK2-ADAPTERS_LIB NAMES ifpack2-adapters PATHS ${TRILINOS_DIR}/lib
+	DOC "Location of Ifpack2-adapters library")
+  if(${IFPACK2_LIB} STREQUAL "IFPACK2-ADAPTERS_LIB-NOTFOUND")
+	message(SEND_ERROR "Ifpack2-adapters library not found!")
+  endif()
+
+  include_directories(${TRILINOS_DIR}/include)
+  message(STATUS "Building with Trilinos found at ${TRILINOS_DIR}")
 endif()
-if(NOT DEFINED PETSC_ARCH)
-  set(PETSC_ARCH $ENV{PETSC_ARCH} CACHE STRING "PETSc architecture to use")
-endif()
-find_library(PETSC_LIB NAMES petsc PATHS ${PETSC_DIR}/${PETSC_ARCH}/lib
-  DOC "Location of PETSc library")
-include_directories(${PETSC_DIR}/include ${PETSC_DIR}/${PETSC_ARCH}/include)
-message(STATUS "Building with PETSc found at ${PETSC_LIB}")
 
 # BLASTed
-if(WITH_BLASTED)
+if(WITH_PETSC AND WITH_BLASTED)
   find_path(BLASTED_INCLUDE_DIR blasted_petsc.h PATHS ENV BLASTED_DIR PATH_SUFFIXES include
 	DOC "Include directory of BLASTed library")
   if(${BLASTED_INCLUDE_DIR} STREQUAL "BLASTED_INCLUDE_DIR-NOTFOUND")
