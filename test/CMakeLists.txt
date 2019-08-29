@@ -12,7 +12,7 @@ add_test(NAME Assembly
   )
 
 add_test(NAME MatVec
-  COMMAND ${MPIEXEC} -n 1 ./testmatvec
+	COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_CURRENT_BINARY_DIR}/testmatvec
   ${CMAKE_CURRENT_SOURCE_DIR}/discretization-verification/poisson-conv.control
   )
 
