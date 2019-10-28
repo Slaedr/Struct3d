@@ -129,10 +129,12 @@ SMat PDEBase::computeLHS(const CartMesh *const m) const
 	if(rank == 0)
 		printf("PDEBase: ComputeLHS: Setting values of the LHS matrix...\n");
 
+	const sint lend[3] = { A.start+A.sz[0], A.start+A.sz[1], A.start+A.sz[2] };
+
 #pragma omp parallel for collapse(2) default(shared)
-	for(PetscInt k = A.start; k < A.start+A.sz[2]; k++)
-		for(PetscInt j = A.start; j < A.start+A.sz[1]; j++)
-			for(PetscInt i = A.start; i < A.start+A.sz[0]; i++)
+	for(PetscInt k = A.start; k < lend[2]; k++)
+		for(PetscInt j = A.start; j < lend[1]; j++)
+			for(PetscInt i = A.start; i < lend[0]; i++)
 			{
 				const sint idx = m->localFlattenedIndexAll(k,j,i);
 
