@@ -343,7 +343,7 @@ if(WITH_PETSC AND WITH_BLASTED)
 	  message(WARNING "Don't know Fortran library for this compiler")
 	endif()
   endif(WITH_MC64)
-endif(WITH_BLASTED)
+endif()
 
 # -------------------------------------------------------------------------- #
 
