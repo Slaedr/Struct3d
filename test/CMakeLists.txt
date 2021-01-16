@@ -3,16 +3,16 @@
 add_executable(testnativeassembly nativevectorassemblytest.cpp)
 target_link_libraries(testnativeassembly pdes)
 
-add_executable(testmatvec matvectest.cpp)
-target_link_libraries(testmatvec pdes)
+add_executable(testresgridconv resgridconvtest.cpp)
+target_link_libraries(testresgridconv pdes)
 
 add_test(NAME Assembly
   COMMAND ${MPIEXEC} -n 1 ./testnativeassembly
   ${CMAKE_CURRENT_SOURCE_DIR}/input/poissonsmall.control
   )
 
-add_test(NAME MatVec
-	COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_CURRENT_BINARY_DIR}/testmatvec
+add_test(NAME ResidualGridConvergence
+	COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ${CMAKE_CURRENT_BINARY_DIR}/testresgridconv
   ${CMAKE_CURRENT_SOURCE_DIR}/discretization-verification/poisson-conv.control
   )
 
