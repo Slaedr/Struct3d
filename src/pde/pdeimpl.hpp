@@ -113,15 +113,16 @@ public:
 		PetscInt start[NDIM], lsize[NDIM];
 		ierr = DMDAGetCorners(da, &start[0], &start[1], &start[2], &lsize[0], &lsize[1], &lsize[2]);
 		CHKERRQ(ierr);
+		const PetscInt end[NDIM] {start[0]+lsize[0], start[1]+lsize[1], start[2]+lsize[2]};
 
 		// get local data that can be accessed by global indices
 		PetscReal *** rhs;
 		ierr = DMDAVecGetArray(da, f, (void*)&rhs); CHKERRQ(ierr);
 
 #pragma omp parallel for collapse(2)
-		for(PetscInt k = start[2]; k < start[2]+lsize[2]; k++)
-			for(PetscInt j = start[1]; j < start[1]+lsize[1]; j++)
-				for(PetscInt i = start[0]; i < start[0]+lsize[0]; i++)
+		for(PetscInt k = start[2]; k < end[2]; k++)
+			for(PetscInt j = start[1]; j < end[1]; j++)
+				for(PetscInt i = start[0]; i < end[0]; i++)
 				{
 					rhs[k][j][i] =
 						static_cast<const ConcretePDE*>(this)->rhs_kernel(m, func, i+1,j+1,k+1);
@@ -140,12 +141,13 @@ public:
 		const int rank = get_mpi_rank(MPI_COMM_WORLD);
 
 		SVec f(m);
+		const sint idxmax[3] = {f.start + f.sz[0],f.start + f.sz[1], f.start + f.sz[2]};
 
 		// iterate over nodes
 #pragma omp parallel for collapse(2)
-		for(PetscInt k = f.start; k < f.start + f.sz[2]; k++)
-			for(PetscInt j = f.start; j < f.start + f.sz[1]; j++)
-				for(PetscInt i = f.start; i < f.start + f.sz[0]; i++)
+		for(PetscInt k = f.start; k < idxmax[2]; k++)
+			for(PetscInt j = f.start; j < idxmax[1]; j++)
+				for(PetscInt i = f.start; i < idxmax[0]; i++)
 				{
 					f.vals[m->localFlattenedIndexAll(k,j,i)] =
 						static_cast<const ConcretePDE*>(this)->rhs_kernel(m,func,i,j,k);
