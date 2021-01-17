@@ -35,7 +35,7 @@ add_test(NAME CD_PetscGridConv_UniformGrid
 add_test(NAME StructSolver_GridConv_CDCirc_UniformGrid_ILU0
   COMMAND ${SEQEXEC} ${SEQTASKS} ${THREADOTPS} ./gridconv ${CMAKE_CURRENT_SOURCE_DIR}/cdcirc-conv.control
   -options_file ${CMAKE_CURRENT_SOURCE_DIR}/native.perc
-  -ksp_max_it 500 -s3d_ksp_type gcr -s3d_pc_apply_sweeps 2
+  -ksp_max_it 500 -ksp_restart 30 -s3d_ksp_type gcr -s3d_pc_build_sweeps 4 -s3d_pc_apply_sweeps 3
   )
 
 add_test(NAME StructSolver_GridConv_Poisson_UniformGrid_SGS-ISAI

@@ -65,7 +65,7 @@ if(CXX_COMPILER_GNUCLANG OR CXX_COMPILER_INTEL)
   set (CMAKE_CXX_FLAGS "-std=c++14 -Wall -Werror")
   set (CMAKE_C_FLAGS "-std=c11 -Wall -Werror")
   set (CMAKE_CXX_FLAGS_DEBUG "-g")
-  set (CMAKE_CXX_FLAGS_RELEASE "-O3")
+  set (CMAKE_CXX_FLAGS_RELEASE "-O3 -g")
   if( CXX_COMPILER_CLANG )
     # assume libcxx has been built with Clang
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")

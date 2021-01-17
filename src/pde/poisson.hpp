@@ -10,10 +10,12 @@
 
 #include <petscmat.h>
 #include "cartmesh.hpp"
-#include "pdebase.hpp"
+#include "pdeimpl.hpp"
+
+class Poisson;
 
 /// Assembles LHS matrix and RHS vector for Poisson eqn: - div grad u = f
-class Poisson : public PDEBase
+class Poisson : public PDEImpl<Poisson>
 {
 public:
 	Poisson(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals);
@@ -25,10 +27,10 @@ public:
 
 	std::function<sreal(const sreal[NDIM])> test_rhs() const;
 
-protected:
 	/// Kernel used for assembling the matrix
-	void lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
-	                   const sint nghost, sreal *const __restrict v) const;
+	//#pragma omp declare simd uniform(this,m,nghost,j,k) linear(i:1) notinbranch
+	void lhsmat_kernel(const CartMesh *m, sint i, sint j, sint k,
+	                   sint nghost, sreal *__restrict v) const;
 
 	/// Kernel used for assembling the right hand side vector using source and BCs
 	sreal rhs_kernel(const CartMesh *const m, const std::function<sreal(const sreal[NDIM])>& sourcef,

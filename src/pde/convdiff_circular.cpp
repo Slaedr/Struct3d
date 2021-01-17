@@ -9,21 +9,12 @@
 
 ConvDiffCirc::ConvDiffCirc(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals,
                            const sreal advel, const sreal diffc)
-	: PDEBase(bc_types,bc_vals), mu{diffc}, bmag(advel)
+	: PDEImpl<ConvDiffCirc>(bc_types,bc_vals), mu{diffc}, bmag{advel}
 {
 	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
 	if(rank == 0) {
 		printf("ConvDiff: Using |b| = %f, mu = %f.\n", bmag, mu);
 	}
-}
-
-inline std::array<sreal,NDIM> ConvDiffCirc::advectionVel(const sreal r[NDIM]) const
-{
-	std::array<sreal,NDIM> v;
-	v[0] = 2*r[1]*(1.0-r[0]*r[0]);
-	v[1] = -2*r[0]*(1.0-r[1]*r[1]);
-	v[2] = std::sin(PI*r[2]);
-	return v;
 }
 
 std::array<std::function<sreal(const sreal[NDIM])>,2> ConvDiffCirc::manufactured_solution() const
@@ -56,9 +47,9 @@ std::function<sreal(const sreal[NDIM])> ConvDiffCirc::test_rhs() const
 }
 
 /// TODO: Correct convection part!!!
-inline void
-ConvDiffCirc::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
-                            const sint nghost, sreal *const __restrict v) const
+//#pragma omp declare simd uniform(this,m,nghost,j,k) linear(i:1) notinbranch
+void ConvDiffCirc::lhsmat_kernel(const CartMesh *const m, sint i, const sint j, const sint k,
+                                 const sint nghost, sreal *const __restrict v) const
 {
 	// 1-offset indices for mesh coords access
 	//const sint I = i + nghost, J = j + nghost, K = k + nghost;
@@ -111,3 +102,5 @@ sreal ConvDiffCirc::rhs_kernel(const CartMesh *const m,
 	// TODO: Add BC
 	return rhs;
 }
+
+template class PDEImpl<ConvDiffCirc>;

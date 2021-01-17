@@ -9,7 +9,7 @@
 #include "common_utils.hpp"
 
 Poisson::Poisson(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals)
-	: PDEBase(bc_types, bc_vals)
+	: PDEImpl<Poisson>(bc_types, bc_vals)
 { }
 
 std::array<std::function<sreal(const sreal[NDIM])>,2> Poisson::manufactured_solution() const
@@ -25,7 +25,8 @@ std::function<sreal(const sreal[NDIM])> Poisson::test_rhs() const
 	return [](const sreal r[NDIM]) { return sin(PI*r[0])*sin(PI*r[1])*sin(PI*r[2]); };
 }
 
-void Poisson::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
+//#pragma omp declare simd uniform(this,m,nghost,j,k) linear(i:1) notinbranch
+void Poisson::lhsmat_kernel(const CartMesh *const m, sint i, const sint j, const sint k,
                             const sint nghost, sreal *const __restrict v) const
 {
 	// 1-offset indices for mesh coords access

@@ -138,8 +138,6 @@ PetscErrorCode CartMesh::createMesh(const PetscInt npdim[NDIM])
 		coords[i] = (sreal*)std::malloc(npoind[i]*sizeof(sreal));
 
 	if(rank == 0) {
-		std::printf("CartMesh: Number of points in each direction: %d,%d,%d.\n", 
-		            npoind[0], npoind[1], npoind[2]);
 		std::printf("CartMesh: Number of procs in each direction: %d,%d,%d.\n", 
 		            nprocs[0], nprocs[1], nprocs[2]);
 		std::printf("CartMesh: Total points = %d, domain points = %d, partitions = %d\n", 

@@ -66,7 +66,7 @@ void SMat::apply(const SVec& x, SVec& y) const
 
 	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
-#pragma omp parallel for collapse(2) default(shared)
+	//#pragma omp parallel for default(shared)
 	for(sint k = x.start; k < idxmax[2]; k++)
 		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd
@@ -104,7 +104,7 @@ void SMat::apply_res(const SVec& b, const SVec& x, SVec& y) const
 {
 	if(x.m != y.m || x.m != b.m || x.m != m)
 		throw std::runtime_error("All vectors and matrix should be defined over the same mesh!");
-	
+
 	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
 #pragma omp parallel for collapse(2) default(shared)

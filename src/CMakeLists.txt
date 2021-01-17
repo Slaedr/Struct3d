@@ -9,8 +9,7 @@ target_link_libraries(linalg base)
 
 add_library(cases case.cpp)
 
-add_library(pdes pde/pdefactory.cpp pde/convdiff.cpp pde/convdiff_circular.cpp pde/poisson.cpp
-  pde/pdebase.cpp)
+add_library(pdes pde/pdefactory.cpp pde/convdiff.cpp pde/convdiff_circular.cpp pde/poisson.cpp)
 target_link_libraries(pdes base)
 
 add_subdirectory(perftesting)

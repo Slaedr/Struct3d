@@ -37,6 +37,9 @@ add_test(NAME ScalingTest_OpenMP
   -options_file ${CMAKE_CURRENT_BINARY_DIR}/input/scaling_openmp.perc
   )
 
+add_executable(timematvec timematvec.cpp)
+target_link_libraries(timematvec pdes)
+  
 if(WITH_BLASTED)
   add_executable(testblasted_csr compare_blasted.cpp)
   target_link_libraries(testblasted_csr ${BLASTED_LIB} base poisson)

@@ -9,9 +9,9 @@
 
 ConvDiff::ConvDiff(const std::array<BCType,6>& bc_types, const std::array<sreal,6>& bc_vals,
                    const std::array<sreal,NDIM> advel, const sreal diffc)
-	: PDEBase(bc_types,bc_vals), mu{diffc}, b(advel)
+	: PDEImpl<ConvDiff>(bc_types,bc_vals), mu{diffc}, b(advel)
 {
-	const int rank = get_mpi_rank(PETSC_COMM_WORLD);
+	const int rank = get_mpi_rank(MPI_COMM_WORLD);
 	if(rank == 0) {
 		printf("ConvDiff: Using b = (%f,%f,%f), mu = %f.\n", b[0], b[1], b[2], mu);
 	}
@@ -45,9 +45,9 @@ std::function<sreal(const sreal[NDIM])> ConvDiff::test_rhs() const
 	return [](const sreal r[NDIM]) { return sin(PI*r[0])*sin(PI*r[1])*sin(PI*r[2]); };
 }
 
-void
-ConvDiff::lhsmat_kernel(const CartMesh *const m, const sint i, const sint j, const sint k,
-                        const sint nghost, sreal *const __restrict v) const
+//#pragma omp declare simd uniform(this,m,nghost,j,k) linear(i:1) notinbranch
+void ConvDiff::lhsmat_kernel(const CartMesh *const m, sint i, const sint j, const sint k,
+                             const sint nghost, sreal *const __restrict v) const
 {
 	// 1-offset indices for mesh coords access
 	//const sint I = i + nghost, J = j + nghost, K = k + nghost;
@@ -122,3 +122,5 @@ sreal ConvDiff::rhs_kernel(const CartMesh *const m, const std::function<sreal(co
 		}*/
 	return rhs;
 }
+
+template class PDEImpl<ConvDiff>;
