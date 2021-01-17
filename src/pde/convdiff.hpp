@@ -28,7 +28,7 @@ public:
 	std::function<sreal(const sreal[NDIM])> test_rhs() const;
 
 	/// Kernel used for assembling the matrix
-	//#pragma omp declare simd uniform(this,m,nghost,j,k) linear(i:1) notinbranch
+#pragma omp declare simd uniform(this,m,nghost,j,k) linear(i:1) notinbranch
 	void lhsmat_kernel(const CartMesh *m, sint i, sint j, sint k,
 	                   sint nghost, sreal *__restrict v) const;
 

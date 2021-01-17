@@ -66,7 +66,7 @@ void SMat::apply(const SVec& x, SVec& y) const
 
 	const sint idxmax[3] = {x.start + x.sz[0],x.start + x.sz[1], x.start + x.sz[2]};
 
-	//#pragma omp parallel for default(shared)
+#pragma omp parallel for default(shared) collapse(2)
 	for(sint k = x.start; k < idxmax[2]; k++)
 		for(sint j = x.start; j < idxmax[1]; j++)
 #pragma omp simd
